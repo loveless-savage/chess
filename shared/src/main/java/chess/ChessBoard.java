@@ -45,4 +45,20 @@ public class ChessBoard {
     public void resetBoard() {
         throw new RuntimeException("Not implemented");
     }
+
+    /**
+     * overrides for equality and hashcodes
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return pieces.hashCode()==that.hashCode();
+    }
+    @Override
+    public int hashCode() {
+        return pieces.hashCode();
+    }
 }
