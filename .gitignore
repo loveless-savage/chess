@@ -5,10 +5,6 @@ target
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-.idea
-.idea/*
-**/*.xml
-**/*.iml
 
 ### Chess project ###
 server/**/db.properties
