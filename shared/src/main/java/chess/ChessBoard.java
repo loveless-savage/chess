@@ -93,6 +93,41 @@ public class ChessBoard {
     }
 
     /**
+     * convert object representation of board to ascii representation
+     */
+    private static final Map<ChessPiece.PieceType, Character> TYPE_TO_CHAR_MAP = Map.of(
+            ChessPiece.PieceType.PAWN, 'p',
+            ChessPiece.PieceType.KNIGHT, 'n',
+            ChessPiece.PieceType.ROOK, 'r',
+            ChessPiece.PieceType.QUEEN, 'q',
+            ChessPiece.PieceType.KING, 'k',
+            ChessPiece.PieceType.BISHOP, 'b');
+    public String printBoard() {
+        char[] boardText = new char[144];
+        int i,j;
+        for (i = 0; i < 8; i++) {
+            for (j = 0; j < 8; j++) {
+                boardText[18*i+2*j] = '|';
+                boardText[18*i+2*j+1] = ' ';
+            }
+            boardText[18*i+16] = '|';
+            boardText[18*i+17] = '\n';
+        }
+        // fill in each piece
+        for(var pos : pieces.keySet()) {
+            ChessPiece currentPiece = pieces.get(pos);
+            char pieceT = TYPE_TO_CHAR_MAP.get(currentPiece.getPieceType());
+            if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE){
+                pieceT = Character.toUpperCase(pieceT);
+            }
+            i = 8-pos.getRow();
+            j =-1+pos.getColumn();
+            boardText[18*i+2*j+1] = pieceT;
+        }
+        return new String(boardText);
+    }
+
+    /**
      * overrides for equality and hashcodes
      */
     @Override
