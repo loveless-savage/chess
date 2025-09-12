@@ -112,7 +112,7 @@ public class ChessBoard {
                 boardText[18*i+2*j] = '|';
 
                 chess.ChessPiece currentPiece = pieces[7-i][j];
-                if(currentPiece.getPieceType() == null) { // blank space
+                if(currentPiece == null || currentPiece.getPieceType() == null) { // blank space
                     boardText[18*i+2*j+1] = ' ';
                 }else{ // non-empty character
                     char type = TYPE_TO_CHAR_MAP.get(currentPiece.getPieceType());
@@ -135,11 +135,11 @@ public class ChessBoard {
             return false;
         }
         ChessBoard that = (ChessBoard) o;
-        return pieces.hashCode()==that.hashCode();
+        return toString().equals(that.toString());
     }
     @Override
     public int hashCode() {
-        return pieces.hashCode();
+        return toString().hashCode();
     }
 
     /**
