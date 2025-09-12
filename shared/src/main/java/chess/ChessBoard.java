@@ -142,4 +142,12 @@ public class ChessBoard {
     public int hashCode() {
         return pieces.hashCode();
     }
+
+    /**
+     * override for toString
+     */
+    @Override
+    public String toString() {
+        return printBoard();
+    }
 }
