@@ -52,8 +52,16 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pos) {
+        switch (type) {
+            case PieceType.KING   -> { return kingMoves(board,pos);   }
+            case PieceType.QUEEN  -> { return queenMoves(board,pos);  }
+            case PieceType.BISHOP -> { return bishopMoves(board,pos); }
+            case PieceType.KNIGHT -> { return knightMoves(board,pos); }
+            case PieceType.ROOK   -> { return rookMoves(board,pos);   }
+            case PieceType.PAWN   -> { return pawnMoves(board,pos);   }
+            default -> throw new RuntimeException("Moves for piece of type " + type + " are not known");
+        }
     }
 
     /**
@@ -71,5 +79,27 @@ public class ChessPiece {
     @Override
     public int hashCode() {
         return Objects.hash(color, type);
+    }
+
+    /**
+     * movesets for different pieces
+     */
+    private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition pos) {
+        throw new RuntimeException("King moves not implemented");
+    }
+    private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition pos) {
+        throw new RuntimeException("Queen moves not implemented");
+    }
+    private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition pos) {
+        throw new RuntimeException("Bishop moves not implemented");
+    }
+    private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition pos) {
+        throw new RuntimeException("Knight moves not implemented");
+    }
+    private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition pos) {
+        throw new RuntimeException("Rook moves not implemented");
+    }
+    private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition pos) {
+        throw new RuntimeException("Pawn moves not implemented");
     }
 }
