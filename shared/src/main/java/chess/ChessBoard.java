@@ -76,7 +76,7 @@ public class ChessBoard {
     /**
      * convert ascii representation of board to object representation
      */
-    public void loadBoard(String boardText) {
+    private void loadBoard(String boardText) {
         char[] boardIn = boardText.toCharArray();
         int row = 8;
         int col = 1;
@@ -87,16 +87,16 @@ public class ChessBoard {
                 col=1;
                 continue;
             }
-            if(c == ' ') pieces[8-row][col-1] = null; // empty spaces
-            if(pieces[8-row][col-1] != null &&
-                    c == TYPE_TO_CHAR_MAP.get(pieces[8-row][col-1].getPieceType())) { // skip unchanged pieces
+            if(c == ' ') pieces[row-1][col-1] = null; // empty spaces
+            if(pieces[row-1][col-1] != null &&
+                    c == TYPE_TO_CHAR_MAP.get(pieces[row-1][col-1].getPieceType())) { // skip unchanged pieces
                 continue;
             }
 
             ChessGame.TeamColor color = Character.isLowerCase(c) ? ChessGame.TeamColor.BLACK
                     : ChessGame.TeamColor.WHITE;
             var type = CHAR_TO_TYPE_MAP.get(Character.toLowerCase(c));
-            pieces[8-row][col-1] = new ChessPiece(color,type);
+            pieces[row-1][col-1] = new ChessPiece(color,type);
             col++;
         }
     }
@@ -104,7 +104,7 @@ public class ChessBoard {
     /**
      * convert object representation of board to ascii representation
      */
-    public String printBoard() {
+    private String printBoard() {
         char[] boardText = new char[144];
         int i,j;
         for (i = 0; i < 8; i++) {
