@@ -76,7 +76,7 @@ public class ChessBoard {
     /**
      * convert ascii representation of board to object representation
      */
-    private void loadBoard(String boardText) {
+    public void loadBoard(String boardText) {
         char[] boardIn = boardText.toCharArray();
         int row = 8;
         int col = 1;
@@ -106,29 +106,23 @@ public class ChessBoard {
      */
     public String printBoard() {
         char[] boardText = new char[144];
-        /*
         int i,j;
         for (i = 0; i < 8; i++) {
             for (j = 0; j < 8; j++) {
                 boardText[18*i+2*j] = '|';
+
                 chess.ChessPiece currentPiece = pieces[7-i][j];
-                boardText[18*i+2*j+1] = ' ';
+                if(currentPiece.getPieceType() == null) { // blank space
+                    boardText[18*i+2*j+1] = ' ';
+                }else{ // non-empty character
+                    char type = TYPE_TO_CHAR_MAP.get(currentPiece.getPieceType());
+                    if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) type = Character.toUpperCase(type);
+                    boardText[18*i+2*j+1] = type;
+                }
             }
             boardText[18*i+16] = '|';
             boardText[18*i+17] = '\n';
         }
-        // fill in each piece
-        for(var pos : pieces.keySet()) {
-            ChessPiece currentPiece = pieces.get(pos);
-            char pieceT = TYPE_TO_CHAR_MAP.get(currentPiece.getPieceType());
-            if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                pieceT = Character.toUpperCase(pieceT);
-            }
-            i = 8-pos.getRow();
-            j =-1+pos.getColumn();
-            boardText[18*i+2*j+1] = pieceT;
-        }
-        */
         return new String(boardText);
     }
 
