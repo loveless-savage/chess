@@ -188,7 +188,31 @@ public class ChessPiece {
         return moves;
     }
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition pos) {
-        throw new RuntimeException("Pawn moves not implemented");
+        var moves = new HashSet<ChessMove>();
+        // white pawns march up the board, black pawns march down
+        int dx = (color == ChessGame.TeamColor.WHITE)? 1 : -1;
+        ChessPosition newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn());
+        // is the path forward blocked? pawns cannot capture forward
+        if(board.getPiece(newPos) == null) {
+            moves.add(new ChessMove(pos,newPos));
+            // if the pawn is in its original row, it can also move two spaces
+            if((color == ChessGame.TeamColor.WHITE && pos.getRow() == 2) ||
+                    (color == ChessGame.TeamColor.BLACK && pos.getRow() == 7)) {
+                newPos = new ChessPosition(pos.getRow()+2*dx,pos.getColumn());
+                if(board.getPiece(newPos) == null) moves.add(new ChessMove(pos, newPos));
+            }
+        }
+        // even if the path forward is blocked, the pawn can capture diagonally
+        newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn()+1); // to the right
+        if(board.getPiece(newPos) != null && color != board.getPiece(newPos).color) {
+            moves.add(new ChessMove(pos, newPos));
+        }
+        newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn()-1); // to the left
+        if(board.getPiece(newPos) != null && color != board.getPiece(newPos).color) {
+            moves.add(new ChessMove(pos, newPos));
+        }
+
+        return moves;
     }
 
     /**
