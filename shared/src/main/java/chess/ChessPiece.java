@@ -102,7 +102,21 @@ public class ChessPiece {
         throw new RuntimeException("Knight moves not implemented");
     }
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition pos) {
-        throw new RuntimeException("Rook moves not implemented");
+        var moves = new HashSet<ChessMove>();
+        // define marching directions
+        IncrementFunction stepup = (p) -> new ChessPosition(
+                p.getRow()+1,p.getColumn());
+        IncrementFunction stepdown = (p) -> new ChessPosition(
+                p.getRow()-1,p.getColumn());
+        IncrementFunction stepright = (p) -> new ChessPosition(
+                p.getRow(),p.getColumn()+1);
+        IncrementFunction stepleft = (p) -> new ChessPosition(
+                p.getRow(),p.getColumn()-1);
+        moves.addAll(moveMarch(board, pos, stepup));
+        moves.addAll(moveMarch(board, pos, stepdown));
+        moves.addAll(moveMarch(board, pos, stepright));
+        moves.addAll(moveMarch(board, pos, stepleft));
+        return moves;
     }
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition pos) {
         throw new RuntimeException("Pawn moves not implemented");
