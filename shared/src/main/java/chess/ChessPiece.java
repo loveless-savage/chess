@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -122,9 +123,13 @@ public class ChessPiece {
         while(pos.getRow()<=8 && pos.getRow()>=1 &&
               pos.getColumn()<=8 && pos.getColumn()>=1) {
             // did we run into another piece?
-            if(true) { //TODO
+            ChessPiece collisionpiece = board.getPiece(pos);
+            if(collisionpiece == null) { // no collision yet
                 moves.add(new ChessMove(posIn, pos));
-            } else {
+            } else if(getTeamColor() != collisionpiece.getTeamColor()){ // enemy team?
+                moves.add(new ChessMove(posIn, pos));
+                break;
+            } else { // abort when we collide with our own team
                 break;
             }
             pos = stepper.step(pos);
