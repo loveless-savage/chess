@@ -96,7 +96,21 @@ public class ChessPiece {
         throw new RuntimeException("Queen moves not implemented");
     }
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition pos) {
-        throw new RuntimeException("Bishop moves not implemented");
+        var moves = new HashSet<ChessMove>();
+        // define marching directions
+        IncrementFunction stepur = (p) -> new ChessPosition(
+                p.getRow()+1,p.getColumn()+1);
+        IncrementFunction stepdr = (p) -> new ChessPosition(
+                p.getRow()-1,p.getColumn()+1);
+        IncrementFunction stepul = (p) -> new ChessPosition(
+                p.getRow()+1,p.getColumn()-1);
+        IncrementFunction stepdl = (p) -> new ChessPosition(
+                p.getRow()-1,p.getColumn()-1);
+        moves.addAll(moveMarch(board, pos, stepur));
+        moves.addAll(moveMarch(board, pos, stepdr));
+        moves.addAll(moveMarch(board, pos, stepul));
+        moves.addAll(moveMarch(board, pos, stepdl));
+        return moves;
     }
     private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition pos) {
         throw new RuntimeException("Knight moves not implemented");
