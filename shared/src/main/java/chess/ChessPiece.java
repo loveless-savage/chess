@@ -80,6 +80,10 @@ public class ChessPiece {
     public int hashCode() {
         return Objects.hash(color, type);
     }
+    @Override
+    public String toString() {
+        return color.toString() + " " + type.toString();
+    }
 
     /**
      * movesets for different pieces
