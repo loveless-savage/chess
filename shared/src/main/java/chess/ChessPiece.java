@@ -93,7 +93,33 @@ public class ChessPiece {
         throw new RuntimeException("King moves not implemented");
     }
     private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition pos) {
-        throw new RuntimeException("Queen moves not implemented");
+        var moves = new HashSet<ChessMove>();
+        // define marching directions
+        IncrementFunction stepup = (p) -> new ChessPosition( // up
+                p.getRow()+1,p.getColumn());
+        IncrementFunction stepdown = (p) -> new ChessPosition( // down
+                p.getRow()-1,p.getColumn());
+        IncrementFunction stepright = (p) -> new ChessPosition( // right
+                p.getRow(),p.getColumn()+1);
+        IncrementFunction stepleft = (p) -> new ChessPosition( // left
+                p.getRow(),p.getColumn()-1);
+        IncrementFunction stepur = (p) -> new ChessPosition( // up + right
+                p.getRow()+1,p.getColumn()+1);
+        IncrementFunction stepdr = (p) -> new ChessPosition( // down + right
+                p.getRow()-1,p.getColumn()+1);
+        IncrementFunction stepul = (p) -> new ChessPosition( // up + left
+                p.getRow()+1,p.getColumn()-1);
+        IncrementFunction stepdl = (p) -> new ChessPosition( // down + left
+                p.getRow()-1,p.getColumn()-1);
+        moves.addAll(moveMarch(board, pos, stepup));
+        moves.addAll(moveMarch(board, pos, stepdown));
+        moves.addAll(moveMarch(board, pos, stepright));
+        moves.addAll(moveMarch(board, pos, stepleft));
+        moves.addAll(moveMarch(board, pos, stepur));
+        moves.addAll(moveMarch(board, pos, stepdr));
+        moves.addAll(moveMarch(board, pos, stepul));
+        moves.addAll(moveMarch(board, pos, stepdl));
+        return moves;
     }
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition pos) {
         var moves = new HashSet<ChessMove>();
