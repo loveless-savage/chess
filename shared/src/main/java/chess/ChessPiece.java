@@ -154,7 +154,21 @@ public class ChessPiece {
         return moves;
     }
     private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition pos) {
-        throw new RuntimeException("Knight moves not implemented");
+        var moves = new HashSet<ChessMove>();
+        // which directions can the knight move relative to its current spot?
+        int[] dx = {2, 2, 1,-1,-2,-2,-1, 1};
+        int[] dy = {1,-1,-2,-2,-1, 1, 2, 2};
+        // look at each possibility in turn
+        for(int i=0;i<8;i++){
+            ChessPosition newPos = new ChessPosition(pos.getRow()+dx[i],pos.getColumn()+dy[i]);
+            // skip this position if is off the board
+            if(newPos.getRow()>8 || newPos.getRow()<1 ||
+                    newPos.getColumn()>8 || newPos.getColumn()<1) continue;
+            // no friendly fire
+            if(board.getPiece(newPos) != null && color == board.getPiece(newPos).color) continue;
+            moves.add(new ChessMove(pos,newPos));
+        }
+        return moves;
     }
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition pos) {
         var moves = new HashSet<ChessMove>();
