@@ -70,4 +70,16 @@ public class ChessMove {
     public int hashCode() {
         return Objects.hash(startPosition, endPosition, promotionPiece);
     }
+
+    @Override
+    public String toString() {
+        if (promotionPiece == null) {
+            return "Move: " + startPosition.toString()
+                   + " => " + endPosition.toString();
+        } else {
+            return "Move: " + startPosition.toString()
+                   + " => " + endPosition.toString()
+                     + " (" + promotionPiece.toString() + ")";
+        }
+    }
 }
