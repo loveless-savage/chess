@@ -25,7 +25,7 @@ public class ChessBoard {
     public void addPiece(ChessPosition pos, ChessPiece piece) {
         if(pos.getRow()>8 || pos.getRow()<1 ||
                 pos.getColumn()>8 || pos.getColumn()<1) {
-            throw new RuntimeException("Cannot add piece: position "+pos.toString() + " out of bounds");
+            throw new RuntimeException("Cannot add piece: position "+pos+" out of bounds");
         }
         pieces[pos.getRow()-1][pos.getColumn()-1] = piece;
     }

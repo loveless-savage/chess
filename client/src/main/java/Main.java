@@ -6,7 +6,7 @@ public class Main {
         //System.out.println("♕ 240 Chess Client: " + piece);
         var board = new ChessBoard();
         board.resetBoard();
-        System.out.println(board.toString());
+        System.out.println(board);
 
         /*
         board.loadBoard("""
