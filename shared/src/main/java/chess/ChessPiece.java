@@ -66,7 +66,7 @@ public class ChessPiece {
     }
 
     /**
-     * overrides for equality and hashcodes
+     * overrides
      */
     @Override
     public boolean equals(Object o) {
@@ -76,7 +76,6 @@ public class ChessPiece {
         ChessPiece that = (ChessPiece) o;
         return color == that.color && type == that.type;
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(color, type);
@@ -85,6 +84,8 @@ public class ChessPiece {
     public String toString() {
         return color.toString() + " " + type.toString();
     }
+
+////////////////////////////////////////////////////////////////////////////////
 
     /**
      * movesets for different pieces
@@ -124,13 +125,13 @@ public class ChessPiece {
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition pos) {
         var moves = new HashSet<ChessMove>();
         // define marching directions
-        IncrementFunction stepur = (p) -> new ChessPosition(
+        IncrementFunction stepur = (p) -> new ChessPosition( // up + right
                 p.getRow()+1,p.getColumn()+1);
-        IncrementFunction stepdr = (p) -> new ChessPosition(
+        IncrementFunction stepdr = (p) -> new ChessPosition( // down + right
                 p.getRow()-1,p.getColumn()+1);
-        IncrementFunction stepul = (p) -> new ChessPosition(
+        IncrementFunction stepul = (p) -> new ChessPosition( // up + left
                 p.getRow()+1,p.getColumn()-1);
-        IncrementFunction stepdl = (p) -> new ChessPosition(
+        IncrementFunction stepdl = (p) -> new ChessPosition( // down + left
                 p.getRow()-1,p.getColumn()-1);
         moves.addAll(moveMarch(board, pos, stepur));
         moves.addAll(moveMarch(board, pos, stepdr));
@@ -144,13 +145,13 @@ public class ChessPiece {
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition pos) {
         var moves = new HashSet<ChessMove>();
         // define marching directions
-        IncrementFunction stepup = (p) -> new ChessPosition(
+        IncrementFunction stepup = (p) -> new ChessPosition( // up
                 p.getRow()+1,p.getColumn());
-        IncrementFunction stepdown = (p) -> new ChessPosition(
+        IncrementFunction stepdown = (p) -> new ChessPosition( // down
                 p.getRow()-1,p.getColumn());
-        IncrementFunction stepright = (p) -> new ChessPosition(
+        IncrementFunction stepright = (p) -> new ChessPosition( // right
                 p.getRow(),p.getColumn()+1);
-        IncrementFunction stepleft = (p) -> new ChessPosition(
+        IncrementFunction stepleft = (p) -> new ChessPosition( // left
                 p.getRow(),p.getColumn()-1);
         moves.addAll(moveMarch(board, pos, stepup));
         moves.addAll(moveMarch(board, pos, stepdown));

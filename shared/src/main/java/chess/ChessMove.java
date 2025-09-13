@@ -48,7 +48,7 @@ public class ChessMove {
     }
 
     /**
-     * overrides for equality and hashcodes
+     * overrides
      */
     @Override
     public boolean equals(Object o) {
@@ -60,12 +60,10 @@ public class ChessMove {
                 endPosition.equals(that.endPosition) &&
                 promotionPiece == that.promotionPiece;
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(startPosition, endPosition, promotionPiece);
     }
-
     @Override
     public String toString() {
         if (promotionPiece == null) {

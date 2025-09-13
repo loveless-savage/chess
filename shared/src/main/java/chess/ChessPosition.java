@@ -34,7 +34,7 @@ public class ChessPosition {
     }
 
     /**
-     * overrides for equality and hashcode
+     * overrides
      */
     @Override
     public boolean equals(Object o) {

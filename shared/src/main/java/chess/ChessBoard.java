@@ -56,6 +56,28 @@ public class ChessBoard {
     }
 
     /**
+     * overrides
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return toString().equals(that.toString());
+    }
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+    @Override
+    public String toString() {
+        return printBoard();
+    }
+
+////////////////////////////////////////////////////////////////////////////////
+
+    /**
      * mappings between ascii representation of pieces to object representation
      */
     private static final Map<Character, ChessPiece.PieceType> CHAR_TO_TYPE_MAP = Map.of(
@@ -124,29 +146,5 @@ public class ChessBoard {
             boardText[18*i+17] = '\n';
         }
         return new String(boardText);
-    }
-
-    /**
-     * overrides for equality and hashcodes
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessBoard that = (ChessBoard) o;
-        return toString().equals(that.toString());
-    }
-    @Override
-    public int hashCode() {
-        return toString().hashCode();
-    }
-
-    /**
-     * override for toString
-     */
-    @Override
-    public String toString() {
-        return printBoard();
     }
 }
