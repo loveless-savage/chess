@@ -194,7 +194,7 @@ public class ChessPiece {
         ChessPosition newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn());
         // is the path forward blocked? pawns cannot capture forward
         if(board.getPiece(newPos) == null) {
-            moves.add(new ChessMove(pos,newPos));
+            moves.addAll(pawnPromotions(pos,newPos));
             // if the pawn is in its original row, it can also move two spaces
             if((color == ChessGame.TeamColor.WHITE && pos.getRow() == 2) ||
                     (color == ChessGame.TeamColor.BLACK && pos.getRow() == 7)) {
@@ -205,11 +205,11 @@ public class ChessPiece {
         // even if the path forward is blocked, the pawn can capture diagonally
         newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn()+1); // to the right
         if(board.getPiece(newPos) != null && color != board.getPiece(newPos).color) {
-            moves.add(new ChessMove(pos, newPos));
+            moves.addAll(pawnPromotions(pos,newPos));
         }
         newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn()-1); // to the left
         if(board.getPiece(newPos) != null && color != board.getPiece(newPos).color) {
-            moves.add(new ChessMove(pos, newPos));
+            moves.addAll(pawnPromotions(pos,newPos));
         }
 
         return moves;
@@ -240,6 +240,24 @@ public class ChessPiece {
                 break;
             }
             pos = stepper.step(pos);
+        }
+        return moves;
+    }
+
+    /**
+     * utility for expanding a pawn move into all possible promotions if it reaches the other end of the board
+     */
+    private Collection<ChessMove> pawnPromotions(ChessPosition pos, ChessPosition newPos) {
+        var moves = new HashSet<ChessMove>();
+        if((color == ChessGame.TeamColor.WHITE && newPos.getRow() == 8) ||
+                (color == ChessGame.TeamColor.BLACK && newPos.getRow() == 1)) {
+            for (var i : PieceType.values()) {
+                // can't promote to a pawn or a king
+                if(i == PieceType.PAWN || i == PieceType.KING) continue;
+                moves.add(new ChessMove(pos,newPos,i));
+            }
+        } else { // false alarm! don't promote
+            moves.add(new ChessMove(pos, newPos));
         }
         return moves;
     }
