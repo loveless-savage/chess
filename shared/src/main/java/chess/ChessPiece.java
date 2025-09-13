@@ -12,8 +12,8 @@ import java.util.Objects;
  */
 public class ChessPiece {
 
-    private ChessGame.TeamColor color;
-    private PieceType type;
+    private final ChessGame.TeamColor color;
+    private final PieceType type;
 
     public ChessPiece(ChessGame.TeamColor inColor, ChessPiece.PieceType inType) {
         color = inColor;
@@ -221,7 +221,7 @@ public class ChessPiece {
     interface IncrementFunction{
         ChessPosition step(ChessPosition before);
     }
-    public Collection<ChessMove> moveMarch(ChessBoard board, ChessPosition posIn, IncrementFunction stepper) {
+    private Collection<ChessMove> moveMarch(ChessBoard board, ChessPosition posIn, IncrementFunction stepper) {
         // collect all moves we find along this march
         var moves = new HashSet<ChessMove>();
         // where are we looking now?
@@ -233,7 +233,7 @@ public class ChessPiece {
             ChessPiece collisionpiece = board.getPiece(pos);
             if(collisionpiece == null) { // no collision yet
                 moves.add(new ChessMove(posIn, pos));
-            } else if(getTeamColor() != collisionpiece.getTeamColor()){ // enemy team?
+            } else if(color != collisionpiece.color){ // enemy team?
                 moves.add(new ChessMove(posIn, pos));
                 break;
             } else { // abort when we collide with our own team
