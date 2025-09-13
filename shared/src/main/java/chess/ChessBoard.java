@@ -104,6 +104,7 @@ public class ChessBoard {
     /**
      * convert ascii representation of board to object representation
      */
+    // TODO: fix null vs ChessPosition(null)
     private void loadBoard(String boardText) {
         char[] boardIn = boardText.toCharArray();
         int row = 8;

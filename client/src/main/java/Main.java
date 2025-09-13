@@ -2,25 +2,28 @@ import chess.*;
 
 public class Main {
     public static void main(String[] args) {
-        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+        //var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         //System.out.println("♕ 240 Chess Client: " + piece);
-
         var board = new ChessBoard();
         board.resetBoard();
-        System.out.println(board.printBoard());
+        System.out.println(board.toString());
 
         /*
-        var piece2 = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
-        System.out.println("board init  = " + board);
-        board.addPiece(new ChessPosition(1,2),piece);
-        System.out.println("board 1     = " + board);
-        board.addPiece(new ChessPosition(2,4),piece2);
-        System.out.println("board 2     = " + board);
-        board.resetBoard();
-        System.out.println("board final = " + board);
-        board.addPiece(new ChessPosition(2,4),piece2);
-        board.addPiece(new ChessPosition(1,2),piece);
-        System.out.println("board 2     = " + board);
+        board.loadBoard("""
+                | |n|b|q|k|b|n|r|
+                |p|p|p|p|p|p|p|p|
+                | | | | | | | | |
+                | |r| | | | | | |
+                | | | | | | | | |
+                | | | | | | | | |
+                |P|P|P|P|P|P|P|P|
+                |R|N|B|Q|K|B|N|R|
+                """);
+        var pos = new ChessPosition(5,2);
+        var piece = board.getPiece(pos);
+        System.out.println(piece.toString());
+        var place = piece.pieceMoves(board,pos);
+        place.forEach((p) -> System.out.println(p));
         */
     }
 }
