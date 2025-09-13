@@ -106,4 +106,29 @@ public class ChessPiece {
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition pos) {
         throw new RuntimeException("Pawn moves not implemented");
     }
+
+    /**
+     * utility for marching along path in any direction until colliding with another piece
+     */
+    interface IncrementFunction{
+        ChessPosition step(ChessPosition before);
+    }
+    public Collection<ChessMove> moveMarch(ChessBoard board, ChessPosition posIn, IncrementFunction stepper) {
+        // collect all moves we find along this march
+        var moves = new HashSet<ChessMove>();
+        // where are we looking now?
+        ChessPosition pos = stepper.step(posIn);
+        // keep stepping and adding moves until we step off the board
+        while(pos.getRow()<=8 && pos.getRow()>=1 &&
+              pos.getColumn()<=8 && pos.getColumn()>=1) {
+            // did we run into another piece?
+            if(true) { //TODO
+                moves.add(new ChessMove(posIn, pos));
+            } else {
+                break;
+            }
+            pos = stepper.step(pos);
+        }
+        return moves;
+    }
 }
