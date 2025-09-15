@@ -109,48 +109,24 @@ public class ChessPiece {
     }
     private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition pos) {
         var moves = new HashSet<ChessMove>();
-        // define marching directions
-        IncrementFunction stepup = (p) -> new ChessPosition( // up
-                p.getRow()+1,p.getColumn());
-        IncrementFunction stepdown = (p) -> new ChessPosition( // down
-                p.getRow()-1,p.getColumn());
-        IncrementFunction stepright = (p) -> new ChessPosition( // right
-                p.getRow(),p.getColumn()+1);
-        IncrementFunction stepleft = (p) -> new ChessPosition( // left
-                p.getRow(),p.getColumn()-1);
-        IncrementFunction stepur = (p) -> new ChessPosition( // up + right
-                p.getRow()+1,p.getColumn()+1);
-        IncrementFunction stepdr = (p) -> new ChessPosition( // down + right
-                p.getRow()-1,p.getColumn()+1);
-        IncrementFunction stepul = (p) -> new ChessPosition( // up + left
-                p.getRow()+1,p.getColumn()-1);
-        IncrementFunction stepdl = (p) -> new ChessPosition( // down + left
-                p.getRow()-1,p.getColumn()-1);
-        moves.addAll(moveMarch(board, pos, stepup));
-        moves.addAll(moveMarch(board, pos, stepdown));
-        moves.addAll(moveMarch(board, pos, stepright));
-        moves.addAll(moveMarch(board, pos, stepleft));
-        moves.addAll(moveMarch(board, pos, stepur));
-        moves.addAll(moveMarch(board, pos, stepdr));
-        moves.addAll(moveMarch(board, pos, stepul));
-        moves.addAll(moveMarch(board, pos, stepdl));
+        // march in each direction, accumulating end positions as far as we can go
+        moves.addAll(moveMarch(board,pos, 1, 0)); // right
+        moves.addAll(moveMarch(board,pos, 1, 1)); // up + right
+        moves.addAll(moveMarch(board,pos, 0, 1)); // up
+        moves.addAll(moveMarch(board,pos,-1, 1)); // up + left
+        moves.addAll(moveMarch(board,pos,-1, 0)); // left
+        moves.addAll(moveMarch(board,pos,-1,-1)); // down + left
+        moves.addAll(moveMarch(board,pos, 0,-1)); // down
+        moves.addAll(moveMarch(board,pos, 1,-1)); // down + right
         return moves;
     }
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition pos) {
         var moves = new HashSet<ChessMove>();
-        // define marching directions
-        IncrementFunction stepur = (p) -> new ChessPosition( // up + right
-                p.getRow()+1,p.getColumn()+1);
-        IncrementFunction stepdr = (p) -> new ChessPosition( // down + right
-                p.getRow()-1,p.getColumn()+1);
-        IncrementFunction stepul = (p) -> new ChessPosition( // up + left
-                p.getRow()+1,p.getColumn()-1);
-        IncrementFunction stepdl = (p) -> new ChessPosition( // down + left
-                p.getRow()-1,p.getColumn()-1);
-        moves.addAll(moveMarch(board, pos, stepur));
-        moves.addAll(moveMarch(board, pos, stepdr));
-        moves.addAll(moveMarch(board, pos, stepul));
-        moves.addAll(moveMarch(board, pos, stepdl));
+        // march in each direction, accumulating end positions as far as we can go
+        moves.addAll(moveMarch(board,pos, 1, 1)); // up + right
+        moves.addAll(moveMarch(board,pos,-1, 1)); // up + left
+        moves.addAll(moveMarch(board,pos, 1,-1)); // down + right
+        moves.addAll(moveMarch(board,pos,-1,-1)); // down + left
         return moves;
     }
     private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition pos) {
@@ -172,19 +148,11 @@ public class ChessPiece {
     }
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition pos) {
         var moves = new HashSet<ChessMove>();
-        // define marching directions
-        IncrementFunction stepup = (p) -> new ChessPosition( // up
-                p.getRow()+1,p.getColumn());
-        IncrementFunction stepdown = (p) -> new ChessPosition( // down
-                p.getRow()-1,p.getColumn());
-        IncrementFunction stepright = (p) -> new ChessPosition( // right
-                p.getRow(),p.getColumn()+1);
-        IncrementFunction stepleft = (p) -> new ChessPosition( // left
-                p.getRow(),p.getColumn()-1);
-        moves.addAll(moveMarch(board, pos, stepup));
-        moves.addAll(moveMarch(board, pos, stepdown));
-        moves.addAll(moveMarch(board, pos, stepright));
-        moves.addAll(moveMarch(board, pos, stepleft));
+        // march in each direction, accumulating end positions as far as we can go
+        moves.addAll(moveMarch(board,pos, 1, 0)); // right
+        moves.addAll(moveMarch(board,pos,-1, 0)); // left
+        moves.addAll(moveMarch(board,pos, 0, 1)); // up
+        moves.addAll(moveMarch(board,pos, 0,-1)); // down
         return moves;
     }
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition pos) {
@@ -218,17 +186,14 @@ public class ChessPiece {
     /**
      * utility for marching along path in any direction until colliding with another piece
      */
-    interface IncrementFunction{
-        ChessPosition step(ChessPosition before);
-    }
-    private Collection<ChessMove> moveMarch(ChessBoard board, ChessPosition posIn, IncrementFunction stepper) {
+    private Collection<ChessMove> moveMarch(ChessBoard board, ChessPosition posIn, int dx, int dy) {
         // collect all moves we find along this march
         var moves = new HashSet<ChessMove>();
         // where are we looking now?
-        ChessPosition pos = stepper.step(posIn);
+        ChessPosition pos = new ChessPosition(posIn.getRow() + dx, posIn.getColumn() + dy);
         // keep stepping and adding moves until we step off the board
         while(pos.getRow()<=8 && pos.getRow()>=1 &&
-              pos.getColumn()<=8 && pos.getColumn()>=1) {
+                pos.getColumn()<=8 && pos.getColumn()>=1) {
             // did we run into another piece?
             ChessPiece collisionpiece = board.getPiece(pos);
             if(collisionpiece == null) { // no collision yet
@@ -239,7 +204,7 @@ public class ChessPiece {
             } else { // abort when we collide with our own team
                 break;
             }
-            pos = stepper.step(pos);
+            pos = new ChessPosition(pos.getRow() + dx, pos.getColumn() + dy);
         }
         return moves;
     }
