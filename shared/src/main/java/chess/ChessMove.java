@@ -9,18 +9,17 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
+    private final ChessPosition startPosition, endPosition;
+    private final ChessPiece.PieceType promotionPiece;
 
-    private ChessPosition startPosition, endPosition;
-    private ChessPiece.PieceType promotionPiece;
-
-    public ChessMove(ChessPosition inStartPosition, ChessPosition inEndPosition,
-                     ChessPiece.PieceType inPromotionPiece) {
-        startPosition = inStartPosition;
-        endPosition = inEndPosition;
-        promotionPiece = inPromotionPiece;
+    public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
+                     ChessPiece.PieceType promotionPiece) {
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.promotionPiece = promotionPiece;
     }
-    public ChessMove(ChessPosition inStartPosition, ChessPosition inEndPosition) {
-        this(inStartPosition,inEndPosition,null);
+    public ChessMove(ChessPosition startPosition, ChessPosition endPosition) {
+        this(startPosition,endPosition,null);
     }
 
     /**
@@ -48,17 +47,17 @@ public class ChessMove {
     }
 
     /**
-     * overrides
+     * overrides for builtin functions
      */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ChessMove that = (ChessMove) o;
-        return startPosition.equals(that.startPosition) &&
-                endPosition.equals(that.endPosition) &&
-                promotionPiece == that.promotionPiece;
+        ChessMove chessMove = (ChessMove) o;
+        return Objects.equals(startPosition, chessMove.startPosition) &&
+               Objects.equals(endPosition, chessMove.endPosition) &&
+               promotionPiece == chessMove.promotionPiece;
     }
     @Override
     public int hashCode() {
@@ -66,13 +65,10 @@ public class ChessMove {
     }
     @Override
     public String toString() {
-        if (promotionPiece == null) {
-            return "Move: " + startPosition.toString()
-                   + " => " + endPosition.toString();
+        if(promotionPiece == null) {
+            return startPosition + " => " + endPosition;
         } else {
-            return "Move: " + startPosition.toString()
-                   + " => " + endPosition.toString()
-                     + " (" + promotionPiece.toString() + ")";
+            return startPosition + " => " + endPosition + " [" + promotionPiece + "]";
         }
     }
 }

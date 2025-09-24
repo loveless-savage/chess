@@ -1,6 +1,6 @@
 package chess;
 
-//import java.util.Objects;
+import java.util.Objects;
 
 /**
  * Represents a single square position on a chess board
@@ -9,12 +9,11 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessPosition {
+    private final int row, col;
 
-    private int row, col;
-
-    public ChessPosition(int inRow, int inCol) {
-        row = inRow;
-        col = inCol;
+    public ChessPosition(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 
     /**
@@ -34,7 +33,14 @@ public class ChessPosition {
     }
 
     /**
-     * overrides
+     * @return is this position on the board?
+     */
+    public boolean isInBounds() {
+        return (row>=1 && row<=8 && col>=1 && col<=8);
+    }
+
+    /**
+     * overrides for builtin functions
      */
     @Override
     public boolean equals(Object o) {
@@ -42,7 +48,7 @@ public class ChessPosition {
             return false;
         }
         ChessPosition that = (ChessPosition) o;
-        return row == that.getRow() && col == that.getColumn();
+        return row == that.row && col == that.col;
     }
     @Override
     public int hashCode() {

@@ -11,13 +11,14 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPiece {
-
     private final ChessGame.TeamColor color;
-    private final PieceType type;
+    private final ChessPiece.PieceType type;
+    private final MoveSet moveSet;
 
-    public ChessPiece(ChessGame.TeamColor inColor, ChessPiece.PieceType inType) {
-        color = inColor;
-        type = inType;
+    public ChessPiece(ChessGame.TeamColor color, ChessPiece.PieceType type) {
+        this.color = color;
+        this.type = type;
+        moveSet = new MoveSet();
     }
 
     /**
@@ -54,19 +55,11 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pos) {
-        switch (type) {
-            case PieceType.KING   -> { return kingMoves(board,pos);   }
-            case PieceType.QUEEN  -> { return queenMoves(board,pos);  }
-            case PieceType.BISHOP -> { return bishopMoves(board,pos); }
-            case PieceType.KNIGHT -> { return knightMoves(board,pos); }
-            case PieceType.ROOK   -> { return rookMoves(board,pos);   }
-            case PieceType.PAWN   -> { return pawnMoves(board,pos);   }
-            default -> throw new RuntimeException("Moves for piece of type " + type + " are not known");
-        }
+        return moveSet.pieceMoves(board,pos);
     }
 
     /**
-     * overrides
+     * overrides for builtin functions
      */
     @Override
     public boolean equals(Object o) {
@@ -76,154 +69,151 @@ public class ChessPiece {
         ChessPiece that = (ChessPiece) o;
         return color == that.color && type == that.type;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(color, type);
     }
     @Override
     public String toString() {
-        return color.toString() + " " + type.toString();
+        return color + " " + type;
     }
 
 ////////////////////////////////////////////////////////////////////////////////
-
     /**
-     * movesets for different pieces
+     * internal class that manages piece movement logic
      */
-    private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition pos) {
-        var moves = new HashSet<ChessMove>();
-        // which directions can the king step?
-        int[] dx = {1, 1, 1, 0,-1,-1,-1, 0};
-        int[] dy = {1, 0,-1,-1,-1, 0, 1, 1};
-        // look at each possibility in turn
-        for(int i=0;i<8;i++){
-            ChessPosition newPos = new ChessPosition(pos.getRow()+dx[i],pos.getColumn()+dy[i]);
-            // skip this position if is off the board
-            if(newPos.getRow()>8 || newPos.getRow()<1 ||
-                    newPos.getColumn()>8 || newPos.getColumn()<1) continue;
-            // no friendly fire
-            if(board.getPiece(newPos) != null && color == board.getPiece(newPos).color) continue;
-            moves.add(new ChessMove(pos,newPos));
-        }
-        return moves;
-    }
-    private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition pos) {
-        var moves = new HashSet<ChessMove>();
-        // march in each direction, accumulating end positions as far as we can go
-        moves.addAll(moveMarch(board,pos, 1, 0)); // right
-        moves.addAll(moveMarch(board,pos, 1, 1)); // up + right
-        moves.addAll(moveMarch(board,pos, 0, 1)); // up
-        moves.addAll(moveMarch(board,pos,-1, 1)); // up + left
-        moves.addAll(moveMarch(board,pos,-1, 0)); // left
-        moves.addAll(moveMarch(board,pos,-1,-1)); // down + left
-        moves.addAll(moveMarch(board,pos, 0,-1)); // down
-        moves.addAll(moveMarch(board,pos, 1,-1)); // down + right
-        return moves;
-    }
-    private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition pos) {
-        var moves = new HashSet<ChessMove>();
-        // march in each direction, accumulating end positions as far as we can go
-        moves.addAll(moveMarch(board,pos, 1, 1)); // up + right
-        moves.addAll(moveMarch(board,pos,-1, 1)); // up + left
-        moves.addAll(moveMarch(board,pos, 1,-1)); // down + right
-        moves.addAll(moveMarch(board,pos,-1,-1)); // down + left
-        return moves;
-    }
-    private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition pos) {
-        var moves = new HashSet<ChessMove>();
-        // which directions can the knight move relative to its current spot?
-        int[] dx = {2, 2, 1,-1,-2,-2,-1, 1};
-        int[] dy = {1,-1,-2,-2,-1, 1, 2, 2};
-        // look at each possibility in turn
-        for(int i=0;i<8;i++){
-            ChessPosition newPos = new ChessPosition(pos.getRow()+dx[i],pos.getColumn()+dy[i]);
-            // skip this position if is off the board
-            if(newPos.getRow()>8 || newPos.getRow()<1 ||
-                    newPos.getColumn()>8 || newPos.getColumn()<1) continue;
-            // no friendly fire
-            if(board.getPiece(newPos) != null && color == board.getPiece(newPos).color) continue;
-            moves.add(new ChessMove(pos,newPos));
-        }
-        return moves;
-    }
-    private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition pos) {
-        var moves = new HashSet<ChessMove>();
-        // march in each direction, accumulating end positions as far as we can go
-        moves.addAll(moveMarch(board,pos, 1, 0)); // right
-        moves.addAll(moveMarch(board,pos,-1, 0)); // left
-        moves.addAll(moveMarch(board,pos, 0, 1)); // up
-        moves.addAll(moveMarch(board,pos, 0,-1)); // down
-        return moves;
-    }
-    private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition pos) {
-        var moves = new HashSet<ChessMove>();
-        // white pawns march up the board, black pawns march down
-        int dx = (color == ChessGame.TeamColor.WHITE)? 1 : -1;
-        ChessPosition newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn());
-        // is the path forward blocked? pawns cannot capture forward
-        if(board.getPiece(newPos) == null) {
-            moves.addAll(pawnPromotions(pos,newPos));
-            // if the pawn is in its original row, it can also move two spaces
-            if((color == ChessGame.TeamColor.WHITE && pos.getRow() == 2) ||
-                    (color == ChessGame.TeamColor.BLACK && pos.getRow() == 7)) {
-                newPos = new ChessPosition(pos.getRow()+2*dx,pos.getColumn());
-                if(board.getPiece(newPos) == null) moves.add(new ChessMove(pos, newPos));
+    private class MoveSet {
+        private Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pos) {
+            Collection<ChessMove> moves = new HashSet<ChessMove>();
+            switch (type) {
+                case KING -> {
+                    int[] dx = { 1, 1, 0,-1,-1,-1, 0, 1};
+                    int[] dy = { 0, 1, 1, 1, 0,-1,-1,-1};
+                    moves = batchMoves(board,pos,dx,dy,false);
+                }
+                case QUEEN -> {
+                    int[] dx = { 1, 1, 0,-1,-1,-1, 0, 1};
+                    int[] dy = { 0, 1, 1, 1, 0,-1,-1,-1};
+                    moves = batchMoves(board,pos,dx,dy,true);
+                }
+                case BISHOP -> {
+                    int[] dx = { 1,-1,-1, 1};
+                    int[] dy = { 1, 1,-1,-1};
+                    moves = batchMoves(board,pos,dx,dy,true);
+                }
+                case KNIGHT -> {
+                    int[] dx = { 2, 1,-1,-2,-2,-1, 1, 2};
+                    int[] dy = { 1, 2, 2, 1,-1,-2,-2,-1};
+                    moves = batchMoves(board,pos,dx,dy,false);
+                }
+                case ROOK -> {
+                    int[] dx = { 1, 0,-1, 0};
+                    int[] dy = { 0, 1, 0,-1};
+                    moves = batchMoves(board,pos,dx,dy,true);
+                }
+                case PAWN -> {
+                    int dx = (color == ChessGame.TeamColor.WHITE) ? 1:-1;
+                    ChessPosition target = new ChessPosition(pos.getRow()+dx,pos.getColumn());
+                    if (!target.isInBounds()){
+                        break;
+                    }
+                    var collisionPiece = board.getPiece(target);
+                    if (collisionPiece == null) {
+                        moves.addAll(pawnPromoter(pos, target));
+                        if ( (color == ChessGame.TeamColor.WHITE && pos.getRow() == 2) ||
+                             (color == ChessGame.TeamColor.BLACK && pos.getRow() == 7)) {
+                            target = new ChessPosition(pos.getRow()+2*dx,pos.getColumn());
+                            collisionPiece = board.getPiece(target);
+                            if(collisionPiece == null) {
+                                moves.add(new ChessMove(pos, target));
+                            }
+                        }
+                    }
+                    if (pos.getColumn()<8) {
+                        target = new ChessPosition(pos.getRow() + dx, pos.getColumn() + 1);
+                        collisionPiece = board.getPiece(target);
+                        if (collisionPiece != null && color != collisionPiece.color) {
+                            moves.addAll(pawnPromoter(pos, target));
+                        }
+                    }
+                    if (pos.getColumn()>1) {
+                        target = new ChessPosition(pos.getRow() + dx, pos.getColumn() - 1);
+                        collisionPiece = board.getPiece(target);
+                        if (collisionPiece != null && color != collisionPiece.color) {
+                            moves.addAll(pawnPromoter(pos, target));
+                        }
+                    }
+                }
+                default -> {
+                    System.out.println(type + " not a recognized piece type!");
+                    return null;
+                }
             }
-        }
-        // even if the path forward is blocked, the pawn can capture diagonally
-        newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn()+1); // to the right
-        if(board.getPiece(newPos) != null && color != board.getPiece(newPos).color) {
-            moves.addAll(pawnPromotions(pos,newPos));
-        }
-        newPos = new ChessPosition(pos.getRow()+dx,pos.getColumn()-1); // to the left
-        if(board.getPiece(newPos) != null && color != board.getPiece(newPos).color) {
-            moves.addAll(pawnPromotions(pos,newPos));
+            return moves;
         }
 
-        return moves;
-    }
-
-    /**
-     * utility for marching along path in any direction until colliding with another piece
-     */
-    private Collection<ChessMove> moveMarch(ChessBoard board, ChessPosition posIn, int dx, int dy) {
-        // collect all moves we find along this march
-        var moves = new HashSet<ChessMove>();
-        // where are we looking now?
-        ChessPosition pos = new ChessPosition(posIn.getRow() + dx, posIn.getColumn() + dy);
-        // keep stepping and adding moves until we step off the board
-        while(pos.getRow()<=8 && pos.getRow()>=1 &&
-                pos.getColumn()<=8 && pos.getColumn()>=1) {
-            // did we run into another piece?
-            ChessPiece collisionpiece = board.getPiece(pos);
-            if(collisionpiece == null) { // no collision yet
-                moves.add(new ChessMove(posIn, pos));
-            } else if(color != collisionpiece.color){ // enemy team?
-                moves.add(new ChessMove(posIn, pos));
-                break;
-            } else { // abort when we collide with our own team
-                break;
+        /**
+         * accumulate moves in an array of directions
+         */
+        private Collection<ChessMove> batchMoves(ChessBoard board, ChessPosition pos,
+                                                    int[] dx, int[] dy, boolean doMarch) {
+            var moves = new HashSet<ChessMove>();
+            for (int i=0; i<dx.length; i++) {
+                if (doMarch) {
+                    moves.addAll(moveMarch(board,pos,dx[i],dy[i]));
+                } else {
+                    ChessPosition target = new ChessPosition(pos.getRow()+dx[i],pos.getColumn()+dy[i]);
+                    if (!target.isInBounds()){
+                        continue;
+                    }
+                    var collisionPiece = board.getPiece(target);
+                    if(collisionPiece == null || color != collisionPiece.color) {
+                        moves.add(new ChessMove(pos, target));
+                    }
+                }
             }
-            pos = new ChessPosition(pos.getRow() + dx, pos.getColumn() + dy);
+            return moves;
         }
-        return moves;
-    }
 
-    /**
-     * utility for expanding a pawn move into all possible promotions if it reaches the other end of the board
-     */
-    private Collection<ChessMove> pawnPromotions(ChessPosition pos, ChessPosition newPos) {
-        var moves = new HashSet<ChessMove>();
-        if((color == ChessGame.TeamColor.WHITE && newPos.getRow() == 8) ||
-                (color == ChessGame.TeamColor.BLACK && newPos.getRow() == 1)) {
-            for (var i : PieceType.values()) {
-                // can't promote to a pawn or a king
-                if(i == PieceType.PAWN || i == PieceType.KING) continue;
-                moves.add(new ChessMove(pos,newPos,i));
+        /**
+         * march along a specified direction until hitting an obstacle
+         */
+        private Collection<ChessMove> moveMarch(ChessBoard board, ChessPosition pos, int dx, int dy) {
+            var moves = new HashSet<ChessMove>();
+            ChessPosition target = new ChessPosition(pos.getRow()+dx,pos.getColumn()+dy);
+            while (target.isInBounds()) {
+                var collisionPiece = board.getPiece(target);
+                if(collisionPiece == null) {
+                    moves.add(new ChessMove(pos, target));
+                } else if (color != collisionPiece.color) {
+                    moves.add(new ChessMove(pos, target));
+                    break;
+                } else {
+                    break;
+                }
+                target = new ChessPosition(target.getRow()+dx,target.getColumn()+dy);
             }
-        } else { // false alarm! don't promote
-            moves.add(new ChessMove(pos, newPos));
+            return moves;
         }
-        return moves;
+
+        /**
+         * convert a single pawn move into an array, each with a different promition piece
+         */
+        private Collection<ChessMove> pawnPromoter(ChessPosition pos, ChessPosition target) {
+            var moves = new HashSet<ChessMove>();
+            if ( (color == ChessGame.TeamColor.WHITE && target.getRow() == 8) ||
+                 (color == ChessGame.TeamColor.BLACK && target.getRow() == 1)) {
+                for (var promo : PieceType.values()) {
+                    if (promo == PieceType.KING || promo == PieceType.PAWN) {
+                        continue;
+                    }
+                    moves.add(new ChessMove(pos, target, promo));
+                }
+            } else {
+                moves.add(new ChessMove(pos, target));
+            }
+            return moves;
+        }
     }
 }
