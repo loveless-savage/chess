@@ -9,7 +9,6 @@ import java.util.Map;
  * signature of the existing methods.
  */
 public class ChessBoard {
-
     private final ChessPiece[][] pieces;
 
     public ChessBoard() {
@@ -104,28 +103,31 @@ public class ChessBoard {
     /**
      * convert ascii representation of board to object representation
      */
-    // TODO: fix null vs ChessPosition(null)
     private void loadBoard(String boardText) {
         char[] boardIn = boardText.toCharArray();
         int row = 8;
         int col = 1;
-        for (var c : boardIn){
-            if(c == '|') continue; // skip delimiters
-            if(c == '\n') { // new row
+        for (var c : boardIn) {
+            if (c == '|') continue; // skip delimiters
+            if (c == '\n') { // new row
                 row--;
-                col=1;
+                col = 1;
                 continue;
             }
-            if(c == ' ') pieces[row-1][col-1] = null; // empty spaces
-            if(pieces[row-1][col-1] != null &&
-                    c == TYPE_TO_CHAR_MAP.get(pieces[row-1][col-1].getPieceType())) { // skip unchanged pieces
+            if (c == ' ') { // empty spaces
+                pieces[row-1][col-1] = null;
                 continue;
             }
 
-            ChessGame.TeamColor color = Character.isLowerCase(c) ? ChessGame.TeamColor.BLACK
-                    : ChessGame.TeamColor.WHITE;
+            ChessGame.TeamColor color = Character.isLowerCase(c) ?
+                    ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             var type = CHAR_TO_TYPE_MAP.get(Character.toLowerCase(c));
-            pieces[row-1][col-1] = new ChessPiece(color,type);
+
+            if(pieces[row-1][col-1] == null || // always write to null spaces
+                    type != pieces[row-1][col-1].getPieceType() || // if piece type and color both match,
+                    color != pieces[row-1][col-1].getTeamColor()) { // we can leave the piece unchanged
+                pieces[row-1][col-1] = new ChessPiece(color,type);
+            }
             col++;
         }
     }
@@ -141,7 +143,7 @@ public class ChessBoard {
                 boardText[18*i+2*j] = '|';
 
                 chess.ChessPiece currentPiece = pieces[7-i][j];
-                if(currentPiece == null || currentPiece.getPieceType() == null) { // blank space
+                if(currentPiece == null){ // blank space
                     boardText[18*i+2*j+1] = ' ';
                 }else{ // non-empty character
                     char type = TYPE_TO_CHAR_MAP.get(currentPiece.getPieceType());
