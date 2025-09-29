@@ -51,7 +51,7 @@ public class ChessBoard {
      */
     public ChessPosition getKing(ChessGame.TeamColor team) {
         for(int row=1; row<=8; row++) {
-            for (int col = 1; col <= 8; col++) {
+            for (int col=1; col<=8; col++) {
                 ChessPiece piece = pieces[row-1][col-1];
                 if(piece != null && // is there a piece here?
                         piece.getPieceType() == ChessPiece.PieceType.KING && // is it a king?
