@@ -57,12 +57,14 @@ public class ChessGame {
         Collection<ChessMove> moves = new HashSet<ChessMove>();
         // test each potential move to see if it endangers this piece's own king
         for(var move : piece.pieceMoves(board,startPosition)){
+            // temporarily make move
             ChessPiece realEndPosState = board.getPiece(move.getEndPosition());
             board.addPiece(move.getEndPosition(),piece);
             board.addPiece(move.getStartPosition(),null);
             if(!isInCheck(piece.getTeamColor())) {
                 moves.add(move);
             }
+            // restore actual state of the board
             board.addPiece(move.getEndPosition(),realEndPosState);
             board.addPiece(move.getStartPosition(),piece);
         }
