@@ -104,22 +104,17 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        // check for attack from each position on the board
-        for(int row=1; row<=8; row++) {
-            for (int col=1; col<=8; col++) {
-                ChessPosition pos = new ChessPosition(row,col);
-                ChessPiece piece = board.getPiece(pos);
-                if(piece != null && // is there a piece to move?
-                        piece.getTeamColor() != teamColor) { // disregard friendly fire
-                    // do any of this piece's moves land on the king?
-                    var moves = piece.pieceMoves(board,pos);
-                    if(moves.stream().anyMatch(move -> move.getEndPosition().equals(board.getKing(teamColor)))) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        TeamColor enemyColor = (teamColor == TeamColor.BLACK) ? TeamColor.WHITE : TeamColor.BLACK;
+        // for each piece on the enemy team, check its possible moveset
+        TeamTestFunction checkTest = (pos, piece) -> {
+            var moves = piece.pieceMoves(board,pos);
+            // do any of this piece's moves land on our king?
+            return moves.stream().anyMatch(
+                    move -> move.getEndPosition().equals(board.getKing(teamColor))
+            );
+        };
+        // if any of the enemy team's pieces can reach the king, return true
+        return forAnyOnTeam(enemyColor,checkTest);
     }
 
     /**
@@ -129,25 +124,15 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        // we must be in check in order to be in checkmate
         if(!isInCheck(teamColor)) {
             return false;
         }
-        // check for an escape route from each position on the board
-        for(int row=1; row<=8; row++) {
-            for (int col=1; col<=8; col++) {
-                ChessPosition pos = new ChessPosition(row,col);
-                ChessPiece piece = board.getPiece(pos);
-                if(piece != null && // is there a piece to move?
-                        piece.getTeamColor() == teamColor) { // only our pieces can move to block check
-                    // do any of this piece's moves escape?
-                    if(!validMoves(pos).isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        // exhausted all possible escape routes
-        return true;
+        // for each piece on teamColor, check whether it has any valid moves
+        TeamTestFunction checkmateTest = (pos, piece) ->
+                !validMoves(pos).isEmpty();
+        // if any of our team's pieces have valid moves, return false
+        return !forAnyOnTeam(teamColor,checkmateTest);
     }
 
     /**
@@ -158,25 +143,15 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        // if in check, abort
         if(isInCheck(teamColor)) {
             return false;
         }
-        // check for an escape route from each position on the board
-        for(int row=1; row<=8; row++) {
-            for (int col=1; col<=8; col++) {
-                ChessPosition pos = new ChessPosition(row,col);
-                ChessPiece piece = board.getPiece(pos);
-                if(piece != null && // is there a piece to move?
-                        piece.getTeamColor() == teamColor) { // only our pieces can move to block check
-                    // do any of this piece's moves escape?
-                    if(!validMoves(pos).isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        // exhausted all possible escape routes
-        return true;
+        // for each piece on teamColor, check whether it has any valid moves
+        TeamTestFunction stalemateTest = (pos, piece) ->
+                !validMoves(pos).isEmpty();
+        // if any of our team's pieces have valid moves, return false
+        return !forAnyOnTeam(teamColor,stalemateTest);
     }
 
     /**
@@ -216,5 +191,28 @@ public class ChessGame {
     public String toString() {
         String gamestate = turn==TeamColor.WHITE ? "WHITE" : "BLACK ";
         return "   turn: " + gamestate + "   \n" + board;
+    }
+
+    /**
+     * helper function: run a test for each piece of the specified team
+     * e.g, see if moving this piece will free the king from check
+     */
+    private interface TeamTestFunction {
+        boolean run(ChessPosition pos, ChessPiece piece);
+    }
+    private boolean forAnyOnTeam(TeamColor activeColor, TeamTestFunction test) {
+        for(int row=1; row<=8; row++) {
+            for (int col=1; col<=8; col++) {
+                ChessPosition pos = new ChessPosition(row,col);
+                ChessPiece piece = board.getPiece(pos);
+                if(piece != null && // is there a piece to move?
+                        piece.getTeamColor() == activeColor) { // disregard friendly fire
+                    if(test.run(pos,piece)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
