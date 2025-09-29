@@ -44,6 +44,26 @@ public class ChessBoard {
     }
 
     /**
+     * Locates the king of given color
+     *
+     * @param team Which king are we looking for?
+     * @return position of the king
+     */
+    public ChessPosition getKing(ChessGame.TeamColor team) {
+        for(int row=1; row<=8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = pieces[row-1][col-1];
+                if(piece != null && // is there a piece here?
+                        piece.getPieceType() == ChessPiece.PieceType.KING && // is it a king?
+                        piece.getTeamColor() == team){ // is it on the team we're asking for?
+                    return new ChessPosition(row,col);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Sets the board to the default starting board
      */
     public void resetBoard() {

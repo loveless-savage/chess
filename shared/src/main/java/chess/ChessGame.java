@@ -90,7 +90,22 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // check for attack from each position on the board
+        for(int row=1; row<=8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row,col);
+                ChessPiece piece = board.getPiece(pos);
+                if(piece != null && // is there a piece to move?
+                        piece.getTeamColor() != teamColor) { // disregard friendly fire
+                    // do any of this piece's moves land on the king?
+                    var moves = piece.pieceMoves(board,pos);
+                    if(moves.stream().anyMatch(move -> move.getEndPosition().equals(board.getKing(teamColor)))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
