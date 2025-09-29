@@ -38,7 +38,9 @@ public class ChessBoard {
      */
     public ChessPiece getPiece(ChessPosition pos) {
         if(pos.getRow()>8 || pos.getRow()<1 ||
-                pos.getColumn()>8 || pos.getColumn()<1) return null;
+                pos.getColumn()>8 || pos.getColumn()<1) {
+            return null;
+        }
 
         return pieces[pos.getRow()-1][pos.getColumn()-1];
     }
@@ -128,7 +130,9 @@ public class ChessBoard {
         int row = 8;
         int col = 1;
         for (var c : boardIn) {
-            if (c == '|') continue; // skip delimiters
+            if (c == '|') { // skip delimiters
+                continue;
+            }
             if (c == '\n') { // new row
                 row--;
                 col = 1;
@@ -167,7 +171,9 @@ public class ChessBoard {
                     boardText[18*i+2*j+1] = ' ';
                 }else{ // non-empty character
                     char type = TYPE_TO_CHAR_MAP.get(currentPiece.getPieceType());
-                    if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) type = Character.toUpperCase(type);
+                    if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        type = Character.toUpperCase(type);
+                    }
                     boardText[18*i+2*j+1] = type;
                 }
             }

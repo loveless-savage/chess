@@ -53,8 +53,10 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if(piece == null) return null;
-        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        if(piece == null) {
+            return null;
+        }
+        Collection<ChessMove> moves = new HashSet<>();
         // test each potential move to see if it endangers this piece's own king
         for(var move : piece.pieceMoves(board,startPosition)){
             // temporarily make move

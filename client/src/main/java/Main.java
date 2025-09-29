@@ -1,29 +1,23 @@
 import chess.*;
 
+import java.util.Map;
+
 public class Main {
     public static void main(String[] args) {
-        //var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
         //System.out.println("♕ 240 Chess Client: " + piece);
+        var pos = new ChessPosition(5,5);
+        var target = new ChessPosition(7,5);
+
         var board = new ChessBoard();
         board.resetBoard();
+        board.addPiece(target,null);
+        var kingPos = board.getKing(ChessGame.TeamColor.BLACK);
         System.out.println(board);
+        var moves = piece.pieceMoves(board,pos);
+        System.out.println(moves.stream().anyMatch(move -> move.getEndPosition().equals(kingPos)));
 
-        /*
-        board.loadBoard("""
-                | |n|b|q|k|b|n|r|
-                |p|p|p|p|p|p|p|p|
-                | | | | | | | | |
-                | |r| | | | | | |
-                | | | | | | | | |
-                | | | | | | | | |
-                |P|P|P|P|P|P|P|P|
-                |R|N|B|Q|K|B|N|R|
-                """);
-        var pos = new ChessPosition(5,2);
-        var piece = board.getPiece(pos);
-        System.out.println(piece.toString());
-        var place = piece.pieceMoves(board,pos);
-        place.forEach((p) -> System.out.println(p));
-        */
+        ChessGame game = new ChessGame();
+        System.out.println(game);
     }
 }
