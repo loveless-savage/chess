@@ -54,10 +54,10 @@ public class ChessMove {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(startPosition, chessMove.startPosition) &&
-               Objects.equals(endPosition, chessMove.endPosition) &&
-               promotionPiece == chessMove.promotionPiece;
+        ChessMove that = (ChessMove) o;
+        return Objects.equals(startPosition, that.startPosition) &&
+               Objects.equals(endPosition, that.endPosition) &&
+               promotionPiece == that.promotionPiece;
     }
     @Override
     public int hashCode() {
