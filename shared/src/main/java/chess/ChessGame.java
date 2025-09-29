@@ -158,7 +158,25 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if(isInCheck(teamColor)) {
+            return false;
+        }
+        // check for an escape route from each position on the board
+        for(int row=1; row<=8; row++) {
+            for (int col=1; col<=8; col++) {
+                ChessPosition pos = new ChessPosition(row,col);
+                ChessPiece piece = board.getPiece(pos);
+                if(piece != null && // is there a piece to move?
+                        piece.getTeamColor() == teamColor) { // only our pieces can move to block check
+                    // do any of this piece's moves escape?
+                    if(!validMoves(pos).isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        // exhausted all possible escape routes
+        return true;
     }
 
     /**
