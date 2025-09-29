@@ -72,6 +72,10 @@ public class ChessGame {
         } else if(!validMoves(move.getStartPosition()).contains(move)) {
             throw new InvalidMoveException(piece+" cannot move to "+move.getEndPosition()+"!");
         }
+        // promote pawn if applicable
+        if(move.getPromotionPiece() != null) {
+            piece = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+        }
         board.addPiece(move.getEndPosition(),piece);
         board.addPiece(move.getStartPosition(),null);
         setTeamTurn(turn == TeamColor.BLACK ? TeamColor.WHITE : TeamColor.BLACK);
