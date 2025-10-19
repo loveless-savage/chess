@@ -3,18 +3,20 @@ package server;
 import com.google.gson.Gson;
 import model.*;
 import io.javalin.*;
-import service.Service;
+import service.*;
 
 public class Server {
 
     private final Javalin javalin;
     private final Gson serializer;
-    private final Service service;
+    private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         serializer = new Gson();
-        service = new Service();
+        userService = new UserService();
+        gameService = new GameService();
 
         javalin.delete("/db", ctx -> {
             System.out.println(ctx.body().getClass());
@@ -28,7 +30,7 @@ public class Server {
             System.out.println(bod);
             ctx.status(418);
             ctx.contentType("application/json");
-            var registerResult = service.register(bod);
+            var registerResult = userService.register(bod);
             ctx.result(serializer.toJson(registerResult));
         });
     }

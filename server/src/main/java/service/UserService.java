@@ -5,14 +5,12 @@ import dataaccess.*;
 import model.*;
 import java.util.UUID;
 
-public class Service {
+public class UserService {
     AuthDAO authDAO;
-    GameDAO gameDAO;
     UserDAO userDAO;
 
-    public Service() {
+    public UserService() {
         authDAO = new AuthDAO();
-        gameDAO = new GameDAO();
         userDAO = new UserDAO();
     }
 
@@ -24,18 +22,6 @@ public class Service {
         return usernameAndPassword;
     }
     public void logout(String authToken) {
-        return;
-    }
-    public GameData[] listGames(String authToken) {
-        return null;
-    }
-    public int createGame(String authToken, String gameName) {
-        return 0;
-    }
-    public void joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) {
-        return;
-    }
-    public void clear() {
         return;
     }
 
