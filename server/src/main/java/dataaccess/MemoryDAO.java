@@ -1,6 +1,8 @@
 package dataaccess;
 
-public abstract class MemoryDAO<T,K> implements DAO<T,K> {
+import model.*;
+
+public abstract class MemoryDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     T refdata;
 
     public void create(T data) {

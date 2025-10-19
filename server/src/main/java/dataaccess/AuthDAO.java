@@ -1,6 +1,6 @@
 package dataaccess;
 
-import model.UserData;
+import model.*;
 
-public class AuthDAO extends MemoryDAO<UserData,String>{
+public class AuthDAO extends MemoryDAO<AuthData,String>{
 }

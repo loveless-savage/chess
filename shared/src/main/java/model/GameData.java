@@ -8,4 +8,8 @@ public record GameData(
         String blackUsername,
         String gameName,
         ChessGame game
-) {};
+) implements ModelData<Integer> {
+    public Integer key() {
+        return gameID;
+    }
+};
