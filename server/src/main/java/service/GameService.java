@@ -1,12 +1,8 @@
 package service;
 
-import chess.ChessGame;
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.UserDAO;
-import model.AuthData;
-import model.GameData;
-import model.UserData;
+import chess.*;
+import dataaccess.*;
+import model.*;
 
 import java.util.UUID;
 
