@@ -13,4 +13,9 @@ public class Service {
         gameDAO = new MemoryDAO<>();
         userDAO = new MemoryDAO<>();
     }
+
+    public AuthData register(UserData newUser) { // TODO: result instead of AuthData
+        userDAO.create(newUser);
+        return new AuthData(newUser.username(),"fillerauth");
+    }
 }
