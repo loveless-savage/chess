@@ -4,8 +4,6 @@ import chess.*;
 import dataaccess.*;
 import model.*;
 
-import java.util.UUID;
-
 public class GameService {
     AuthDAO authDAO;
     GameDAO gameDAO;
@@ -13,6 +11,10 @@ public class GameService {
     public GameService() {
         authDAO = new AuthDAO();
         gameDAO = new GameDAO();
+    }
+    public GameService(AuthDAO authIn, GameDAO gameIn) {
+        authDAO = authIn;
+        gameDAO = gameIn;
     }
 
     public GameData[] listGames(String authToken) {

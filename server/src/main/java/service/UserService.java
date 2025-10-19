@@ -13,6 +13,10 @@ public class UserService {
         authDAO = new AuthDAO();
         userDAO = new UserDAO();
     }
+    public UserService(AuthDAO authIn, UserDAO userIn) {
+        authDAO = authIn;
+        userDAO = userIn;
+    }
 
     public AuthData register(UserData newUser) { // TODO: result instead of AuthData
         userDAO.create(newUser);
