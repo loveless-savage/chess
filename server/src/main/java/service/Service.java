@@ -3,6 +3,7 @@ package service;
 import chess.*;
 import dataaccess.*;
 import model.*;
+import java.util.UUID;
 
 public class Service {
     AuthDAO authDAO;
@@ -36,5 +37,9 @@ public class Service {
     }
     public void clear() {
         return;
+    }
+
+    public static String generateToken() {
+        return UUID.randomUUID().toString();
     }
 }
