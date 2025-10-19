@@ -5,14 +5,14 @@ import dataaccess.*;
 import model.*;
 
 public class Service {
-    DAO<AuthData> authDAO;
-    DAO<GameData> gameDAO;
-    DAO<UserData> userDAO;
+    AuthDAO authDAO;
+    GameDAO gameDAO;
+    UserDAO userDAO;
 
     public Service() {
-        authDAO = new MemoryDAO<>();
-        gameDAO = new MemoryDAO<>();
-        userDAO = new MemoryDAO<>();
+        authDAO = new AuthDAO();
+        gameDAO = new GameDAO();
+        userDAO = new UserDAO();
     }
 
     public AuthData register(UserData newUser) { // TODO: result instead of AuthData

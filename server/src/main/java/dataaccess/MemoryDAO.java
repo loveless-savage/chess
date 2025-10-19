@@ -1,6 +1,6 @@
 package dataaccess;
 
-public class MemoryDAO<T> implements DAO<T> {
+public abstract class MemoryDAO<T,K> implements DAO<T,K> {
     T refdata;
 
     public void create(T data) {
@@ -8,7 +8,7 @@ public class MemoryDAO<T> implements DAO<T> {
         System.out.println("memory not actually created lol");
     }
 
-    public T get(String key) {
+    public T get(K key) {
         return refdata;
     }
 
