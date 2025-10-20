@@ -20,6 +20,10 @@ public abstract class MemoryDAO<T extends ModelData<K>,K> implements DAO<T,K> {
         refdata = data;
     }
 
+    public void delete(K key) {
+        refdata = null;
+    }
+
     public void clear() {
         refdata = null;
     }

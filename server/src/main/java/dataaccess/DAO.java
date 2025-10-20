@@ -6,5 +6,6 @@ public interface DAO<T extends ModelData<K>,K> {
     void create(T data);
     T get(K key);
     void update(T data);
+    void delete(K key);
     void clear();
 }
