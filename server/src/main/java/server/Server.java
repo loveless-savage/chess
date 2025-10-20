@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.*;
 import model.*;
 import io.javalin.*;
 import service.*;
@@ -11,12 +12,18 @@ public class Server {
     private final Gson serializer;
     private final UserService userService;
     private final GameService gameService;
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         serializer = new Gson();
-        userService = new UserService();
-        gameService = new GameService();
+        userDAO = new UserDAO();
+        authDAO = new AuthDAO();
+        gameDAO = new GameDAO();
+        userService = new UserService(userDAO, authDAO);
+        gameService = new GameService(authDAO, gameDAO);
 
         javalin.delete("/db", ctx -> {
             System.out.println(ctx.body().getClass());
