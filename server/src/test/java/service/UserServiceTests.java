@@ -52,13 +52,15 @@ public class UserServiceTests {
 
     @Test
     public void logoutTest() {
-        String goodToken = userService.login(loginRequest).authToken();
+        userService.clear();
+        String goodToken = userService.register(goodData).authToken();
         userService.logout(goodToken);
         Assertions.assertThrows(UnauthorizedException.class,() -> userService.logout(goodToken));
     }
     @Test
     public void logoutUnauthorizedTest() {
-        String badToken = userService.login(loginRequest).authToken() + "_bad";
+        userService.clear();
+        String badToken = userService.register(goodData).authToken() + "_bad";
         Assertions.assertThrows(UnauthorizedException.class,() -> userService.logout(badToken));
     }
 
