@@ -50,7 +50,7 @@ public class GameServiceTests {
     public void listGamesTest() {
         Assertions.assertArrayEquals(new GameData[]{firstGame}, gameService.listGames(currentAuth.authToken()));
         gameService.createGame(currentAuth.authToken(),"otherGame");
-        Assertions.assertArrayEquals(new GameData[]{firstGame, takenGame}, gameService.listGames(currentAuth.authToken()));
+        Assertions.assertArrayEquals(new GameData[]{firstGame, otherGame}, gameService.listGames(currentAuth.authToken()));
         gameService.clear();
         authDAO.create(currentAuth);
         Assertions.assertArrayEquals(new GameData[]{}, gameService.listGames(currentAuth.authToken()));
