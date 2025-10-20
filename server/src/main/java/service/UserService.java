@@ -6,27 +6,36 @@ import model.*;
 import java.util.UUID;
 
 public class UserService {
-    AuthDAO authDAO;
     UserDAO userDAO;
+    AuthDAO authDAO;
 
     public UserService() {
-        authDAO = new AuthDAO();
         userDAO = new UserDAO();
+        authDAO = new AuthDAO();
     }
-    public UserService(AuthDAO authIn, UserDAO userIn) {
-        authDAO = authIn;
+    public UserService(UserDAO userIn, AuthDAO authIn) {
         userDAO = userIn;
+        authDAO = authIn;
     }
 
-    public AuthData register(UserData newUser) { // TODO: result instead of AuthData
+    public AuthData register(UserData newUser) {
+        userDAO.get(newUser.username()); // FIXME: AlreadyTakenException [403]
         userDAO.create(newUser);
-        return new AuthData(newUser.username(),"fillerauth");
+        AuthData loginInfo = new AuthData(generateToken(), newUser.username());
+        authDAO.create(loginInfo);
+        return loginInfo;
     }
-    public AuthData login(AuthData usernameAndPassword) {
-        return usernameAndPassword;
+    public AuthData login(AuthData loginRequest) {
+        userDAO.get(loginRequest.username()); // FIXME: NotFoundException [404], UnauthorizedException [401]
+        return new AuthData(generateToken(), loginRequest.username());
     }
     public void logout(String authToken) {
-        return;
+        authDAO.get(authToken); // FIXME: UnauthorizedException [401]
+        authDAO.delete(authToken);
+    }
+    public void clear() {
+        authDAO.clear();
+        userDAO.clear();
     }
 
     public static String generateToken() {
