@@ -1,6 +1,6 @@
 package dataaccess;
 
-import model.*;
+import model.UserData;
 import org.junit.jupiter.api.*;
 
 public class UserDAOTests {
@@ -44,5 +44,16 @@ public class UserDAOTests {
         dao.update(betterData);
         Assertions.assertNotEquals(dao.get("correctUsername"),goodData);
         Assertions.assertEquals(dao.get("correctUsername"),betterData);
+    }
+
+    @Test
+    public void deleteTest() {
+        UserData otherData = new UserData("otherUsername","otherPassword","other@email");
+        dao.create(otherData);
+        Assertions.assertEquals(dao.get("correctUsername"),goodData);
+        Assertions.assertEquals(dao.get("otherUsername"),otherData);
+        dao.delete("correctUsername");
+        Assertions.assertNull(dao.get("correctUsername"));
+        Assertions.assertEquals(dao.get("otherUsername"),otherData);
     }
 }

@@ -1,7 +1,7 @@
 package dataaccess;
 
-import chess.ChessGame;
 import model.GameData;
+import chess.ChessGame;
 import org.junit.jupiter.api.*;
 
 public class GameDAOTests {
@@ -53,5 +53,16 @@ public class GameDAOTests {
         GameData otherData = new GameData(201,"alice","bob","otherGame",new ChessGame());
         dao.create(otherData);
         Assertions.assertArrayEquals(dao.list(),new GameData[]{goodData,otherData});
+    }
+
+    @Test
+    public void deleteTest() {
+        GameData otherData = new GameData(201,"alice","bob","otherGame",new ChessGame());
+        dao.create(otherData);
+        Assertions.assertEquals(dao.get(200),goodData);
+        Assertions.assertEquals(dao.get(201),otherData);
+        dao.delete(200);
+        Assertions.assertNull(dao.get(200));
+        Assertions.assertEquals(dao.get(201),otherData);
     }
 }
