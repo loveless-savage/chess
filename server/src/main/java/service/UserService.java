@@ -25,7 +25,7 @@ public class UserService {
         authDAO.create(loginInfo);
         return loginInfo;
     }
-    public AuthData login(AuthData loginRequest) {
+    public AuthData login(LoginRequest loginRequest) {
         userDAO.get(loginRequest.username()); // FIXME: NotFoundException [404], UnauthorizedException [401]
         return new AuthData(generateToken(), loginRequest.username());
     }

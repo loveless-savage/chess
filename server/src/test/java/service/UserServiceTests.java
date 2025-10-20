@@ -6,14 +6,14 @@ import org.junit.jupiter.api.*;
 public class UserServiceTests {
     private static UserService userService;
     private static UserData goodData, otherData;
-    private static AuthData loginRequest;
+    private static LoginRequest loginRequest;
 
     @BeforeAll
     public static void init(){
         userService = new UserService();
         goodData = new UserData("correctUsername","correctPassword","correct@email");
         otherData = new UserData("otherUsername","otherPassword","other@email");
-        loginRequest = new AuthData("correctUsername","correctPassword");
+        loginRequest = new LoginRequest("correctUsername","correctPassword");
     }
     @BeforeEach
     public void setup() {
@@ -41,12 +41,12 @@ public class UserServiceTests {
     }
     @Test
     public void loginUserNotFoundTest() {
-        AuthData badLoginRequest = new AuthData("badUsername","correctPassword");
+        LoginRequest badLoginRequest = new LoginRequest("badUsername","correctPassword");
         Assertions.assertThrows(NotFoundException.class,() -> userService.login(badLoginRequest));
     }
     @Test
     public void loginBadPasswordTest() {
-        AuthData badLoginRequest = new AuthData("correctUsername","badPassword");
+        LoginRequest badLoginRequest = new LoginRequest("correctUsername","badPassword");
         Assertions.assertThrows(UnauthorizedException.class,() -> userService.login(badLoginRequest));
     }
 
@@ -66,9 +66,9 @@ public class UserServiceTests {
     public void clearTest() {
         userService.register(otherData);
         userService.clear();
-        AuthData loginRequest = new AuthData("correctUsername","correctPassword");
+        LoginRequest loginRequest = new LoginRequest("correctUsername","correctPassword");
         Assertions.assertThrows(NotFoundException.class,() -> userService.login(loginRequest));
-        AuthData otherLoginRequest = new AuthData("otherUsername","otherPassword");
+        LoginRequest otherLoginRequest = new LoginRequest("otherUsername","otherPassword");
         Assertions.assertThrows(NotFoundException.class,() -> userService.login(otherLoginRequest));
     }
 }
