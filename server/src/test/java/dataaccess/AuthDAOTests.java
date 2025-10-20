@@ -45,4 +45,15 @@ public class AuthDAOTests {
         Assertions.assertNotEquals(dao.get("goodToken"),goodData);
         Assertions.assertEquals(dao.get("goodToken"),betterData);
     }
+
+    @Test
+    public void deleteTest() {
+        AuthData otherData = new AuthData("otherToken","otherUsername");
+        dao.create(otherData);
+        Assertions.assertEquals(dao.get("goodToken"),goodData);
+        Assertions.assertEquals(dao.get("otherToken"),otherData);
+        dao.delete("goodToken");
+        Assertions.assertNull(dao.get("goodToken"));
+        Assertions.assertEquals(dao.get("otherToken"),otherData);
+    }
 }
