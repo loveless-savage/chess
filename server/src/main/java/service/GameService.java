@@ -18,15 +18,36 @@ public class GameService {
     }
 
     public GameData[] listGames(String authToken) {
-        return null;
+        authDAO.get(authToken); // FIXME: UnauthorizedException [401]
+        return gameDAO.list();
     }
     public int createGame(String authToken, String gameName) {
-        return 0;
+        authDAO.get(authToken); // FIXME: UnauthorizedException [401]
+        int newGameID = gameDAO.getNextID();
+        GameData newGame = new GameData(newGameID,"","",gameName,new ChessGame());
+        gameDAO.create(newGame);
+        return newGameID;
     }
     public void joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) {
-        return;
+        AuthData userAuth = authDAO.get(authToken); // FIXME: UnauthorizedException [401]
+        GameData currentGame = gameDAO.get(gameID); // FIXME: NotFoundException [404]
+        GameData updatedGame;
+        if(playerColor == ChessGame.TeamColor.WHITE) {
+            // TODO: AlreadyTakenException [403]
+            updatedGame = new GameData(currentGame.gameID(),
+                                       userAuth.username(), currentGame.blackUsername(),
+                                       currentGame.gameName(),
+                                       currentGame.game());
+        } else {
+            updatedGame = new GameData(currentGame.gameID(),
+                                       currentGame.whiteUsername(), userAuth.username(),
+                                       currentGame.gameName(),
+                                       currentGame.game());
+        }
+        gameDAO.update(updatedGame);
     }
     public void clear() {
-        return;
+        authDAO.clear();
+        gameDAO.clear();
     }
 }
