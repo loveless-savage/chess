@@ -2,6 +2,8 @@ package dataaccess;
 
 import model.*;
 
+import java.util.Objects;
+
 public abstract class MemoryDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     T refdata;
 
@@ -20,5 +22,19 @@ public abstract class MemoryDAO<T extends ModelData<K>,K> implements DAO<T,K> {
 
     public void clear() {
         refdata = null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MemoryDAO<?, ?> that = (MemoryDAO<?, ?>) o;
+        return Objects.equals(refdata, that.refdata);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(refdata);
     }
 }
