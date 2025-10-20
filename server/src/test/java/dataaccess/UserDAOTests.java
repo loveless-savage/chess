@@ -8,13 +8,13 @@ public class UserDAOTests {
     private static UserData goodData;
 
     @BeforeAll
-    public static void setup() {
+    public static void init() {
         dao = new UserDAO();
         daoEmpty = new UserDAO();
         goodData = new UserData("correctUsername","correctPassword","correct@email");
     }
     @BeforeEach
-    public void setupEach() {
+    public void setup() {
         dao.create(goodData);
     }
     @AfterEach
@@ -25,12 +25,12 @@ public class UserDAOTests {
     @Test
     public void clearTest() {
         dao.clear();
-        Assertions.assertEquals(dao, daoEmpty);
+        Assertions.assertEquals(daoEmpty, dao);
     }
 
     @Test
     public void createTest() {
-        Assertions.assertEquals(dao.get("correctUsername"),goodData);
+        Assertions.assertEquals(goodData, dao.get("correctUsername"));
     }
 
     @Test
@@ -42,18 +42,18 @@ public class UserDAOTests {
     public void updateTest() {
         UserData betterData = new UserData("correctUsername","updatedPassword","updated@email");
         dao.update(betterData);
-        Assertions.assertNotEquals(dao.get("correctUsername"),goodData);
-        Assertions.assertEquals(dao.get("correctUsername"),betterData);
+        Assertions.assertNotEquals(goodData, dao.get("correctUsername"));
+        Assertions.assertEquals(betterData, dao.get("correctUsername"));
     }
 
     @Test
     public void deleteTest() {
         UserData otherData = new UserData("otherUsername","otherPassword","other@email");
         dao.create(otherData);
-        Assertions.assertEquals(dao.get("correctUsername"),goodData);
-        Assertions.assertEquals(dao.get("otherUsername"),otherData);
+        Assertions.assertEquals(goodData, dao.get("correctUsername"));
+        Assertions.assertEquals(otherData, dao.get("otherUsername"));
         dao.delete("correctUsername");
         Assertions.assertNull(dao.get("correctUsername"));
-        Assertions.assertEquals(dao.get("otherUsername"),otherData);
+        Assertions.assertEquals(otherData, dao.get("otherUsername"));
     }
 }

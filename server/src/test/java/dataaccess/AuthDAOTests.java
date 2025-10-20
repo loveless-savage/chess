@@ -25,12 +25,12 @@ public class AuthDAOTests {
     @Test
     public void clearTest() {
         dao.clear();
-        Assertions.assertEquals(dao, daoEmpty);
+        Assertions.assertEquals(daoEmpty, dao);
     }
 
     @Test
     public void createTest() {
-        Assertions.assertEquals(dao.get("goodToken"),goodData);
+        Assertions.assertEquals(goodData, dao.get("goodToken"));
     }
 
     @Test
@@ -42,18 +42,18 @@ public class AuthDAOTests {
     public void updateTest() {
         AuthData betterData = new AuthData("goodToken","updatedUsername");
         dao.update(betterData);
-        Assertions.assertNotEquals(dao.get("goodToken"),goodData);
-        Assertions.assertEquals(dao.get("goodToken"),betterData);
+        Assertions.assertNotEquals(goodData, dao.get("goodToken"));
+        Assertions.assertEquals(betterData, dao.get("goodToken"));
     }
 
     @Test
     public void deleteTest() {
         AuthData otherData = new AuthData("otherToken","otherUsername");
         dao.create(otherData);
-        Assertions.assertEquals(dao.get("goodToken"),goodData);
-        Assertions.assertEquals(dao.get("otherToken"),otherData);
+        Assertions.assertEquals(goodData, dao.get("goodToken"));
+        Assertions.assertEquals(otherData, dao.get("otherToken"));
         dao.delete("goodToken");
         Assertions.assertNull(dao.get("goodToken"));
-        Assertions.assertEquals(dao.get("otherToken"),otherData);
+        Assertions.assertEquals(otherData, dao.get("otherToken"));
     }
 }

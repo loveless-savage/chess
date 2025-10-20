@@ -26,12 +26,12 @@ public class GameDAOTests {
     @Test
     public void clearTest() {
         dao.clear();
-        Assertions.assertEquals(dao, daoEmpty);
+        Assertions.assertEquals(daoEmpty, dao);
     }
 
     @Test
     public void createTest() {
-        Assertions.assertEquals(dao.get(200),goodData);
+        Assertions.assertEquals(goodData, dao.get(200));
     }
 
     @Test
@@ -43,26 +43,26 @@ public class GameDAOTests {
     public void updateTest() {
         GameData betterData = new GameData(200,"newWhitePlayer","newBlackPlayer","updatedGame",new ChessGame());
         dao.update(betterData);
-        Assertions.assertNotEquals(dao.get(200),goodData);
-        Assertions.assertEquals(dao.get(200),betterData);
+        Assertions.assertNotEquals(goodData, dao.get(200));
+        Assertions.assertEquals(betterData, dao.get(200));
     }
 
     @Test
     public void listTest() {
-        Assertions.assertArrayEquals(dao.list(),new GameData[]{goodData});
+        Assertions.assertArrayEquals(new GameData[]{goodData}, dao.list());
         GameData otherData = new GameData(201,"alice","bob","otherGame",new ChessGame());
         dao.create(otherData);
-        Assertions.assertArrayEquals(dao.list(),new GameData[]{goodData,otherData});
+        Assertions.assertArrayEquals(new GameData[]{goodData,otherData}, dao.list());
     }
 
     @Test
     public void deleteTest() {
         GameData otherData = new GameData(201,"alice","bob","otherGame",new ChessGame());
         dao.create(otherData);
-        Assertions.assertEquals(dao.get(200),goodData);
-        Assertions.assertEquals(dao.get(201),otherData);
+        Assertions.assertEquals(goodData, dao.get(200));
+        Assertions.assertEquals(otherData, dao.get(201));
         dao.delete(200);
         Assertions.assertNull(dao.get(200));
-        Assertions.assertEquals(dao.get(201),otherData);
+        Assertions.assertEquals(otherData, dao.get(201));
     }
 }
