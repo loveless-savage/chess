@@ -25,20 +25,66 @@ public class Server {
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);
 
-        javalin.delete("/db", ctx -> {
-            System.out.println(ctx.body().getClass());
+        javalin.delete("/db", ctx -> { // Clear application
+            gameService.clear();
+            userService.clear();
             ctx.status(200);
-            ctx.contentType("text/plain");
-            ctx.result(serializer.toJson("heey"));
+            ctx.contentType("application/json");
+            ctx.result("{}");
         });
 
-        javalin.post("/user", ctx -> {
-            UserData bod = serializer.fromJson(ctx.body(),UserData.class);
-            System.out.println(bod);
-            ctx.status(418);
+        javalin.post("/user", ctx -> { // Register
+            UserData registerRequest = serializer.fromJson(ctx.body(),UserData.class);
+            var registerResult = userService.register(registerRequest);
+            ctx.status(200);
             ctx.contentType("application/json");
-            var registerResult = userService.register(bod);
             ctx.result(serializer.toJson(registerResult));
+        });
+
+        javalin.post("/session", ctx -> { // Login
+            LoginRequest loginRequest = serializer.fromJson(ctx.body(),LoginRequest.class);
+            var loginResult = userService.login(loginRequest);
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result(serializer.toJson(loginResult));
+        });
+
+        javalin.delete("/session", ctx -> { // Logout
+            String authToken = ctx.header("authorization");
+            userService.logout(authToken);
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result("{}");
+        });
+
+        javalin.get("/game", ctx -> { // List games
+            String authToken = ctx.header("authorization");
+            GameData[] listResult = gameService.listGames(authToken);
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result(serializer.toJson(listResult));
+        });
+
+        javalin.post("/game", ctx -> { // Create Game
+            String authToken = ctx.header("authorization");
+            int gameIDResponse = gameService.createGame(authToken,ctx.body());
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result("{gameID:"+gameIDResponse+"}");
+        });
+
+        javalin.put("/game", ctx -> { // Join Game
+            String authToken = ctx.header("authorization");
+            GameJoinRequest joinRequest = serializer.fromJson(ctx.body(),GameJoinRequest.class);
+            gameService.joinGame("",null,0);
+            ctx.status(200);
+            ctx.result("{}");
+        });
+
+        javalin.exception(UnauthorizedException.class, (e,ctx) -> {
+            ctx.status(401);
+            ctx.contentType("application/json");
+            ctx.result("{Error: " + e.getMessage() + "}");
         });
     }
 
