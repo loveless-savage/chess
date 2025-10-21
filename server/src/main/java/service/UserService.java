@@ -42,7 +42,9 @@ public class UserService {
                     !userRetrieved.password().equals(loginRequest.password())) {
             throw new UnauthorizedException("unauthorized");
         }
-        return new AuthData(generateToken(), loginRequest.username());
+        AuthData loginInfo = new AuthData(generateToken(), loginRequest.username());
+        authDAO.create(loginInfo);
+        return loginInfo;
     }
 
     public void logout(String authToken) {
