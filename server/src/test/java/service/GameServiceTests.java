@@ -19,9 +19,9 @@ public class GameServiceTests {
         gameService = new GameService(authDAO, gameDAO);
         currentAuth = new AuthData("fillerAuthToken","currentUser");
 
-        firstGame = new GameData(0,"","","firstGame",new ChessGame());
-        otherGame = new GameData(1,"","","otherGame",new ChessGame());
-        takenGame = new GameData(2,"enemyWhite","enemyBlack","takenGame",new ChessGame());
+        firstGame = new GameData(1,null,null,"firstGame",new ChessGame());
+        otherGame = new GameData(2,null,null,"otherGame",new ChessGame());
+        takenGame = new GameData(3,"enemyWhite","enemyBlack","takenGame",new ChessGame());
     }
     @BeforeEach
     public void setup() {
@@ -36,10 +36,10 @@ public class GameServiceTests {
     @Test
     public void createGameTest() {
         gameDAO.clear();
-        Assertions.assertEquals(0, gameService.createGame(currentAuth.authToken(),new GameCreateRequest("firstGame")));
-        Assertions.assertEquals(1, gameService.createGame(currentAuth.authToken(),new GameCreateRequest("otherGame")));
-        Assertions.assertEquals(firstGame, gameDAO.get(0));
-        Assertions.assertEquals(otherGame, gameDAO.get(1));
+        Assertions.assertEquals(1, gameService.createGame(currentAuth.authToken(),new GameCreateRequest("firstGame")));
+        Assertions.assertEquals(2, gameService.createGame(currentAuth.authToken(),new GameCreateRequest("otherGame")));
+        Assertions.assertEquals(firstGame, gameDAO.get(1));
+        Assertions.assertEquals(otherGame, gameDAO.get(2));
     }
     @Test
     public void createGameUnauthorizedTest() {
@@ -62,19 +62,19 @@ public class GameServiceTests {
 
     @Test
     public void joinGameAsWhiteTest() {
-        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 0);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 1);
         gameService.joinGame(currentAuth.authToken(), joinRequest);
-        Assertions.assertEquals(currentAuth.username(), gameDAO.get(0).whiteUsername());
+        Assertions.assertEquals(currentAuth.username(), gameDAO.get(1).whiteUsername());
     }
     @Test
     public void joinGameAsBlackTest() {
-        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.BLACK, 0);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.BLACK, 1);
         gameService.joinGame(currentAuth.authToken(), joinRequest);
-        Assertions.assertEquals(currentAuth.username(), gameDAO.get(0).blackUsername());
+        Assertions.assertEquals(currentAuth.username(), gameDAO.get(1).blackUsername());
     }
     @Test
     public void joinGameUnauthorizedTest() {
-        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 0);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 1);
         Assertions.assertThrows(UnauthorizedException.class,() ->
                 gameService.joinGame("wrongToken", joinRequest)
         );
@@ -82,7 +82,7 @@ public class GameServiceTests {
     @Test
     public void joinGameAsWhiteAlreadyTakenTest() {
         gameDAO.create(takenGame);
-        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 2);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 3);
         Assertions.assertThrows(AlreadyTakenException.class,() ->
                 gameService.joinGame(currentAuth.authToken(), joinRequest)
         );
@@ -90,7 +90,7 @@ public class GameServiceTests {
     @Test
     public void joinGameAsBlackAlreadyTakenTest() {
         gameDAO.create(takenGame);
-        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.BLACK, 2);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.BLACK, 3);
         Assertions.assertThrows(AlreadyTakenException.class,() ->
                 gameService.joinGame(currentAuth.authToken(), joinRequest)
         );

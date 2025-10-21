@@ -42,7 +42,7 @@ public class UserServiceTests {
     @Test
     public void loginUserNotFoundTest() {
         LoginRequest badLoginRequest = new LoginRequest("badUsername","correctPassword");
-        Assertions.assertThrows(NotFoundException.class,() -> userService.login(badLoginRequest));
+        Assertions.assertThrows(UnauthorizedException.class,() -> userService.login(badLoginRequest));
     }
     @Test
     public void loginBadPasswordTest() {
@@ -69,8 +69,8 @@ public class UserServiceTests {
         userService.register(otherData);
         userService.clear();
         LoginRequest loginRequest = new LoginRequest("correctUsername","correctPassword");
-        Assertions.assertThrows(NotFoundException.class,() -> userService.login(loginRequest));
+        Assertions.assertThrows(UnauthorizedException.class,() -> userService.login(loginRequest));
         LoginRequest otherLoginRequest = new LoginRequest("otherUsername","otherPassword");
-        Assertions.assertThrows(NotFoundException.class,() -> userService.login(otherLoginRequest));
+        Assertions.assertThrows(UnauthorizedException.class,() -> userService.login(otherLoginRequest));
     }
 }
