@@ -5,6 +5,7 @@ import dataaccess.*;
 import model.*;
 import io.javalin.*;
 import service.*;
+import java.util.Map;
 
 public class Server {
 
@@ -84,7 +85,13 @@ public class Server {
         javalin.exception(UnauthorizedException.class, (e,ctx) -> {
             ctx.status(401);
             ctx.contentType("application/json");
-            ctx.result("{Error: " + e.getMessage() + "}");
+            ctx.result(serializer.toJson(Map.of("message", "Error: " + e.getMessage() )));
+        });
+
+        javalin.exception(AlreadyTakenException.class, (e,ctx) -> {
+            ctx.status(403);
+            ctx.contentType("application/json");
+            ctx.result(serializer.toJson(Map.of("message", "Error: " + e.getMessage() )));
         });
     }
 
