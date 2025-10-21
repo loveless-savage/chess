@@ -3,7 +3,7 @@ package dataaccess;
 import model.*;
 
 public class GameDAO extends MemoryDAO<GameData,Integer>{
-    private int nextID = 0;
+    private int nextID = 1;
 
     public void create(GameData data) {
         super.create(data);
@@ -14,7 +14,7 @@ public class GameDAO extends MemoryDAO<GameData,Integer>{
     }
     public void clear() {
         super.clear();
-        nextID = 0;
+        nextID = 1;
     }
 
     public GameData[] list() {
