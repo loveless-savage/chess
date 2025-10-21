@@ -64,6 +64,7 @@ public class Server {
             ctx.status(200);
             ctx.contentType("application/json");
             ctx.result(serializer.toJson(listResult));
+            ctx.result(serializer.toJson(Map.of("games",listResult)));
         });
 
         javalin.post("/game", ctx -> { // Create Game
