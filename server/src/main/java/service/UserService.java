@@ -20,9 +20,12 @@ public class UserService {
         authDAO = authIn;
     }
 
-    public AuthData register(UserData newUser) throws AlreadyTakenException {
-        if(userDAO.get(newUser.username()) != null) { // TODO: AlreadyTakenException [403]
-            throw new AlreadyTakenException("already taken");
+    public AuthData register(UserData newUser) {
+        if(newUser.username() == null || newUser.password() == null || newUser.email() == null) {
+            throw new BadRequestException("bad request");
+        }
+        if(userDAO.get(newUser.username()) != null) {
+            throw new AlreadyTakenException("username already taken");
         }
         userDAO.create(newUser);
         AuthData loginInfo = new AuthData(generateToken(), newUser.username());
@@ -31,18 +34,19 @@ public class UserService {
     }
 
     public AuthData login(LoginRequest loginRequest) {
-        var userRetrieved = userDAO.get(loginRequest.username());
-        if(userRetrieved == null) { // TODO: NotFoundException [404]
-            throw new NotFoundException("username not found");
+        if(loginRequest.username() == null || loginRequest.password() == null) {
+            throw new BadRequestException("bad request");
         }
-        if(!userRetrieved.password().equals(loginRequest.password())) { // TODO: UnauthorizedException [401]
+        var userRetrieved = userDAO.get(loginRequest.username());
+        if(userRetrieved == null ||
+                    !userRetrieved.password().equals(loginRequest.password())) {
             throw new UnauthorizedException("unauthorized");
         }
         return new AuthData(generateToken(), loginRequest.username());
     }
 
     public void logout(String authToken) {
-        if(authDAO.get(authToken) == null) { // TODO: UnauthorizedException [401]
+        if(authDAO.get(authToken) == null) {
             throw new UnauthorizedException("unauthorized");
         }
         authDAO.delete(authToken);
