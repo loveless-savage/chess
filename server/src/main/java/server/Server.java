@@ -78,7 +78,7 @@ public class Server {
         javalin.put("/game", ctx -> { // Join Game
             String authToken = ctx.header("authorization");
             GameJoinRequest joinRequest = serializer.fromJson(ctx.body(),GameJoinRequest.class);
-            gameService.joinGame("",null,0);
+            gameService.joinGame(authToken,joinRequest);
             ctx.status(200);
             ctx.result("{}");
         });

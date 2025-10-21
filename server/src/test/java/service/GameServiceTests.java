@@ -62,32 +62,37 @@ public class GameServiceTests {
 
     @Test
     public void joinGameAsWhiteTest() {
-        gameService.joinGame(currentAuth.authToken(), ChessGame.TeamColor.WHITE, 0);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 0);
+        gameService.joinGame(currentAuth.authToken(), joinRequest);
         Assertions.assertEquals(currentAuth.username(), gameDAO.get(0).whiteUsername());
     }
     @Test
     public void joinGameAsBlackTest() {
-        gameService.joinGame(currentAuth.authToken(), ChessGame.TeamColor.BLACK, 0);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.BLACK, 0);
+        gameService.joinGame(currentAuth.authToken(), joinRequest);
         Assertions.assertEquals(currentAuth.username(), gameDAO.get(0).blackUsername());
     }
     @Test
     public void joinGameUnauthorizedTest() {
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 0);
         Assertions.assertThrows(UnauthorizedException.class,() ->
-                gameService.joinGame("wrongToken", ChessGame.TeamColor.WHITE, 0)
+                gameService.joinGame("wrongToken", joinRequest)
         );
     }
     @Test
     public void joinGameAsWhiteAlreadyTakenTest() {
         gameDAO.create(takenGame);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 2);
         Assertions.assertThrows(AlreadyTakenException.class,() ->
-                gameService.joinGame(currentAuth.authToken(), ChessGame.TeamColor.WHITE, 2)
+                gameService.joinGame(currentAuth.authToken(), joinRequest)
         );
     }
     @Test
     public void joinGameAsBlackAlreadyTakenTest() {
         gameDAO.create(takenGame);
+        GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.BLACK, 2);
         Assertions.assertThrows(AlreadyTakenException.class,() ->
-                gameService.joinGame(currentAuth.authToken(), ChessGame.TeamColor.BLACK, 2)
+                gameService.joinGame(currentAuth.authToken(), joinRequest)
         );
     }
 

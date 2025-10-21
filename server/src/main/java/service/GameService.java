@@ -31,22 +31,22 @@ public class GameService {
             throw new UnauthorizedException("unauthorized");
         }
         int newGameID = gameDAO.getNextID();
-        GameData newGame = new GameData(newGameID,"","",createRequest.gameName(),new ChessGame());
+        GameData newGame = new GameData(newGameID,null,null,createRequest.gameName(),new ChessGame());
         gameDAO.create(newGame);
         return newGameID;
     }
-    public void joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) {
+    public void joinGame(String authToken, GameJoinRequest joinRequest) {
         AuthData userAuth = authDAO.get(authToken);
         if(userAuth == null) { // TODO: UnauthorizedException [401]
             throw new UnauthorizedException("unauthorized");
         }
-        GameData currentGame = gameDAO.get(gameID);
+        GameData currentGame = gameDAO.get(joinRequest.gameID());
         if(currentGame == null) { // TODO: NotFoundException [404]
             throw new NotFoundException("game not found");
         }
         GameData updatedGame;
-        if(playerColor == ChessGame.TeamColor.WHITE) {
-            if(!currentGame.whiteUsername().isEmpty()) { // TODO: AlreadyTakenException [403]
+        if(joinRequest.playerColor() == ChessGame.TeamColor.WHITE) {
+            if(currentGame.whiteUsername() != null) { // TODO: AlreadyTakenException [403]
                 throw new AlreadyTakenException("team already taken");
             }
             updatedGame = new GameData(currentGame.gameID(),
@@ -54,7 +54,7 @@ public class GameService {
                                        currentGame.gameName(),
                                        currentGame.game());
         } else {
-            if(!currentGame.blackUsername().isEmpty()) { // TODO: AlreadyTakenException [403]
+            if(currentGame.blackUsername() != null) { // TODO: AlreadyTakenException [403]
                 throw new AlreadyTakenException("team already taken");
             }
             updatedGame = new GameData(currentGame.gameID(),
