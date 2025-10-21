@@ -42,7 +42,7 @@ public class GameService {
         }
         GameData currentGame = gameDAO.get(joinRequest.gameID());
         if(currentGame == null) { // TODO: NotFoundException [404]
-            throw new NotFoundException("game not found");
+            throw new BadRequestException("no game with given ID");
         }
         GameData updatedGame;
         if(joinRequest.playerColor() == ChessGame.TeamColor.WHITE) {
@@ -53,7 +53,7 @@ public class GameService {
                                        userAuth.username(), currentGame.blackUsername(),
                                        currentGame.gameName(),
                                        currentGame.game());
-        } else {
+        } else if(joinRequest.playerColor() == ChessGame.TeamColor.BLACK) {
             if(currentGame.blackUsername() != null) { // TODO: AlreadyTakenException [403]
                 throw new AlreadyTakenException("team already taken");
             }
@@ -61,6 +61,8 @@ public class GameService {
                                        currentGame.whiteUsername(), userAuth.username(),
                                        currentGame.gameName(),
                                        currentGame.game());
+        } else {
+            throw new BadRequestException("bad team color");
         }
         gameDAO.update(updatedGame);
     }
