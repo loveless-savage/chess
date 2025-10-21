@@ -18,7 +18,7 @@ public class GameService {
     }
 
     public GameData[] listGames(String authToken) {
-        if(authDAO.get(authToken) == null) { // TODO: UnauthorizedException [401]
+        if(authDAO.get(authToken) == null) {
             throw new UnauthorizedException("unauthorized");
         }
         return gameDAO.list();
@@ -27,7 +27,7 @@ public class GameService {
         if(authToken == null || createRequest.gameName() == null) {
             throw new BadRequestException("bad request");
         }
-        if(authDAO.get(authToken) == null) { // TODO: UnauthorizedException [401]
+        if(authDAO.get(authToken) == null) {
             throw new UnauthorizedException("unauthorized");
         }
         int newGameID = gameDAO.getNextID();
@@ -37,16 +37,16 @@ public class GameService {
     }
     public void joinGame(String authToken, GameJoinRequest joinRequest) {
         AuthData userAuth = authDAO.get(authToken);
-        if(userAuth == null) { // TODO: UnauthorizedException [401]
+        if(userAuth == null) {
             throw new UnauthorizedException("unauthorized");
         }
         GameData currentGame = gameDAO.get(joinRequest.gameID());
-        if(currentGame == null) { // TODO: NotFoundException [404]
+        if(currentGame == null) {
             throw new BadRequestException("no game with given ID");
         }
         GameData updatedGame;
         if(joinRequest.playerColor() == ChessGame.TeamColor.WHITE) {
-            if(currentGame.whiteUsername() != null) { // TODO: AlreadyTakenException [403]
+            if(currentGame.whiteUsername() != null) {
                 throw new AlreadyTakenException("team already taken");
             }
             updatedGame = new GameData(currentGame.gameID(),
@@ -54,7 +54,7 @@ public class GameService {
                                        currentGame.gameName(),
                                        currentGame.game());
         } else if(joinRequest.playerColor() == ChessGame.TeamColor.BLACK) {
-            if(currentGame.blackUsername() != null) { // TODO: AlreadyTakenException [403]
+            if(currentGame.blackUsername() != null) {
                 throw new AlreadyTakenException("team already taken");
             }
             updatedGame = new GameData(currentGame.gameID(),
