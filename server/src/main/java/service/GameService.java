@@ -23,12 +23,15 @@ public class GameService {
         }
         return gameDAO.list();
     }
-    public int createGame(String authToken, String gameName) {
+    public int createGame(String authToken, GameCreateRequest createRequest) {
+        if(authToken == null || createRequest.gameName() == null) {
+            throw new BadRequestException("bad request");
+        }
         if(authDAO.get(authToken) == null) { // TODO: UnauthorizedException [401]
             throw new UnauthorizedException("unauthorized");
         }
         int newGameID = gameDAO.getNextID();
-        GameData newGame = new GameData(newGameID,"","",gameName,new ChessGame());
+        GameData newGame = new GameData(newGameID,"","",createRequest.gameName(),new ChessGame());
         gameDAO.create(newGame);
         return newGameID;
     }
@@ -44,7 +47,7 @@ public class GameService {
         GameData updatedGame;
         if(playerColor == ChessGame.TeamColor.WHITE) {
             if(!currentGame.whiteUsername().isEmpty()) { // TODO: AlreadyTakenException [403]
-                throw new AlreadyTakenException("already taken");
+                throw new AlreadyTakenException("team already taken");
             }
             updatedGame = new GameData(currentGame.gameID(),
                                        userAuth.username(), currentGame.blackUsername(),
@@ -52,7 +55,7 @@ public class GameService {
                                        currentGame.game());
         } else {
             if(!currentGame.blackUsername().isEmpty()) { // TODO: AlreadyTakenException [403]
-                throw new AlreadyTakenException("already taken");
+                throw new AlreadyTakenException("team already taken");
             }
             updatedGame = new GameData(currentGame.gameID(),
                                        currentGame.whiteUsername(), userAuth.username(),

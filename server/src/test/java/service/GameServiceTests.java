@@ -36,20 +36,20 @@ public class GameServiceTests {
     @Test
     public void createGameTest() {
         gameDAO.clear();
-        Assertions.assertEquals(0, gameService.createGame(currentAuth.authToken(),"firstGame"));
-        Assertions.assertEquals(1, gameService.createGame(currentAuth.authToken(),"otherGame"));
+        Assertions.assertEquals(0, gameService.createGame(currentAuth.authToken(),new GameCreateRequest("firstGame")));
+        Assertions.assertEquals(1, gameService.createGame(currentAuth.authToken(),new GameCreateRequest("otherGame")));
         Assertions.assertEquals(firstGame, gameDAO.get(0));
         Assertions.assertEquals(otherGame, gameDAO.get(1));
     }
     @Test
     public void createGameUnauthorizedTest() {
-        Assertions.assertThrows(UnauthorizedException.class,() -> gameService.createGame("wrongToken","otherGame"));
+        Assertions.assertThrows(UnauthorizedException.class,() -> gameService.createGame("wrongToken",new GameCreateRequest("otherGame")));
     }
 
     @Test
     public void listGamesTest() {
         Assertions.assertArrayEquals(new GameData[]{firstGame}, gameService.listGames(currentAuth.authToken()));
-        gameService.createGame(currentAuth.authToken(),"otherGame");
+        gameService.createGame(currentAuth.authToken(),new GameCreateRequest("otherGame"));
         Assertions.assertArrayEquals(new GameData[]{firstGame, otherGame}, gameService.listGames(currentAuth.authToken()));
         gameService.clear();
         authDAO.create(currentAuth);

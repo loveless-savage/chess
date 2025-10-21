@@ -68,7 +68,8 @@ public class Server {
 
         javalin.post("/game", ctx -> { // Create Game
             String authToken = ctx.header("authorization");
-            int gameIDResponse = gameService.createGame(authToken,ctx.body());
+            GameCreateRequest createRequest = serializer.fromJson(ctx.body(), GameCreateRequest.class);
+            int gameIDResponse = gameService.createGame(authToken,createRequest);
             ctx.status(200);
             ctx.contentType("application/json");
             ctx.result("{gameID:"+gameIDResponse+"}");
