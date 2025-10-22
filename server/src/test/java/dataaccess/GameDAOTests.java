@@ -5,64 +5,64 @@ import chess.ChessGame;
 import org.junit.jupiter.api.*;
 
 public class GameDAOTests {
-    private static GameDAO dao, daoEmpty;
+    private static GameDAO gameDAO, daoEmpty;
     private static GameData goodData;
 
     @BeforeAll
     public static void setup() {
-        dao = new GameDAO();
+        gameDAO = new GameDAO();
         daoEmpty = new GameDAO();
         goodData = new GameData(200,"whitePlayer","blackPlayer","correctGame",new ChessGame());
     }
     @BeforeEach
     public void setupEach() {
-        dao.create(goodData);
+        gameDAO.create(goodData);
     }
     @AfterEach
     public void takeDown() {
-        dao.clear();
+        gameDAO.clear();
     }
 
     @Test
     public void clearTest() {
-        dao.clear();
-        Assertions.assertEquals(daoEmpty, dao);
+        gameDAO.clear();
+        Assertions.assertEquals(daoEmpty, gameDAO);
     }
 
     @Test
     public void createTest() {
-        Assertions.assertEquals(goodData, dao.get(200));
+        Assertions.assertEquals(goodData, gameDAO.get(200));
     }
 
     @Test
     public void getTest() {
-        Assertions.assertNull(dao.get(201));
+        Assertions.assertNull(gameDAO.get(201));
     }
 
     @Test
     public void updateTest() {
         GameData betterData = new GameData(200,"newWhitePlayer","newBlackPlayer","updatedGame",new ChessGame());
-        dao.update(betterData);
-        Assertions.assertNotEquals(goodData, dao.get(200));
-        Assertions.assertEquals(betterData, dao.get(200));
+        gameDAO.update(betterData);
+        Assertions.assertNotEquals(goodData, gameDAO.get(200));
+        Assertions.assertEquals(betterData, gameDAO.get(200));
     }
 
     @Test
     public void listTest() {
-        Assertions.assertArrayEquals(new GameData[]{goodData}, dao.list());
+        Assertions.assertArrayEquals(new GameData[]{goodData}, gameDAO.list());
         GameData otherData = new GameData(201,"alice","bob","otherGame",new ChessGame());
-        dao.create(otherData);
-        Assertions.assertArrayEquals(new GameData[]{goodData,otherData}, dao.list());
+        gameDAO.create(otherData);
+        Assertions.assertArrayEquals(new GameData[]{goodData,otherData}, gameDAO.list());
     }
 
     @Test
     public void deleteTest() {
         GameData otherData = new GameData(201,"alice","bob","otherGame",new ChessGame());
-        dao.create(otherData);
-        Assertions.assertEquals(goodData, dao.get(200));
-        Assertions.assertEquals(otherData, dao.get(201));
-        dao.delete(200);
-        Assertions.assertNull(dao.get(200));
-        Assertions.assertEquals(otherData, dao.get(201));
+        gameDAO.create(otherData);
+        Assertions.assertEquals(goodData, gameDAO.get(200));
+        Assertions.assertEquals(otherData, gameDAO.get(201));
+        gameDAO.delete(200);
+        Assertions.assertNull(gameDAO.get(200));
+        Assertions.assertEquals(otherData, gameDAO.get(201));
     }
 }

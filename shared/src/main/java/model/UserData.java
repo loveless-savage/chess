@@ -8,4 +8,4 @@ public record UserData(
     public String key() {
         return username;
     }
-};
+}

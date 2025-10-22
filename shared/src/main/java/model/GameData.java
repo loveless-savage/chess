@@ -12,4 +12,4 @@ public record GameData(
     public Integer key() {
         return gameID;
     }
-};
+}

@@ -1,15 +1,13 @@
 package service;
 
-import chess.*;
 import dataaccess.*;
 import model.*;
 
-import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
-    UserDAO userDAO;
-    AuthDAO authDAO;
+    final UserDAO userDAO;
+    final AuthDAO authDAO;
 
     public UserService() {
         userDAO = new UserDAO();

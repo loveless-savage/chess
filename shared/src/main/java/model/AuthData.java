@@ -7,4 +7,4 @@ public record AuthData(
     public String key() {
         return authToken;
     }
-};
+}

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public abstract class MemoryDAO<T extends ModelData<K>,K> implements DAO<T,K> {
-    HashMap<K,T> refdata;
+    final HashMap<K,T> refdata;
     MemoryDAO() {
         refdata = new HashMap<>();
     }

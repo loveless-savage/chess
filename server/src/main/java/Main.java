@@ -1,6 +1,3 @@
-import chess.*;
-import dataaccess.*;
-import model.*;
 import server.*;
 
 public class Main {

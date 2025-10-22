@@ -85,7 +85,7 @@ public class ChessPiece {
      */
     private class MoveSet {
         private Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pos) {
-            Collection<ChessMove> moves = new HashSet<ChessMove>();
+            Collection<ChessMove> moves = new HashSet<>();
             switch (type) {
                 case KING -> {
                     int[] dx = { 1, 1, 0,-1,-1,-1, 0, 1};
@@ -198,7 +198,7 @@ public class ChessPiece {
         }
 
         /**
-         * convert a single pawn move into an array, each with a different promition piece
+         * convert a single pawn move into an array, each with a different promotion piece
          */
         private Collection<ChessMove> pawnPromoter(ChessPosition pos, ChessPosition target) {
             var moves = new HashSet<ChessMove>();

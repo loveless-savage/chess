@@ -5,8 +5,8 @@ import dataaccess.*;
 import model.*;
 
 public class GameService {
-    AuthDAO authDAO;
-    GameDAO gameDAO;
+    final AuthDAO authDAO;
+    final GameDAO gameDAO;
 
     public GameService() {
         authDAO = new AuthDAO();

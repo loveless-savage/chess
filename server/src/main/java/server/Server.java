@@ -7,6 +7,7 @@ import io.javalin.*;
 import service.*;
 import java.util.Map;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class Server {
 
     private final Javalin javalin;
