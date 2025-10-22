@@ -1,0 +1,153 @@
+actor Client
+participant Server
+participant Handler
+participant Service
+participant DataAccess
+database db
+
+entryspacing 0.9
+group#43829c #lightblue Registration
+Client -> Server: [POST] /user\n{username,password,email}
+Server -> Handler: {username,password,email}
+Handler -> Service: register(RegisterRequest)
+Service -> DataAccess: getUser(username)
+DataAccess -> db: Find UserData by username
+break User with username already exists
+DataAccess --> Service: UserData
+Service --> Server: AlreadyTakenException
+Server --> Client: 403\n{"message": "Error: already taken"}
+end
+DataAccess --> Service: null
+Service -> DataAccess: createUser(userData)
+DataAccess -> db: Add UserData
+Service -> DataAccess:createAuth(authData)
+DataAccess -> db: Add AuthData
+Service --> Handler: RegisterResult
+Handler --> Server: {username,authToken}
+Server --> Client: 200\n{username,authToken}
+end
+
+group#orange #FCEDCA Login
+Client -> Server: [POST] /session\n{username, password}
+Server -> Handler: {username, password}
+Handler -> Service: login(LoginRequest)
+Service -> DataAccess: getUser(username)
+DataAccess -> db: Find UserData by username
+break Username not found
+DataAccess --> Service: null
+Service --> Server: NotFoundException
+Server --> Client: 403\n{"message": "Error: username not found"}
+end
+DataAccess --> Service: UserData
+break Incorrect password
+Service --> Server: UnauthorizedException
+Server --> Client: 401\n{"message": "Error: unauthorized"}
+end
+Service -> DataAccess: createAuth(authData)
+DataAccess -> db: Add AuthData
+Service --> Handler: LoginResult
+Handler --> Server: {username,authToken}
+Server --> Client: 200\n{username,authToken}
+end
+
+group#green #lightgreen Logout
+Client -> Server: [DELETE] /session\nauthToken
+Server -> Handler: {authToken}
+Handler -> Service: logout(LogoutRequest)
+Service -> DataAccess: getAuth(authToken)
+DataAccess -> db: Find AuthData
+break authToken not found in database
+DataAccess --> Service: null
+Service --> Server: UnauthorizedException
+Server --> Client: 401\n{"message": "Error: unauthorized"}
+end
+DataAccess --> Service: AuthData
+Service -> DataAccess:deleteAuth(authData)
+DataAccess -> db: Remove AuthData
+Service --> Handler: LogoutResult
+Handler --> Server: { }
+Server --> Client: 200\n{ }
+end
+
+group#red #pink List Games
+Client -> Server: [GET] /game\nauthToken
+Server -> Handler: {authToken}
+Handler -> Service: listGames(ListRequest)
+Service -> DataAccess: getAuth(authToken)
+DataAccess -> db: Find AuthData
+break authToken not found in database
+DataAccess --> Service: null
+Service --> Server: UnauthorizedException
+Server --> Client: 401\n{"message": "Error: unauthorized"}
+end
+DataAccess --> Service: AuthData
+Service -> DataAccess: listGames()
+DataAccess -> db: Get all games
+DataAccess --> Service: GameData[]
+Service --> Handler: GameListResult
+Handler --> Server: {games}
+Server --> Client: 200\n{games}
+end
+
+group#d790e0 #E3CCE6 Create Game 
+Client -> Server: [POST] /game\nauthToken\n{gameName}
+Server -> Handler: {authToken,gameName}
+Handler -> Service: createGame(CreateRequest)
+Service -> DataAccess: getAuth(authToken)
+DataAccess -> db: Find AuthData
+break authToken not found in database
+DataAccess --> Service: null
+Service --> Server: UnauthorizedException
+Server --> Client: 401\n{"message": "Error: unauthorized"}
+end
+DataAccess --> Service: AuthData
+Service -> DataAccess: createGame(gameName)
+DataAccess -> db: Create game
+DataAccess --> Service: GameData
+Service --> Handler: gameID
+Handler --> Server: {gameID}
+Server --> Client: 200\n{gameID}
+end
+
+group#yellow #lightyellow Join Game #black
+Client -> Server: [PUT] /game\nauthToken\n{playerColor, gameID}
+Server -> Handler: {authToken,\nplayerColor, gameID}
+Handler -> Service: joinGame(JoinRequest)
+Service -> DataAccess: getAuth(authToken)
+DataAccess -> db: Find AuthData
+break authToken not found in database
+DataAccess --> Service: null
+Service --> Server: UnauthorizedException
+Server --> Client: 401\n{"message": "Error: unauthorized"}
+end
+DataAccess --> Service: AuthData
+Service -> DataAccess: getGame(gameID)
+DataAccess -> db: Find game by ID
+break Game not found
+DataAccess --> Service: null
+Service --> Server: NotFoundException
+Server --> Client: 403\n{"message": "Error: game not found"}
+end
+DataAccess --> Service: GameData
+break Requested game slot already claimed
+Service --> Server: AlreadyTakenException
+Server --> Client: 403\n{"message": "Error: already taken"}
+end
+Service -> Service: addPlayer(GameData,\nplayerColor,username)
+Service -> DataAccess: updateGame(GameData)
+DataAccess -> db: Update game
+Service --> Handler: JoinGameResult
+Handler --> Server: { }
+Server --> Client: 200\n{ }
+end
+
+group#gray #lightgray Clear application 
+Client -> Server: [DELETE] /db
+Server -> Handler: { }
+Handler -> Service: clear()
+Service -> DataAccess: clear()
+DataAccess -> db: Clear all data
+Service --> Handler: ClearResult
+Handler --> Server: { }
+Server --> Client: 200\n{ }
+end
