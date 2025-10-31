@@ -1,6 +1,5 @@
 package dataaccess;
 
-import com.google.gson.Gson;
 import model.ModelData;
 
 import java.sql.ResultSet;
