@@ -69,6 +69,19 @@ public class UserDAOTests {
     }
 
     @Test
+    public void updateNoChangeTest() throws DataAccessException {
+        Assertions.assertDoesNotThrow(() -> dao.update(goodData));
+        Assertions.assertEquals(goodData, dao.get("correctUsername"));
+    }
+
+    @Test
+    public void updateNotFoundTest() throws DataAccessException {
+        UserData badData = new UserData("badUsername","correctPassword","correct@email");
+        Assertions.assertThrows(DataAccessException.class, () -> dao.update(badData));
+        Assertions.assertEquals(goodData, dao.get("correctUsername"));
+    }
+
+    @Test
     public void deleteTest() throws DataAccessException {
         UserData otherData = new UserData("otherUsername","otherPassword","other@email");
         dao.create(otherData);

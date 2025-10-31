@@ -48,6 +48,9 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
 
     public void update(T data) throws DataAccessException {
         T dataOld = get(data.keyValue());
+        if (dataOld == null) {
+            throw new DataAccessException("no entry could be found to update");
+        }
         String statement = "UPDATE " + tableName + " SET " + toSQLDiff(data,dataOld) + " WHERE " + keyName + "='" + data.keyValue() + "'";
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement);
