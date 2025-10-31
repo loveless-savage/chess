@@ -5,22 +5,22 @@ import org.junit.jupiter.api.*;
 import java.sql.SQLException;
 
 public class UserDAOTests {
-    private static UserDAO dao;
+    private static UserDAO userDAO;
     private static UserData goodData;
 
     @BeforeAll
     public static void init() {
-        dao = new UserDAO();
+        userDAO = new UserDAO();
         goodData = new UserData("correctUsername","correctPassword","correct@email");
     }
     @BeforeEach
     public void setup() throws DataAccessException {
-        dao.clear();
-        dao.create(goodData);
+        userDAO.clear();
+        userDAO.create(goodData);
     }
     @AfterEach
     public void takeDown() throws DataAccessException {
-        dao.clear();
+        userDAO.clear();
     }
 
     @Test
@@ -41,64 +41,64 @@ public class UserDAOTests {
 
     @Test
     public void createAlreadyExistsTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> dao.create(goodData));
+        Assertions.assertThrows(DataAccessException.class, () -> userDAO.create(goodData));
     }
 
     @Test
     public void createBadDataTest() {
         UserData nullEmail = new UserData("badUsername","badPassword",null);
-        Assertions.assertThrows(DataAccessException.class, () -> dao.create(nullEmail));
+        Assertions.assertThrows(DataAccessException.class, () -> userDAO.create(nullEmail));
         UserData nullPass = new UserData("badUsername",null,"bad@email");
-        Assertions.assertThrows(DataAccessException.class, () -> dao.create(nullPass));
+        Assertions.assertThrows(DataAccessException.class, () -> userDAO.create(nullPass));
         UserData nullPassEmail = new UserData("badUsername",null,null);
-        Assertions.assertThrows(DataAccessException.class, () -> dao.create(nullPassEmail));
+        Assertions.assertThrows(DataAccessException.class, () -> userDAO.create(nullPassEmail));
     }
 
     @Test
     public void getTest() throws DataAccessException {
-        Assertions.assertEquals(goodData,dao.get("correctUsername"));
+        Assertions.assertEquals(goodData, userDAO.get("correctUsername"));
     }
 
     @Test
     public void getWrongUsernameTest() throws DataAccessException {
-        Assertions.assertNull(dao.get("badUsername"));
+        Assertions.assertNull(userDAO.get("badUsername"));
     }
 
     @Test
     public void updateTest() throws DataAccessException {
         UserData betterData = new UserData("correctUsername","updatedPassword","updated@email");
-        dao.update(betterData);
-        Assertions.assertNotEquals(goodData, dao.get("correctUsername"));
-        Assertions.assertEquals(betterData, dao.get("correctUsername"));
+        userDAO.update(betterData);
+        Assertions.assertNotEquals(goodData, userDAO.get("correctUsername"));
+        Assertions.assertEquals(betterData, userDAO.get("correctUsername"));
     }
 
     @Test
     public void updateNoChangeTest() throws DataAccessException {
-        Assertions.assertDoesNotThrow(() -> dao.update(goodData));
-        Assertions.assertEquals(goodData, dao.get("correctUsername"));
+        Assertions.assertDoesNotThrow(() -> userDAO.update(goodData));
+        Assertions.assertEquals(goodData, userDAO.get("correctUsername"));
     }
 
     @Test
     public void updateNotFoundTest() throws DataAccessException {
         UserData badData = new UserData("badUsername","correctPassword","correct@email");
-        Assertions.assertThrows(DataAccessException.class, () -> dao.update(badData));
-        Assertions.assertEquals(goodData, dao.get("correctUsername"));
+        Assertions.assertThrows(DataAccessException.class, () -> userDAO.update(badData));
+        Assertions.assertEquals(goodData, userDAO.get("correctUsername"));
     }
 
     @Test
     public void deleteTest() throws DataAccessException {
         UserData otherData = new UserData("otherUsername","otherPassword","other@email");
-        dao.create(otherData);
-        Assertions.assertEquals(goodData, dao.get("correctUsername"));
-        Assertions.assertEquals(otherData, dao.get("otherUsername"));
-        dao.delete("correctUsername");
-        Assertions.assertNull(dao.get("correctUsername"));
-        Assertions.assertEquals(otherData, dao.get("otherUsername"));
+        userDAO.create(otherData);
+        Assertions.assertEquals(goodData, userDAO.get("correctUsername"));
+        Assertions.assertEquals(otherData, userDAO.get("otherUsername"));
+        userDAO.delete("correctUsername");
+        Assertions.assertNull(userDAO.get("correctUsername"));
+        Assertions.assertEquals(otherData, userDAO.get("otherUsername"));
     }
 
     @Test
     public void clearTest() throws DataAccessException {
-        dao.clear();
+        userDAO.clear();
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement("SELECT * FROM userData");
             var rs = preparedStatement.executeQuery();
