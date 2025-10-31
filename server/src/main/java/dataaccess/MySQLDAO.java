@@ -5,12 +5,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
-    final String tableName, keyName, tableParams;
+    final String tableName, tableParams, keyName;
 
-    MySQLDAO(String tableNameIn, String keyNameIn, String tableParamsIn) {
+    MySQLDAO(String tableNameIn, String tableParamsIn) {
         tableName = tableNameIn;
-        keyName = keyNameIn;
         tableParams = tableParamsIn;
+        keyName = tableParams.split("PRIMARY KEY \\(")[1].split("\\)")[0];
 
         try {
             DatabaseManager.createDatabase();
