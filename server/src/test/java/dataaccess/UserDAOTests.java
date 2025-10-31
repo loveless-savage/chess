@@ -15,6 +15,7 @@ public class UserDAOTests {
     }
     @BeforeEach
     public void setup() {
+        Assertions.assertDoesNotThrow(() -> dao.clear());
         Assertions.assertDoesNotThrow(() -> dao.create(goodData));
     }
     @AfterEach

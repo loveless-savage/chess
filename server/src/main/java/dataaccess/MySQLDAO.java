@@ -1,14 +1,18 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import model.ModelData;
+
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
-    final String tableName, tableParams;
+    final String tableName, keyName, tableParams;
 
-    MySQLDAO(String tableNameIn, String tableParamsIn) {
+    MySQLDAO(String tableNameIn, String keyNameIn, String tableParamsIn) {
         tableName = tableNameIn;
+        keyName = keyNameIn;
         tableParams = tableParamsIn;
         /*
         DatabaseManager.createDatabase();
@@ -32,7 +36,15 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public T get(K key) {
-        return null;
+        String statement = "SELECT * FROM " + tableName + " WHERE " + keyName + "='" + key + "'";
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement);
+            var rs = preparedStatement.executeQuery();
+            return fromSQL(rs);
+        } catch (SQLException | DataAccessException e) {
+            return null;
+            //throw new DataAccessException(e.getMessage(), e);
+        }
     }
 
     public void update(T data) {
@@ -41,12 +53,12 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     public void delete(K key) {
     }
 
-    public void clear() throws DataAccessException {
+    public void clear() {
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement("DELETE FROM " + tableName);
             preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e);
+        } catch (SQLException | DataAccessException e) {
+            //throw new DataAccessException(e.getMessage(), e);
         }
     }
 
@@ -61,4 +73,6 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
         out += "')";
         return out;
     }
+
+    abstract T fromSQL(ResultSet rs) throws SQLException;
 }
