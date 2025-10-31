@@ -26,7 +26,7 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public void create(T data) throws DataAccessException {
-        String statement = "INSERT INTO " + tableName + " values " + toValues(data);
+        String statement = "INSERT INTO " + tableName + " values " + toSQL(data);
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.executeUpdate();
@@ -61,17 +61,6 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
         }
     }
 
-    private String toValues(T o) {
-        String out = "('";
-        String[] f = o.toString().split("[\\[=,\\]]");
-        ArrayList<String> fnew = new ArrayList<>();
-        for (int i=2; i<f.length; i+=2) {
-            fnew.add(f[i]);
-        }
-        out += String.join("','",fnew);
-        out += "')";
-        return out;
-    }
-
+    abstract String toSQL(T data) throws DataAccessException;
     abstract T fromSQL(ResultSet rs) throws SQLException;
 }

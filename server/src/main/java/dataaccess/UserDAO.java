@@ -14,6 +14,13 @@ public class UserDAO extends MySQLDAO<UserData,String>{
                             """);
     }
 
+    String toSQL(UserData data) throws DataAccessException {
+        if (data.username() == null || data.password() == null || data.email() == null) {
+            throw new DataAccessException("no UserData fields can be null");
+        } else {
+            return "('" + data.username() + "','" + data.password() + "','" + data.email() + "')";
+        }
+    }
     UserData fromSQL(ResultSet rs) throws SQLException {
         if(rs.next()) {
             return new UserData(
