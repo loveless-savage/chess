@@ -40,6 +40,11 @@ public class UserDAOTests {
     }
 
     @Test
+    public void createAlreadyExistsTest() {
+        Assertions.assertThrows(DataAccessException.class, () -> dao.create(goodData));
+    }
+
+    @Test
     public void createBadDataTest() {
         UserData nullEmail = new UserData("badUsername","badPassword",null);
         Assertions.assertThrows(DataAccessException.class, () -> dao.create(nullEmail));
