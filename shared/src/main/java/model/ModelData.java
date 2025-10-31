@@ -1,5 +1,8 @@
 package model;
 
 public interface ModelData<K> {
-    K key();
+    static String keyName() {
+        return "";
+    };
+    K keyValue();
 }

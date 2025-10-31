@@ -5,7 +5,10 @@ public record UserData(
         String password,
         String email
 ) implements ModelData<String> {
-    public String key() {
+    static public String keyName() {
+        return "username";
+    }
+    public String keyValue() {
         return username;
     }
 }

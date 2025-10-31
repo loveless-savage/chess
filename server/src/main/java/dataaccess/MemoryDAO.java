@@ -12,7 +12,7 @@ public abstract class MemoryDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public void create(T data) {
-        refdata.put(data.key(),data);
+        refdata.put(data.keyValue(),data);
     }
 
     public T get(K key) {
@@ -20,7 +20,7 @@ public abstract class MemoryDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public void update(T data) {
-        refdata.replace(data.key(),data);
+        refdata.replace(data.keyValue(),data);
     }
 
     public void delete(K key) {
