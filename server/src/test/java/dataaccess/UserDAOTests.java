@@ -15,16 +15,16 @@ public class UserDAOTests {
     }
     @BeforeEach
     public void setup() {
-        dao.create(goodData);
+        Assertions.assertDoesNotThrow(() -> dao.create(goodData));
     }
     @AfterEach
     public void takeDown() {
-        dao.clear();
+        Assertions.assertDoesNotThrow(() -> dao.clear());
     }
 
     @Test
     public void clearTest() {
-        dao.clear();
+        Assertions.assertDoesNotThrow(() -> dao.clear());
         Assertions.assertEquals(daoEmpty, dao);
     }
 
@@ -41,7 +41,7 @@ public class UserDAOTests {
     @Test
     public void updateTest() {
         UserData betterData = new UserData("correctUsername","updatedPassword","updated@email");
-        dao.update(betterData);
+        Assertions.assertDoesNotThrow(() -> dao.update(betterData));
         Assertions.assertNotEquals(goodData, dao.get("correctUsername"));
         Assertions.assertEquals(betterData, dao.get("correctUsername"));
     }
@@ -49,7 +49,7 @@ public class UserDAOTests {
     @Test
     public void deleteTest() {
         UserData otherData = new UserData("otherUsername","otherPassword","other@email");
-        dao.create(otherData);
+        Assertions.assertDoesNotThrow(() -> dao.create(goodData));
         Assertions.assertEquals(goodData, dao.get("correctUsername"));
         Assertions.assertEquals(otherData, dao.get("otherUsername"));
         dao.delete("correctUsername");

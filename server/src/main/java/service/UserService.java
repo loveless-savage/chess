@@ -25,7 +25,7 @@ public class UserService {
         if(userDAO.get(newUser.username()) != null) {
             throw new AlreadyTakenException("username already taken");
         }
-        userDAO.create(newUser);
+        //userDAO.create(newUser);
         AuthData loginInfo = new AuthData(generateToken(), newUser.username());
         authDAO.create(loginInfo);
         return loginInfo;
@@ -54,7 +54,7 @@ public class UserService {
 
     public void clear() {
         authDAO.clear();
-        userDAO.clear();
+        //userDAO.clear();
     }
 
     public static String generateToken() {

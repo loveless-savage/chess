@@ -22,10 +22,6 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public void create(T data) throws DataAccessException {
-        ArrayList<String> fields = new ArrayList<>();
-        for (var field : data.getClass().getDeclaredFields()) {
-            fields.add(field.getName());
-        }
         String statement = "INSERT INTO " + tableName + " values " + toValues(data);
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement);
