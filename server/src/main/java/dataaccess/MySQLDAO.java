@@ -13,15 +13,16 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
         tableName = tableNameIn;
         keyName = keyNameIn;
         tableParams = tableParamsIn;
-        /*
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (" + tableParams + ")");
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e);
+
+        try {
+            DatabaseManager.createDatabase();
+            try (var conn = DatabaseManager.getConnection()) {
+                var preparedStatement = conn.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (" + tableParams + ")");
+                preparedStatement.execute();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
-        */
     }
 
     public void create(T data) throws DataAccessException {
