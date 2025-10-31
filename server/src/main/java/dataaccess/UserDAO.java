@@ -21,6 +21,19 @@ public class UserDAO extends MySQLDAO<UserData,String>{
             return "('" + data.username() + "','" + data.password() + "','" + data.email() + "')";
         }
     }
+    String toSQLDiff(UserData data, UserData dataOld) throws DataAccessException {
+        if (data.username() == null || data.password() == null || data.email() == null) {
+            throw new DataAccessException("no UserData fields can be null");
+        }
+        String out = "username = '" + data.username() + "'";
+        if (!data.password().equals(dataOld.password())) {
+            out += ", password = '" + data.password() + "'";
+        }
+        if (!data.email().equals(dataOld.email())) {
+            out += ", email = '" + data.email() + "'";
+        }
+        return out;
+    }
     UserData fromSQL(ResultSet rs) throws SQLException {
         if(rs.next()) {
             return new UserData(

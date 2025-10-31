@@ -47,6 +47,14 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public void update(T data) throws DataAccessException {
+        T dataOld = get(data.keyValue());
+        String statement = "UPDATE " + tableName + " SET " + toSQLDiff(data,dataOld) + " WHERE " + keyName + "='" + data.keyValue() + "'";
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
+        }
     }
 
     public void delete(K key) throws DataAccessException {
@@ -62,5 +70,6 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     abstract String toSQL(T data) throws DataAccessException;
+    abstract String toSQLDiff(T data, T dataOld) throws DataAccessException;
     abstract T fromSQL(ResultSet rs) throws SQLException;
 }
