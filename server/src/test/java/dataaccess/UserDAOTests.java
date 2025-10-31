@@ -53,7 +53,7 @@ public class UserDAOTests {
 
     @Test
     public void getTest() throws DataAccessException {
-        Assertions.assertNull(dao.get("correctUsername"));
+        Assertions.assertEquals(goodData,dao.get("correctUsername"));
     }
 
     @Test
