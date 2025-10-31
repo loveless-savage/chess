@@ -6,13 +6,12 @@ import org.junit.jupiter.api.*;
 import java.sql.SQLException;
 
 public class UserDAOTests {
-    private static UserDAO dao, daoEmpty;
+    private static UserDAO dao;
     private static UserData goodData;
 
     @BeforeAll
     public static void init() {
         dao = new UserDAO();
-        daoEmpty = new UserDAO();
         goodData = new UserData("correctUsername","correctPassword","correct@email");
     }
     @BeforeEach
@@ -32,7 +31,7 @@ public class UserDAOTests {
                     "SELECT * FROM userData WHERE username='correctUsername'"
             );
             var rs = preparedStatement.executeQuery();
-            Assertions.assertTrue(rs.next());
+            Assertions.assertTrue(rs.next(),"TABLE userData expected to have an entry, but does not");
             Assertions.assertEquals("correctUsername",rs.getString("username"));
             Assertions.assertEquals("correctPassword",rs.getString("password"));
             Assertions.assertEquals("correct@email",rs.getString("email"));
@@ -83,6 +82,12 @@ public class UserDAOTests {
     @Test
     public void clearTest() throws DataAccessException {
         dao.clear();
-        Assertions.assertEquals(daoEmpty, dao); // FIXME
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT * FROM userData");
+            var rs = preparedStatement.executeQuery();
+            Assertions.assertFalse(rs.next(),"TABLE userData should be empty, but is not");
+        } catch (SQLException | DataAccessException e) {
+            Assertions.fail(e);
+        }
     }
 }
