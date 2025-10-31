@@ -35,30 +35,29 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
         }
     }
 
-    public T get(K key) {
+    public T get(K key) throws DataAccessException {
         String statement = "SELECT * FROM " + tableName + " WHERE " + keyName + "='" + key + "'";
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement);
             var rs = preparedStatement.executeQuery();
             return fromSQL(rs);
         } catch (SQLException | DataAccessException e) {
-            return null;
-            //throw new DataAccessException(e.getMessage(), e);
+            throw new DataAccessException(e.getMessage(), e);
         }
     }
 
-    public void update(T data) {
+    public void update(T data) throws DataAccessException {
     }
 
-    public void delete(K key) {
+    public void delete(K key) throws DataAccessException {
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement("DELETE FROM " + tableName);
             preparedStatement.execute();
         } catch (SQLException | DataAccessException e) {
-            //throw new DataAccessException(e.getMessage(), e);
+            throw new DataAccessException(e.getMessage(), e);
         }
     }
 

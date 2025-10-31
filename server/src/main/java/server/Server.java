@@ -92,12 +92,6 @@ public class Server {
             ctx.result(serializer.toJson(Map.of("message", "Error: " + e.getMessage() )));
         });
 
-        javalin.exception(DataAccessException.class, (e,ctx) -> {
-            ctx.status(400);
-            ctx.contentType("application/json");
-            ctx.result(serializer.toJson(Map.of("message", "Error: " + e.getMessage() )));
-        });
-
         javalin.exception(UnauthorizedException.class, (e,ctx) -> {
             ctx.status(401);
             ctx.contentType("application/json");
@@ -106,6 +100,12 @@ public class Server {
 
         javalin.exception(AlreadyTakenException.class, (e,ctx) -> {
             ctx.status(403);
+            ctx.contentType("application/json");
+            ctx.result(serializer.toJson(Map.of("message", "Error: " + e.getMessage() )));
+        });
+
+        javalin.exception(DataAccessException.class, (e,ctx) -> {
+            ctx.status(500);
             ctx.contentType("application/json");
             ctx.result(serializer.toJson(Map.of("message", "Error: " + e.getMessage() )));
         });

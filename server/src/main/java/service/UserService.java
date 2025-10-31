@@ -18,20 +18,20 @@ public class UserService {
         authDAO = authIn;
     }
 
-    public AuthData register(UserData newUser) {
+    public AuthData register(UserData newUser) throws DataAccessException {
         if(newUser.username() == null || newUser.password() == null || newUser.email() == null) {
             throw new BadRequestException("bad request");
         }
         if(userDAO.get(newUser.username()) != null) {
             throw new AlreadyTakenException("username already taken");
         }
-        //userDAO.create(newUser);
+        userDAO.create(newUser);
         AuthData loginInfo = new AuthData(generateToken(), newUser.username());
         authDAO.create(loginInfo);
         return loginInfo;
     }
 
-    public AuthData login(LoginRequest loginRequest) {
+    public AuthData login(LoginRequest loginRequest) throws DataAccessException {
         if(loginRequest.username() == null || loginRequest.password() == null) {
             throw new BadRequestException("bad request");
         }
@@ -52,9 +52,9 @@ public class UserService {
         authDAO.delete(authToken);
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         authDAO.clear();
-        //userDAO.clear();
+        userDAO.clear();
     }
 
     public static String generateToken() {

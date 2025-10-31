@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import model.*;
 import org.junit.jupiter.api.*;
 
@@ -16,16 +17,16 @@ public class UserServiceTests {
         loginRequest = new LoginRequest("correctUsername","correctPassword");
     }
     @BeforeEach
-    public void setup() {
+    public void setup() throws DataAccessException {
         userService.register(goodData);
     }
     @AfterEach
-    public void takeDown() {
+    public void takeDown() throws DataAccessException {
         userService.clear();
     }
 
     @Test
-    public void registerTest() {
+    public void registerTest() throws DataAccessException {
         userService.clear();
         Assertions.assertEquals("correctUsername", userService.register(goodData).username());
         Assertions.assertEquals("otherUsername", userService.register(otherData).username());
@@ -36,7 +37,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void loginTest() {
+    public void loginTest() throws DataAccessException {
         Assertions.assertEquals(loginRequest.username(), userService.login(loginRequest).username());
     }
     @Test
@@ -51,21 +52,21 @@ public class UserServiceTests {
     }
 
     @Test
-    public void logoutTest() {
+    public void logoutTest() throws DataAccessException {
         userService.clear();
         String goodToken = userService.register(goodData).authToken();
         userService.logout(goodToken);
         Assertions.assertThrows(UnauthorizedException.class,() -> userService.logout(goodToken));
     }
     @Test
-    public void logoutUnauthorizedTest() {
+    public void logoutUnauthorizedTest() throws DataAccessException {
         userService.clear();
         String badToken = userService.register(goodData).authToken() + "_bad";
         Assertions.assertThrows(UnauthorizedException.class,() -> userService.logout(badToken));
     }
 
     @Test
-    public void clearTest() {
+    public void clearTest() throws DataAccessException {
         userService.register(otherData);
         userService.clear();
         LoginRequest loginRequest = new LoginRequest("correctUsername","correctPassword");

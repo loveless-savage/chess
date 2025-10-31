@@ -16,19 +16,13 @@ public class UserDAOTests {
         goodData = new UserData("correctUsername","correctPassword","correct@email");
     }
     @BeforeEach
-    public void setup() {
-        Assertions.assertDoesNotThrow(() -> dao.clear());
-        Assertions.assertDoesNotThrow(() -> dao.create(goodData));
+    public void setup() throws DataAccessException {
+        dao.clear();
+        dao.create(goodData);
     }
     @AfterEach
-    public void takeDown() {
-        Assertions.assertDoesNotThrow(() -> dao.clear());
-    }
-
-    @Test
-    public void clearTest() {
-        Assertions.assertDoesNotThrow(() -> dao.clear());
-        Assertions.assertEquals(daoEmpty, dao);
+    public void takeDown() throws DataAccessException {
+        dao.clear();
     }
 
     @Test
@@ -48,7 +42,7 @@ public class UserDAOTests {
     }
 
     @Test
-    public void createWithNullValuesTest() {
+    public void createWithNullValuesTest() throws DataAccessException {
         UserData nullEmail = new UserData("badUsername","badPassword",null);
         Assertions.assertThrows(DataAccessException.class, () -> dao.create(nullEmail));
         UserData nullPass = new UserData("badUsername",null,"bad@email");
@@ -58,31 +52,37 @@ public class UserDAOTests {
     }
 
     @Test
-    public void getTest() {
+    public void getTest() throws DataAccessException {
         Assertions.assertNull(dao.get("correctUsername"));
     }
 
     @Test
-    public void getWrongUsernameTest() {
+    public void getWrongUsernameTest() throws DataAccessException {
         Assertions.assertNull(dao.get("badUsername"));
     }
 
     @Test
-    public void updateTest() {
+    public void updateTest() throws DataAccessException {
         UserData betterData = new UserData("correctUsername","updatedPassword","updated@email");
-        Assertions.assertDoesNotThrow(() -> dao.update(betterData));
+        dao.update(betterData);
         Assertions.assertNotEquals(goodData, dao.get("correctUsername"));
         Assertions.assertEquals(betterData, dao.get("correctUsername"));
     }
 
     @Test
-    public void deleteTest() {
+    public void deleteTest() throws DataAccessException {
         UserData otherData = new UserData("otherUsername","otherPassword","other@email");
-        Assertions.assertDoesNotThrow(() -> dao.create(goodData));
+        dao.create(otherData);
         Assertions.assertEquals(goodData, dao.get("correctUsername"));
         Assertions.assertEquals(otherData, dao.get("otherUsername"));
         dao.delete("correctUsername");
         Assertions.assertNull(dao.get("correctUsername"));
         Assertions.assertEquals(otherData, dao.get("otherUsername"));
+    }
+
+    @Test
+    public void clearTest() throws DataAccessException {
+        dao.clear();
+        Assertions.assertEquals(daoEmpty, dao); // FIXME
     }
 }
