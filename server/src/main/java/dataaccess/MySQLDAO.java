@@ -1,10 +1,8 @@
 package dataaccess;
 
 import model.ModelData;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     final String tableName, keyName, tableParams;
@@ -61,6 +59,13 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public void delete(K key) throws DataAccessException {
+        String statement = "DELETE FROM " + tableName + " WHERE " + keyName + "='" + key + "'";
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
+        }
     }
 
     public void clear() throws DataAccessException {

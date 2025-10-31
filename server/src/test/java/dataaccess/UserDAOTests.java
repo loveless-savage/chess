@@ -2,7 +2,6 @@ package dataaccess;
 
 import model.UserData;
 import org.junit.jupiter.api.*;
-
 import java.sql.SQLException;
 
 public class UserDAOTests {
@@ -41,7 +40,7 @@ public class UserDAOTests {
     }
 
     @Test
-    public void createWithNullValuesTest() throws DataAccessException {
+    public void createBadDataTest() {
         UserData nullEmail = new UserData("badUsername","badPassword",null);
         Assertions.assertThrows(DataAccessException.class, () -> dao.create(nullEmail));
         UserData nullPass = new UserData("badUsername",null,"bad@email");
