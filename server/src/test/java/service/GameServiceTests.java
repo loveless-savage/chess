@@ -24,17 +24,17 @@ public class GameServiceTests {
         takenGame = new GameData(3,"enemyWhite","enemyBlack","takenGame",new ChessGame());
     }
     @BeforeEach
-    public void setup() {
+    public void setup() throws DataAccessException {
         authDAO.create(currentAuth);
         gameDAO.create(firstGame);
     }
     @AfterEach
-    public void takeDown() {
+    public void takeDown() throws DataAccessException {
         gameService.clear();
     }
 
     @Test
-    public void createGameTest() {
+    public void createGameTest() throws DataAccessException {
         gameDAO.clear();
         Assertions.assertEquals(1, gameService.createGame(currentAuth.authToken(),new GameCreateRequest("firstGame")));
         Assertions.assertEquals(2, gameService.createGame(currentAuth.authToken(),new GameCreateRequest("otherGame")));
@@ -47,7 +47,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void listGamesTest() {
+    public void listGamesTest() throws DataAccessException {
         Assertions.assertArrayEquals(new GameData[]{firstGame}, gameService.listGames(currentAuth.authToken()));
         gameService.createGame(currentAuth.authToken(),new GameCreateRequest("otherGame"));
         Assertions.assertArrayEquals(new GameData[]{firstGame, otherGame}, gameService.listGames(currentAuth.authToken()));
@@ -56,18 +56,18 @@ public class GameServiceTests {
         Assertions.assertArrayEquals(new GameData[]{}, gameService.listGames(currentAuth.authToken()));
     }
     @Test
-    public void listGamesUnauthorizedTest() {
+    public void listGamesUnauthorizedTest() throws DataAccessException {
         Assertions.assertThrows(UnauthorizedException.class,() -> gameService.listGames("wrongToken"));
     }
 
     @Test
-    public void joinGameAsWhiteTest() {
+    public void joinGameAsWhiteTest() throws DataAccessException {
         GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 1);
         gameService.joinGame(currentAuth.authToken(), joinRequest);
         Assertions.assertEquals(currentAuth.username(), gameDAO.get(1).whiteUsername());
     }
     @Test
-    public void joinGameAsBlackTest() {
+    public void joinGameAsBlackTest() throws DataAccessException {
         GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.BLACK, 1);
         gameService.joinGame(currentAuth.authToken(), joinRequest);
         Assertions.assertEquals(currentAuth.username(), gameDAO.get(1).blackUsername());
@@ -80,7 +80,7 @@ public class GameServiceTests {
         );
     }
     @Test
-    public void joinGameAsWhiteAlreadyTakenTest() {
+    public void joinGameAsWhiteAlreadyTakenTest() throws DataAccessException {
         gameDAO.create(takenGame);
         GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.WHITE, 3);
         Assertions.assertThrows(AlreadyTakenException.class,() ->
@@ -88,7 +88,7 @@ public class GameServiceTests {
         );
     }
     @Test
-    public void joinGameAsBlackAlreadyTakenTest() {
+    public void joinGameAsBlackAlreadyTakenTest() throws DataAccessException {
         gameDAO.create(takenGame);
         GameJoinRequest joinRequest = new GameJoinRequest(ChessGame.TeamColor.BLACK, 3);
         Assertions.assertThrows(AlreadyTakenException.class,() ->
@@ -97,7 +97,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void clearTest() {
+    public void clearTest() throws DataAccessException {
         gameDAO.create(otherGame);
         gameService.clear();
         Assertions.assertArrayEquals(new GameData[]{}, gameDAO.list());

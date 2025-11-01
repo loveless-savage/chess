@@ -9,38 +9,38 @@ public class GameDAOTests {
     private static GameData goodData;
 
     @BeforeAll
-    public static void setup() {
+    public static void init() {
         gameDAO = new GameDAO();
         daoEmpty = new GameDAO();
         goodData = new GameData(200,"whitePlayer","blackPlayer","correctGame",new ChessGame());
     }
     @BeforeEach
-    public void setupEach() {
+    public void setup() throws DataAccessException {
         gameDAO.create(goodData);
     }
     @AfterEach
-    public void takeDown() {
+    public void takeDown() throws DataAccessException {
         gameDAO.clear();
     }
 
     @Test
-    public void clearTest() {
+    public void clearTest() throws DataAccessException {
         gameDAO.clear();
         Assertions.assertEquals(daoEmpty, gameDAO);
     }
 
     @Test
-    public void createTest() {
+    public void createTest() throws DataAccessException {
         Assertions.assertEquals(goodData, gameDAO.get(200));
     }
 
     @Test
-    public void getTest() {
+    public void getTest() throws DataAccessException {
         Assertions.assertNull(gameDAO.get(201));
     }
 
     @Test
-    public void updateTest() {
+    public void updateTest() throws DataAccessException {
         GameData betterData = new GameData(200,"newWhitePlayer","newBlackPlayer","updatedGame",new ChessGame());
         gameDAO.update(betterData);
         Assertions.assertNotEquals(goodData, gameDAO.get(200));
@@ -48,7 +48,7 @@ public class GameDAOTests {
     }
 
     @Test
-    public void listTest() {
+    public void listTest() throws DataAccessException {
         Assertions.assertArrayEquals(new GameData[]{goodData}, gameDAO.list());
         GameData otherData = new GameData(201,"alice","bob","otherGame",new ChessGame());
         gameDAO.create(otherData);
@@ -56,7 +56,7 @@ public class GameDAOTests {
     }
 
     @Test
-    public void deleteTest() {
+    public void deleteTest() throws DataAccessException {
         GameData otherData = new GameData(201,"alice","bob","otherGame",new ChessGame());
         gameDAO.create(otherData);
         Assertions.assertEquals(goodData, gameDAO.get(200));
