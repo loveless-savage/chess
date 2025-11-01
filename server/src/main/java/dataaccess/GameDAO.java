@@ -59,7 +59,20 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
         return out + "'" + data.gameName() + "','" + new Gson().toJson(data.game()) + "')";
     }
     String toSQLDiff(GameData data, GameData dataOld) throws DataAccessException {
-        return "FIXME";
+        if (data.gameName() == null || data.game() == null) {
+            throw new DataAccessException("no UserData fields can be null");
+        }
+        String out = "gameName = '" + data.gameName() + "'";
+        if (dataOld.whiteUsername() == null && data.whiteUsername() != null) {
+            out += ", whiteUsername = '" + data.whiteUsername() + "'";
+        }
+        if (dataOld.blackUsername() == null && data.blackUsername() != null) {
+            out += ", blackUsername = '" + data.blackUsername() + "'";
+        }
+        if (!data.game().equals(dataOld.game())) {
+            out += ", game = '" + new Gson().toJson(data.game()) + "'";
+        }
+        return out;
     }
     GameData fromSQL(ResultSet rs) throws SQLException {
         if(rs.next()) {
