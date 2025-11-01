@@ -7,7 +7,7 @@ import org.junit.jupiter.api.*;
 import java.sql.SQLException;
 
 public class GameDAOTests {
-    private static GameDAO gameDAO, daoEmpty;
+    private static GameDAO gameDAO;
     private static GameData goodData;
 
     @BeforeAll
@@ -87,6 +87,12 @@ public class GameDAOTests {
     @Test
     public void clearTest() throws DataAccessException {
         gameDAO.clear();
-        Assertions.assertEquals(daoEmpty, gameDAO);
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT * FROM gameData");
+            var rs = preparedStatement.executeQuery();
+            Assertions.assertFalse(rs.next());
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
+        }
     }
 }
