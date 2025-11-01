@@ -22,7 +22,7 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
     }
 
     public void create(GameData data) throws DataAccessException {
-        String statement = "INSERT INTO " + tableName + " (gameName,game) values " + toSQL(data);
+        String statement = "INSERT INTO " + tableName + " (whiteUsername,blackUsername,gameName,game) values " + toSQL(data);
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.executeUpdate();
@@ -45,7 +45,18 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
     }
 
     String toSQL(GameData data) {
-        return "('" + data.gameName() + "','" + new Gson().toJson(data.game()) + "')";
+        String out = "(";
+        if (data.whiteUsername() == null) {
+            out += "null,";
+        } else {
+            out += "'" + data.whiteUsername() + "',";
+        }
+        if (data.blackUsername() == null) {
+            out += "null,";
+        } else {
+            out += "'" + data.blackUsername() + "',";
+        }
+        return out + "'" + data.gameName() + "','" + new Gson().toJson(data.game()) + "')";
     }
     String toSQLDiff(GameData data, GameData dataOld) throws DataAccessException {
         return "FIXME";

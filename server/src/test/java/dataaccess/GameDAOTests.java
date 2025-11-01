@@ -1,8 +1,10 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import model.GameData;
 import chess.ChessGame;
 import org.junit.jupiter.api.*;
+import java.sql.SQLException;
 
 public class GameDAOTests {
     private static GameDAO gameDAO, daoEmpty;
@@ -11,11 +13,11 @@ public class GameDAOTests {
     @BeforeAll
     public static void init() {
         gameDAO = new GameDAO();
-        daoEmpty = new GameDAO();
         goodData = new GameData(200,"whitePlayer","blackPlayer","correctGame",new ChessGame());
     }
     @BeforeEach
     public void setup() throws DataAccessException {
+        gameDAO.clear();
         gameDAO.create(goodData);
     }
     @AfterEach
@@ -24,14 +26,20 @@ public class GameDAOTests {
     }
 
     @Test
-    public void clearTest() throws DataAccessException {
-        gameDAO.clear();
-        Assertions.assertEquals(daoEmpty, gameDAO);
-    }
-
-    @Test
-    public void createTest() throws DataAccessException {
-        Assertions.assertEquals(new GameData(gameDAO.getLastID(),null,null, goodData.gameName(), goodData.game()), gameDAO.get(gameDAO.getLastID()));
+    public void createTest() {
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(
+                    "SELECT * FROM gameData WHERE gameID=" + gameDAO.getLastID()
+            );
+            var rs = preparedStatement.executeQuery();
+            Assertions.assertTrue(rs.next(),"TABLE gameData expected to have an entry, but does not");
+            Assertions.assertEquals("whitePlayer",rs.getString("whiteUsername"));
+            Assertions.assertEquals("blackPlayer",rs.getString("blackUsername"));
+            Assertions.assertEquals("correctGame",rs.getString("gameName"));
+            Assertions.assertEquals(new ChessGame(),new Gson().fromJson(rs.getString("game"),ChessGame.class));
+        } catch (SQLException | DataAccessException e) {
+            Assertions.fail(e);
+        }
     }
 
     @Test
@@ -64,5 +72,11 @@ public class GameDAOTests {
         gameDAO.delete(200);
         Assertions.assertNull(gameDAO.get(200));
         Assertions.assertEquals(otherData, gameDAO.get(201));
+    }
+
+    @Test
+    public void clearTest() throws DataAccessException {
+        gameDAO.clear();
+        Assertions.assertEquals(daoEmpty, gameDAO);
     }
 }
