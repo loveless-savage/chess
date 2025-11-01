@@ -6,6 +6,7 @@ import model.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class GameDAO extends MySQLDAO<GameData,Integer>{
     private int lastID = 1;
@@ -41,7 +42,23 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
     }
 
     public GameData[] list() throws DataAccessException {
-        return null;
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT * FROM gameData");
+            var rs = preparedStatement.executeQuery();
+            ArrayList<GameData> out = new ArrayList<>();
+            while (rs.next()) {
+                out.add(new GameData(
+                        rs.getInt("gameID"),
+                        rs.getString("whiteUsername"),
+                        rs.getString("blackUsername"),
+                        rs.getString("gameName"),
+                        new Gson().fromJson(rs.getString("game"),ChessGame.class)
+                ));
+            }
+            return out.toArray(GameData[]::new);
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
+        }
     }
 
     String toSQL(GameData data) {
