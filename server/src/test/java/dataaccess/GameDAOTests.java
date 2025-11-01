@@ -13,7 +13,7 @@ public class GameDAOTests {
     @BeforeAll
     public static void init() {
         gameDAO = new GameDAO();
-        goodData = new GameData(200,"whitePlayer","blackPlayer","correctGame",new ChessGame());
+        goodData = new GameData(0,null,null,"correctGame",new ChessGame());
     }
     @BeforeEach
     public void setup() throws DataAccessException {
@@ -33,8 +33,8 @@ public class GameDAOTests {
             );
             var rs = preparedStatement.executeQuery();
             Assertions.assertTrue(rs.next(),"TABLE gameData expected to have an entry, but does not");
-            Assertions.assertEquals("whitePlayer",rs.getString("whiteUsername"));
-            Assertions.assertEquals("blackPlayer",rs.getString("blackUsername"));
+            Assertions.assertNull(rs.getString("whiteUsername"));
+            Assertions.assertNull(rs.getString("blackUsername"));
             Assertions.assertEquals("correctGame",rs.getString("gameName"));
             Assertions.assertEquals(new ChessGame(),new Gson().fromJson(rs.getString("game"),ChessGame.class));
         } catch (SQLException | DataAccessException e) {
@@ -44,15 +44,16 @@ public class GameDAOTests {
 
     @Test
     public void getTest() throws DataAccessException {
-        Assertions.assertNull(gameDAO.get(201));
+        GameData returnedData = new GameData(gameDAO.getLastID(),null,null,"correctGame",new ChessGame());
+        Assertions.assertEquals(returnedData,gameDAO.get(gameDAO.getLastID()));
     }
 
     @Test
     public void updateTest() throws DataAccessException {
-        GameData betterData = new GameData(200,"newWhitePlayer","newBlackPlayer","updatedGame",new ChessGame());
+        GameData betterData = new GameData(gameDAO.getLastID(),"newWhitePlayer","newBlackPlayer","updatedGame",new ChessGame());
         gameDAO.update(betterData);
-        Assertions.assertNotEquals(goodData, gameDAO.get(200));
-        Assertions.assertEquals(betterData, gameDAO.get(200));
+        Assertions.assertNotEquals(goodData, gameDAO.get(gameDAO.getLastID()));
+        Assertions.assertEquals(betterData, gameDAO.get(gameDAO.getLastID()));
     }
 
     @Test
