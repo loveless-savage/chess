@@ -31,7 +31,7 @@ public class GameDAOTests {
 
     @Test
     public void createTest() throws DataAccessException {
-        Assertions.assertEquals(new GameData(gameDAO.getNextID(),null,null, goodData.gameName(), goodData.game()), gameDAO.get(gameDAO.getNextID()));
+        Assertions.assertEquals(new GameData(gameDAO.getLastID(),null,null, goodData.gameName(), goodData.game()), gameDAO.get(gameDAO.getLastID()));
     }
 
     @Test

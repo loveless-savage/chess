@@ -30,7 +30,7 @@ public class GameService {
         if(authDAO.get(authToken) == null) {
             throw new UnauthorizedException("unauthorized");
         }
-        int newGameID = gameDAO.getNextID();
+        int newGameID = gameDAO.getLastID();
         GameData newGame = new GameData(newGameID,null,null,createRequest.gameName(),new ChessGame());
         gameDAO.create(newGame);
         return newGameID;

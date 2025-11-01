@@ -8,7 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class GameDAO extends MySQLDAO<GameData,Integer>{
-    private int nextID = 1;
+    private int lastID = 1;
+
     public GameDAO() {
         super("gameData", """
                              gameID INT NOT NULL AUTO_INCREMENT,
@@ -29,25 +30,21 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
             if (!rs.next()) {
                 throw new DataAccessException("could not retrieve last generated gameID");
             }
-            nextID = rs.getInt(1);
+            lastID = rs.getInt(1);
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage(), e);
         }
     }
 
-    public int getNextID() {
-        return nextID;
-    }
-    public void clear() throws DataAccessException {
-        super.clear();
-        nextID = 1;
+    public int getLastID() {
+        return lastID;
     }
 
     public GameData[] list() throws DataAccessException {
         return null;
     }
 
-    String toSQL(GameData data) throws DataAccessException {
+    String toSQL(GameData data) {
         return "('" + data.gameName() + "','" + new Gson().toJson(data.game()) + "')";
     }
     String toSQLDiff(GameData data, GameData dataOld) throws DataAccessException {
