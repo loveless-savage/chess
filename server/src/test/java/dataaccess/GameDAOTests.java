@@ -59,7 +59,7 @@ public class GameDAOTests {
     @Test
     public void listTest() throws DataAccessException {
         Assertions.assertEquals(1,gameDAO.list().length);
-        GameData otherData = new GameData(201,null,null,"otherGame",new ChessGame());
+        GameData otherData = new GameData(0,null,null,"otherGame",new ChessGame());
         gameDAO.create(otherData);
         GameData[] result = gameDAO.list();
         Assertions.assertEquals(2,result.length);
@@ -75,13 +75,16 @@ public class GameDAOTests {
 
     @Test
     public void deleteTest() throws DataAccessException {
-        GameData otherData = new GameData(201,null,null,"otherGame",new ChessGame());
+        int goodID = gameDAO.getLastID();
+        GameData otherData = new GameData(0,null,null,"otherGame",new ChessGame());
         gameDAO.create(otherData);
-        Assertions.assertEquals(goodData, gameDAO.get(200));
-        Assertions.assertEquals(otherData, gameDAO.get(201));
-        gameDAO.delete(200);
-        Assertions.assertNull(gameDAO.get(200));
-        Assertions.assertEquals(otherData, gameDAO.get(201));
+        int otherID = gameDAO.getLastID();
+
+        Assertions.assertEquals(new GameData(goodID,null,null,"correctGame",new ChessGame()), gameDAO.get(goodID));
+        Assertions.assertEquals(new GameData(otherID,null,null,"otherGame",new ChessGame()), gameDAO.get(otherID));
+        gameDAO.delete(goodID);
+        Assertions.assertNull(gameDAO.get(goodID));
+        Assertions.assertEquals(new GameData(otherID,null,null,"otherGame",new ChessGame()), gameDAO.get(otherID));
     }
 
     @Test
