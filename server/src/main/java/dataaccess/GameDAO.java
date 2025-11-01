@@ -1,10 +1,11 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.*;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class GameDAO extends MySQLDAO<GameData,Integer>{
     private int nextID = 1;
@@ -20,9 +21,20 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
     }
 
     public void create(GameData data) throws DataAccessException {
-        super.create(data);
-        nextID++;
+        String statement = "INSERT INTO " + tableName + " (gameName,game) values " + toSQL(data);
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.executeUpdate();
+            var rs = preparedStatement.getGeneratedKeys();
+            if (!rs.next()) {
+                throw new DataAccessException("could not retrieve last generated gameID");
+            }
+            nextID = rs.getInt(1);
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
+        }
     }
+
     public int getNextID() {
         return nextID;
     }
@@ -36,12 +48,22 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
     }
 
     String toSQL(GameData data) throws DataAccessException {
-        return "FIXME";
+        return "('" + data.gameName() + "','" + new Gson().toJson(data.game()) + "')";
     }
     String toSQLDiff(GameData data, GameData dataOld) throws DataAccessException {
         return "FIXME";
     }
     GameData fromSQL(ResultSet rs) throws SQLException {
-        return null;
+        if(rs.next()) {
+            return new GameData(
+                    rs.getInt("gameID"),
+                    rs.getString("whiteUsername"),
+                    rs.getString("blackUsername"),
+                    rs.getString("gameName"),
+                    new Gson().fromJson(rs.getString("game"), ChessGame.class)
+            );
+        } else {
+            return null;
+        }
     }
 }
