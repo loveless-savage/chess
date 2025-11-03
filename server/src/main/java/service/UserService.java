@@ -2,7 +2,6 @@ package service;
 
 import dataaccess.*;
 import model.*;
-
 import java.util.UUID;
 
 public class UserService {
@@ -45,7 +44,7 @@ public class UserService {
         return loginInfo;
     }
 
-    public void logout(String authToken) {
+    public void logout(String authToken) throws DataAccessException {
         if(authDAO.get(authToken) == null) {
             throw new UnauthorizedException("unauthorized");
         }

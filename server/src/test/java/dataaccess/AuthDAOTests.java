@@ -4,56 +4,56 @@ import model.AuthData;
 import org.junit.jupiter.api.*;
 
 public class AuthDAOTests {
-    private static AuthDAO dao, daoEmpty;
+    private static AuthDAO authDAO, daoEmpty;
     private static AuthData goodData;
 
     @BeforeAll
     public static void setup() {
-        dao = new AuthDAO();
+        authDAO = new AuthDAO();
         daoEmpty = new AuthDAO();
         goodData = new AuthData("goodToken","goodUsername");
     }
     @BeforeEach
-    public void setupEach() {
-        dao.create(goodData);
+    public void setupEach() throws DataAccessException {
+        authDAO.create(goodData);
     }
     @AfterEach
-    public void takeDown() {
-        dao.clear();
+    public void takeDown() throws DataAccessException {
+        authDAO.clear();
     }
 
     @Test
-    public void clearTest() {
-        dao.clear();
-        Assertions.assertEquals(daoEmpty, dao);
+    public void clearTest() throws DataAccessException {
+        authDAO.clear();
+        Assertions.assertEquals(daoEmpty, authDAO);
     }
 
     @Test
-    public void createTest() {
-        Assertions.assertEquals(goodData, dao.get("goodToken"));
+    public void createTest() throws DataAccessException {
+        Assertions.assertEquals(goodData, authDAO.get("goodToken"));
     }
 
     @Test
-    public void getTest() {
-        Assertions.assertNull(dao.get("badToken"));
+    public void getTest() throws DataAccessException {
+        Assertions.assertNull(authDAO.get("badToken"));
     }
 
     @Test
-    public void updateTest() {
+    public void updateTest() throws DataAccessException {
         AuthData betterData = new AuthData("goodToken","updatedUsername");
-        dao.update(betterData);
-        Assertions.assertNotEquals(goodData, dao.get("goodToken"));
-        Assertions.assertEquals(betterData, dao.get("goodToken"));
+        authDAO.update(betterData);
+        Assertions.assertNotEquals(goodData, authDAO.get("goodToken"));
+        Assertions.assertEquals(betterData, authDAO.get("goodToken"));
     }
 
     @Test
-    public void deleteTest() {
+    public void deleteTest() throws DataAccessException {
         AuthData otherData = new AuthData("otherToken","otherUsername");
-        dao.create(otherData);
-        Assertions.assertEquals(goodData, dao.get("goodToken"));
-        Assertions.assertEquals(otherData, dao.get("otherToken"));
-        dao.delete("goodToken");
-        Assertions.assertNull(dao.get("goodToken"));
-        Assertions.assertEquals(otherData, dao.get("otherToken"));
+        authDAO.create(otherData);
+        Assertions.assertEquals(goodData, authDAO.get("goodToken"));
+        Assertions.assertEquals(otherData, authDAO.get("otherToken"));
+        authDAO.delete("goodToken");
+        Assertions.assertNull(authDAO.get("goodToken"));
+        Assertions.assertEquals(otherData, authDAO.get("otherToken"));
     }
 }
