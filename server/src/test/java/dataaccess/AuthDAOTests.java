@@ -76,13 +76,13 @@ public class AuthDAOTests {
 
     @Test
     public void deleteTest() throws DataAccessException {
-        AuthData otherData = new AuthData("otherToken","otherUsername");
+        AuthData otherData = new AuthData(UUID.randomUUID().toString(),"otherUsername");
         authDAO.create(otherData);
-        Assertions.assertEquals(goodData, authDAO.get("goodToken"));
-        Assertions.assertEquals(otherData, authDAO.get("otherToken"));
-        authDAO.delete("goodToken");
-        Assertions.assertNull(authDAO.get("goodToken"));
-        Assertions.assertEquals(otherData, authDAO.get("otherToken"));
+        Assertions.assertEquals(goodData, authDAO.get(goodData.authToken()));
+        Assertions.assertEquals(otherData, authDAO.get(otherData.authToken()));
+        authDAO.delete(goodData.authToken());
+        Assertions.assertNull(authDAO.get(goodData.authToken()));
+        Assertions.assertEquals(otherData, authDAO.get(otherData.authToken()));
     }
 
     @Test
