@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.UserData;
 import org.junit.jupiter.api.*;
+import org.mindrot.jbcrypt.BCrypt;
 import java.sql.SQLException;
 
 public class UserDAOTests {
@@ -11,7 +12,7 @@ public class UserDAOTests {
     @BeforeAll
     public static void init() {
         userDAO = new UserDAO();
-        goodData = new UserData("correctUsername","correctPassword","correct@email");
+        goodData = new UserData("correctUsername",BCrypt.hashpw("correctPassword",BCrypt.gensalt()),"correct@email");
     }
     @BeforeEach
     public void setup() throws DataAccessException {
@@ -32,7 +33,7 @@ public class UserDAOTests {
             var rs = preparedStatement.executeQuery();
             Assertions.assertTrue(rs.next(),"TABLE userData expected to have an entry, but does not");
             Assertions.assertEquals("correctUsername",rs.getString("username"));
-            Assertions.assertEquals("correctPassword",rs.getString("password"));
+            Assertions.assertTrue(BCrypt.checkpw("correctPassword",rs.getString("password")));
             Assertions.assertEquals("correct@email",rs.getString("email"));
         } catch (SQLException | DataAccessException e) {
             Assertions.fail(e);
@@ -46,10 +47,12 @@ public class UserDAOTests {
 
     @Test
     public void createBadDataTest() {
-        UserData nullEmail = new UserData("badUsername","badPassword",null);
+        UserData nullEmail = new UserData("badUsername",BCrypt.hashpw("badPassword",BCrypt.gensalt()),null);
         Assertions.assertThrows(DataAccessException.class,() -> userDAO.create(nullEmail));
         UserData nullPass = new UserData("badUsername",null,"bad@email");
         Assertions.assertThrows(DataAccessException.class,() -> userDAO.create(nullPass));
+        UserData badPass = new UserData("badUsername","badPassword","bad@email");
+        Assertions.assertThrows(DataAccessException.class,() -> userDAO.create(badPass));
         UserData nullPassEmail = new UserData("badUsername",null,null);
         Assertions.assertThrows(DataAccessException.class,() -> userDAO.create(nullPassEmail));
     }
@@ -66,7 +69,7 @@ public class UserDAOTests {
 
     @Test
     public void updateTest() throws DataAccessException {
-        UserData betterData = new UserData("correctUsername","updatedPassword","updated@email");
+        UserData betterData = new UserData("correctUsername",BCrypt.hashpw("updatedPassword",BCrypt.gensalt()),"updated@email");
         userDAO.update(betterData);
         Assertions.assertNotEquals(goodData, userDAO.get("correctUsername"));
         Assertions.assertEquals(betterData, userDAO.get("correctUsername"));
@@ -80,14 +83,14 @@ public class UserDAOTests {
 
     @Test
     public void updateNotFoundTest() throws DataAccessException {
-        UserData badData = new UserData("badUsername","correctPassword","correct@email");
+        UserData badData = new UserData("badUsername",BCrypt.hashpw("correctPassword",BCrypt.gensalt()),"correct@email");
         Assertions.assertThrows(DataAccessException.class,() -> userDAO.update(badData));
         Assertions.assertEquals(goodData, userDAO.get("correctUsername"));
     }
 
     @Test
     public void deleteTest() throws DataAccessException {
-        UserData otherData = new UserData("otherUsername","otherPassword","other@email");
+        UserData otherData = new UserData("otherUsername",BCrypt.hashpw("otherPassword",BCrypt.gensalt()),"other@email");
         userDAO.create(otherData);
         Assertions.assertEquals(goodData, userDAO.get("correctUsername"));
         Assertions.assertEquals(otherData, userDAO.get("otherUsername"));

@@ -8,7 +8,7 @@ public class UserDAO extends MySQLDAO<UserData,String>{
     public UserDAO() {
         super("userData", """
                              username VARCHAR(32) NOT NULL,
-                             password VARCHAR(64) NOT NULL,
+                             password CHAR(60) NOT NULL,
                              email VARCHAR(32) NOT NULL,
                              PRIMARY KEY (username)
                              """);
@@ -17,6 +17,8 @@ public class UserDAO extends MySQLDAO<UserData,String>{
     String toSQL(UserData data) throws DataAccessException {
         if (data.username() == null || data.password() == null || data.email() == null) {
             throw new DataAccessException("no UserData fields can be null");
+        } else if (data.password().length() != 60) {
+            throw new DataAccessException("The provided password was not properly encrypted");
         } else {
             return "('" + data.username() + "','" + data.password() + "','" + data.email() + "')";
         }

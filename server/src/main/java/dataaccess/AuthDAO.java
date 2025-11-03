@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class AuthDAO extends MySQLDAO<AuthData,String>{
     public AuthDAO() {
         super("authData", """
-                             authToken VARCHAR(36) NOT NULL,
+                             authToken CHAR(36) NOT NULL,
                              username VARCHAR(32) NOT NULL,
                              PRIMARY KEY (authToken)
                              """);
