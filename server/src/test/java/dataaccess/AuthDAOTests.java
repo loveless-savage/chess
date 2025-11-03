@@ -84,7 +84,10 @@ public class AuthDAOTests {
         Assertions.assertEquals(otherData, authDAO.get(otherData.authToken()));
     }
 
-    // TODO: deleteNegativeTest()
+    @Test
+    public void deleteNoDataTest() {
+        Assertions.assertDoesNotThrow(() -> authDAO.delete(UUID.randomUUID().toString()));
+    }
 
     @Test
     public void clearTest() throws DataAccessException {

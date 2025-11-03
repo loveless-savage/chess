@@ -99,7 +99,10 @@ public class UserDAOTests {
         Assertions.assertEquals(otherData, userDAO.get("otherUsername"));
     }
 
-    // TODO: deleteNegativeTest()
+    @Test
+    public void deleteNoDataTest() {
+        Assertions.assertDoesNotThrow(() -> userDAO.delete("badUsername"));
+    }
 
     @Test
     public void clearTest() throws DataAccessException {

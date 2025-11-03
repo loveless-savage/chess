@@ -67,8 +67,6 @@ public class GameDAOTests {
         }
     }
 
-    // TODO: getLastIDNegativeTest()
-
     @Test
     public void getTest() throws DataAccessException {
         GameData returnedData = new GameData(gameDAO.getLastID(),null,null,"correctGame",new ChessGame());
@@ -140,7 +138,10 @@ public class GameDAOTests {
         Assertions.assertEquals(new GameData(otherID,null,null,"otherGame",new ChessGame()), gameDAO.get(otherID));
     }
 
-    // TODO: deleteNegativeTest()
+    @Test
+    public void deleteNoDataTest() {
+        Assertions.assertDoesNotThrow(() -> gameDAO.delete(gameDAO.getLastID()+1));
+    }
 
     @Test
     public void clearTest() throws DataAccessException {
