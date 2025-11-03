@@ -40,6 +40,16 @@ public class AuthDAOTests {
     }
 
     @Test
+    public void createBadDataTest() {
+        AuthData badAuthToken = new AuthData("badToken","correctUsername");
+        Assertions.assertThrows(DataAccessException.class,() -> authDAO.create(badAuthToken));
+        AuthData nullAuthToken = new AuthData(null,"correctUsername");
+        Assertions.assertThrows(DataAccessException.class,() -> authDAO.create(nullAuthToken));
+        AuthData badUsername = new AuthData(UUID.randomUUID().toString(),null);
+        Assertions.assertThrows(DataAccessException.class,() -> authDAO.create(badUsername));
+    }
+
+    @Test
     public void getTest() throws DataAccessException {
         Assertions.assertNull(authDAO.get("badToken"));
     }

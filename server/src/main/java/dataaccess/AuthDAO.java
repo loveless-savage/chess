@@ -14,8 +14,10 @@ public class AuthDAO extends MySQLDAO<AuthData,String>{
     }
 
     String toSQL(AuthData data) throws DataAccessException {
-        if (data.authToken() == null || data.username() == null) {
-            throw new DataAccessException("no AuthData fields can be null");
+        if (data.authToken() == null || data.authToken().length() != 36) {
+            throw new DataAccessException("The authToken '" + data.authToken() + "' was not properly generated");
+        } else if (data.username() == null) {
+                throw new DataAccessException("username cannot be null");
         } else {
             return "('" + data.authToken() + "','" + data.username() + "')";
         }
