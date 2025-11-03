@@ -90,7 +90,7 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
             out.setString(2, data.blackUsername());
             out.setString(3, data.gameName());
             out.setString(4, new Gson().toJson(data.game()));
-            out.setInt(5,data.gameID());
+            out.setInt(5,data.keyValue());
             return out;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage(), e);

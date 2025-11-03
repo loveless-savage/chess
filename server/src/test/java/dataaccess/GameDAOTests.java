@@ -84,7 +84,6 @@ public class GameDAOTests {
     public void updateTest() throws DataAccessException {
         GameData betterData = new GameData(gameDAO.getLastID(),"newWhitePlayer","newBlackPlayer","updatedGame",new ChessGame());
         gameDAO.update(betterData);
-        Assertions.assertNotEquals(goodData, gameDAO.get(gameDAO.getLastID()));
         Assertions.assertEquals(betterData, gameDAO.get(gameDAO.getLastID()));
     }
 

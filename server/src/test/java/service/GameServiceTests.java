@@ -54,9 +54,11 @@ public class GameServiceTests {
 
     @Test
     public void listGamesTest() throws DataAccessException {
-        Assertions.assertArrayEquals(new GameData[]{updateID(firstGame,firstID)}, gameService.listGames(currentAuth.authToken()));
+        Assertions.assertArrayEquals(new GameData[]{updateID(firstGame,firstID)},
+                    gameService.listGames(currentAuth.authToken()));
         otherID = gameService.createGame(currentAuth.authToken(),new GameCreateRequest("otherGame"));
-        Assertions.assertArrayEquals(new GameData[]{updateID(firstGame,firstID),updateID(otherGame,otherID)}, gameService.listGames(currentAuth.authToken()));
+        Assertions.assertArrayEquals(new GameData[]{updateID(firstGame,firstID),
+                    updateID(otherGame,otherID)}, gameService.listGames(currentAuth.authToken()));
         gameService.clear();
         authDAO.create(currentAuth);
         Assertions.assertArrayEquals(new GameData[]{}, gameService.listGames(currentAuth.authToken()));

@@ -41,7 +41,7 @@ public class AuthDAO extends MySQLDAO<AuthData,String>{
                     "UPDATE authData SET authToken=?,username=? WHERE authToken = ?");
             out.setString(1, data.authToken());
             out.setString(2, data.username());
-            out.setString(3, data.authToken());
+            out.setString(3, data.keyValue());
             return out;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage(), e);

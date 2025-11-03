@@ -9,9 +9,6 @@ public record GameData(
         String gameName,
         ChessGame game
 ) implements ModelData<Integer> {
-    public String keyName() {
-        return "gameID";
-    }
     public Integer keyValue() {
         return gameID;
     }

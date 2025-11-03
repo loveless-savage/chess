@@ -43,7 +43,7 @@ public class UserDAO extends MySQLDAO<UserData,String>{
             out.setString(1, data.username());
             out.setString(2, data.password());
             out.setString(3, data.email());
-            out.setString(4, data.username());
+            out.setString(4, data.keyValue());
             return out;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage(), e);

@@ -113,37 +113,7 @@ public class ChessPiece {
                     moves = batchMoves(board,pos,dx,dy,true);
                 }
                 case PAWN -> {
-                    int dx = (color == ChessGame.TeamColor.WHITE) ? 1:-1;
-                    ChessPosition target = new ChessPosition(pos.getRow()+dx,pos.getColumn());
-                    if (!target.isInBounds()){
-                        break;
-                    }
-                    var collisionPiece = board.getPiece(target);
-                    if (collisionPiece == null) {
-                        moves.addAll(pawnPromoter(pos, target));
-                        if ( (color == ChessGame.TeamColor.WHITE && pos.getRow() == 2) ||
-                             (color == ChessGame.TeamColor.BLACK && pos.getRow() == 7)) {
-                            target = new ChessPosition(pos.getRow()+2*dx,pos.getColumn());
-                            collisionPiece = board.getPiece(target);
-                            if(collisionPiece == null) {
-                                moves.add(new ChessMove(pos, target));
-                            }
-                        }
-                    }
-                    if (pos.getColumn()<8) {
-                        target = new ChessPosition(pos.getRow() + dx, pos.getColumn() + 1);
-                        collisionPiece = board.getPiece(target);
-                        if (collisionPiece != null && color != collisionPiece.color) {
-                            moves.addAll(pawnPromoter(pos, target));
-                        }
-                    }
-                    if (pos.getColumn()>1) {
-                        target = new ChessPosition(pos.getRow() + dx, pos.getColumn() - 1);
-                        collisionPiece = board.getPiece(target);
-                        if (collisionPiece != null && color != collisionPiece.color) {
-                            moves.addAll(pawnPromoter(pos, target));
-                        }
-                    }
+                    moves = pawnMoves(pos,board);
                 }
                 default -> {
                     System.out.println(type + " not a recognized piece type!");
@@ -193,6 +163,45 @@ public class ChessPiece {
                     break;
                 }
                 target = new ChessPosition(target.getRow()+dx,target.getColumn()+dy);
+            }
+            return moves;
+        }
+
+        /**
+         * carry out pawn moving rules, including double-moving at start, diagonal capturing, and promotion
+         */
+        private Collection<ChessMove> pawnMoves(ChessPosition pos, ChessBoard board) {
+            var moves = new HashSet<ChessMove>();
+            int dx = (color == ChessGame.TeamColor.WHITE) ? 1:-1;
+            ChessPosition target = new ChessPosition(pos.getRow()+dx,pos.getColumn());
+            if (!target.isInBounds()){
+                return null;
+            }
+            var collisionPiece = board.getPiece(target);
+            if (collisionPiece == null) {
+                moves.addAll(pawnPromoter(pos, target));
+                if ( (color == ChessGame.TeamColor.WHITE && pos.getRow() == 2) ||
+                        (color == ChessGame.TeamColor.BLACK && pos.getRow() == 7)) {
+                    target = new ChessPosition(pos.getRow()+2*dx,pos.getColumn());
+                    collisionPiece = board.getPiece(target);
+                    if(collisionPiece == null) {
+                        moves.add(new ChessMove(pos, target));
+                    }
+                }
+            }
+            if (pos.getColumn()<8) {
+                target = new ChessPosition(pos.getRow() + dx, pos.getColumn() + 1);
+                collisionPiece = board.getPiece(target);
+                if (collisionPiece != null && color != collisionPiece.color) {
+                    moves.addAll(pawnPromoter(pos, target));
+                }
+            }
+            if (pos.getColumn()>1) {
+                target = new ChessPosition(pos.getRow() + dx, pos.getColumn() - 1);
+                collisionPiece = board.getPiece(target);
+                if (collisionPiece != null && color != collisionPiece.color) {
+                    moves.addAll(pawnPromoter(pos, target));
+                }
             }
             return moves;
         }
