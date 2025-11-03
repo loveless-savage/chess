@@ -3,9 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class GameDAO extends MySQLDAO<GameData,Integer>{
@@ -23,9 +21,8 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
     }
 
     public void create(GameData data) throws DataAccessException {
-        String statement = "INSERT INTO " + tableName + " (gameName,game) values " + toSQL(data);
         try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
+            var preparedStatement = toSQL(conn,data);
             preparedStatement.executeUpdate();
             var rs = preparedStatement.getGeneratedKeys();
             if (!rs.next()) {
@@ -62,12 +59,22 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
         }
     }
 
-    String toSQL(GameData data) throws DataAccessException {
+    PreparedStatement toSQL(Connection conn, GameData data) throws DataAccessException {
         if (data.gameName() == null || data.game() == null) {
             throw new DataAccessException("no UserData fields can be null");
         }
-        return "('" + data.gameName() + "','" + new Gson().toJson(data.game()) + "')";
+        try {
+            PreparedStatement out = conn.prepareStatement(
+                    "INSERT INTO gameData (gameName,game) values (?,?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            out.setString(1, data.gameName());
+            out.setString(2, new Gson().toJson(data.game()));
+            return out;
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(),e);
+        }
     }
+
     String toSQLDiff(GameData data, GameData dataOld) throws DataAccessException {
         if (data.gameName() == null || data.game() == null) {
             throw new DataAccessException("no UserData fields can be null");
@@ -84,6 +91,7 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
         }
         return out;
     }
+
     GameData fromSQL(ResultSet rs) throws SQLException {
         if(rs.next()) {
             return new GameData(

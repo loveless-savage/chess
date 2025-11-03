@@ -1,6 +1,8 @@
 package dataaccess;
 
 import model.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -14,15 +16,23 @@ public class UserDAO extends MySQLDAO<UserData,String>{
                              """);
     }
 
-    String toSQL(UserData data) throws DataAccessException {
+    PreparedStatement toSQL(Connection conn, UserData data) throws DataAccessException {
         if (data.username() == null || data.password() == null || data.email() == null) {
             throw new DataAccessException("no UserData fields can be null");
         } else if (data.password().length() != 60) {
             throw new DataAccessException("The provided password was not properly encrypted");
-        } else {
-            return "('" + data.username() + "','" + data.password() + "','" + data.email() + "')";
+        }
+        try {
+            PreparedStatement out = conn.prepareStatement("INSERT INTO userData values (?,?,?)");
+            out.setString(1, data.username());
+            out.setString(2, data.password());
+            out.setString(3, data.email());
+            return out;
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(),e);
         }
     }
+
     String toSQLDiff(UserData data, UserData dataOld) throws DataAccessException {
         if (data.username() == null || data.password() == null || data.email() == null) {
             throw new DataAccessException("no UserData fields can be null");

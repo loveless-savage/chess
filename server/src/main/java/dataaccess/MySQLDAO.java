@@ -1,6 +1,8 @@
 package dataaccess;
 
 import model.ModelData;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -24,9 +26,8 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public void create(T data) throws DataAccessException {
-        String statement = "INSERT INTO " + tableName + " values " + toSQL(data);
         try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement(statement);
+            var preparedStatement = toSQL(conn,data);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage(), e);
@@ -77,7 +78,7 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
         }
     }
 
-    abstract String toSQL(T data) throws DataAccessException;
+    abstract PreparedStatement toSQL(Connection conn, T data) throws DataAccessException;
     abstract String toSQLDiff(T data, T dataOld) throws DataAccessException;
     abstract T fromSQL(ResultSet rs) throws SQLException;
 }
