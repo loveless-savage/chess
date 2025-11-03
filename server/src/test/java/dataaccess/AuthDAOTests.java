@@ -61,10 +61,17 @@ public class AuthDAOTests {
 
     @Test
     public void updateTest() throws DataAccessException {
-        AuthData betterData = new AuthData("goodToken","updatedUsername");
+        AuthData betterData = new AuthData(goodData.authToken(),"updatedUsername");
         authDAO.update(betterData);
-        Assertions.assertNotEquals(goodData, authDAO.get("goodToken"));
-        Assertions.assertEquals(betterData, authDAO.get("goodToken"));
+        Assertions.assertNotEquals(goodData, authDAO.get(goodData.authToken()));
+        Assertions.assertEquals(betterData, authDAO.get(goodData.authToken()));
+    }
+
+    @Test
+    public void updateNotFoundTest() throws DataAccessException {
+        AuthData badData = new AuthData(UUID.randomUUID().toString(),"updatedUsername");
+        Assertions.assertThrows(DataAccessException.class,() -> authDAO.update(badData));
+        Assertions.assertEquals(goodData, authDAO.get(goodData.authToken()));
     }
 
     @Test
