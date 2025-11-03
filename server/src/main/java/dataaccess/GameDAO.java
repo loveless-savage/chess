@@ -77,23 +77,24 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
         }
     }
 
-    String toSQLDiff(GameData data, GameData dataOld) throws DataAccessException {
+    PreparedStatement toSQLDiff(Connection conn, GameData data) throws DataAccessException {
         if (data.gameName() == null) {
             throw new DataAccessException("gameName cannot be null");
         } else if (data.game() == null) {
             throw new DataAccessException("game cannot be null");
         }
-        String out = "gameName = '" + data.gameName() + "'";
-        if (dataOld.whiteUsername() == null && data.whiteUsername() != null) {
-            out += ", whiteUsername = '" + data.whiteUsername() + "'";
+        try {
+            PreparedStatement out = conn.prepareStatement(
+                    "UPDATE gameData SET whiteUsername=?,blackUsername=?,gameName=?,game=? WHERE gameID = ?");
+            out.setString(1, data.whiteUsername());
+            out.setString(2, data.blackUsername());
+            out.setString(3, data.gameName());
+            out.setString(4, new Gson().toJson(data.game()));
+            out.setInt(5,data.gameID());
+            return out;
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
         }
-        if (dataOld.blackUsername() == null && data.blackUsername() != null) {
-            out += ", blackUsername = '" + data.blackUsername() + "'";
-        }
-        if (!data.game().equals(dataOld.game())) {
-            out += ", game = '" + new Gson().toJson(data.game()) + "'";
-        }
-        return out;
     }
 
     GameData fromSQL(ResultSet rs) throws SQLException {

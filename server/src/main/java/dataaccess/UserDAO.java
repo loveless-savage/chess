@@ -33,19 +33,23 @@ public class UserDAO extends MySQLDAO<UserData,String>{
         }
     }
 
-    String toSQLDiff(UserData data, UserData dataOld) throws DataAccessException {
+    PreparedStatement toSQLDiff(Connection conn, UserData data) throws DataAccessException {
         if (data.username() == null || data.password() == null || data.email() == null) {
             throw new DataAccessException("no UserData fields can be null");
         }
-        String out = "username = '" + data.username() + "'";
-        if (!data.password().equals(dataOld.password())) {
-            out += ", password = '" + data.password() + "'";
+        try {
+            PreparedStatement out = conn.prepareStatement(
+                    "UPDATE userData SET username=?,password=?,email=? WHERE username = ?");
+            out.setString(1, data.username());
+            out.setString(2, data.password());
+            out.setString(3, data.email());
+            out.setString(4, data.username());
+            return out;
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
         }
-        if (!data.email().equals(dataOld.email())) {
-            out += ", email = '" + data.email() + "'";
-        }
-        return out;
     }
+
     UserData fromSQL(ResultSet rs) throws SQLException {
         if(rs.next()) {
             return new UserData(

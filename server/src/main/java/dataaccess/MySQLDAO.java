@@ -50,9 +50,8 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
         if (dataOld == null) {
             throw new DataAccessException("no entry could be found to update");
         }
-        String statement = "UPDATE " + tableName + " SET " + toSQLDiff(data,dataOld) + " WHERE " + keyName + "='" + data.keyValue() + "'";
         try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement(statement);
+            var preparedStatement = toSQLDiff(conn,data);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage(), e);
@@ -79,6 +78,6 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     abstract PreparedStatement toSQL(Connection conn, T data) throws DataAccessException;
-    abstract String toSQLDiff(T data, T dataOld) throws DataAccessException;
+    abstract PreparedStatement toSQLDiff(Connection conn, T data) throws DataAccessException;
     abstract T fromSQL(ResultSet rs) throws SQLException;
 }
