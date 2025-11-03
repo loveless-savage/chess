@@ -6,13 +6,12 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class AuthDAOTests {
-    private static AuthDAO authDAO, daoEmpty;
+    private static AuthDAO authDAO;
     private static AuthData goodData;
 
     @BeforeAll
     public static void setup() {
         authDAO = new AuthDAO();
-        daoEmpty = new AuthDAO();
         goodData = new AuthData(UUID.randomUUID().toString(),"correctUsername");
     }
     @BeforeEach
@@ -84,6 +83,8 @@ public class AuthDAOTests {
         Assertions.assertNull(authDAO.get(goodData.authToken()));
         Assertions.assertEquals(otherData, authDAO.get(otherData.authToken()));
     }
+
+    // TODO: deleteNegativeTest()
 
     @Test
     public void clearTest() throws DataAccessException {

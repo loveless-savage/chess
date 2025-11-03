@@ -46,11 +46,11 @@ public class GameDAOTests {
     @Test
     public void createBadDataTest() {
         GameData nullName = new GameData(0,null,null,null,new ChessGame());
-        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.create(nullName));
+        Assertions.assertThrows(DataAccessException.class,() -> gameDAO.create(nullName));
         GameData nullGame = new GameData(0,null,null,"badGame",null);
-        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.create(nullGame));
+        Assertions.assertThrows(DataAccessException.class,() -> gameDAO.create(nullGame));
         GameData nullNameGame = new GameData(0,null,null,null,null);
-        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.create(nullNameGame));
+        Assertions.assertThrows(DataAccessException.class,() -> gameDAO.create(nullNameGame));
     }
 
     @Test
@@ -91,11 +91,11 @@ public class GameDAOTests {
     @Test
     public void updateBadDataTest() {
         GameData nullName = new GameData(gameDAO.getLastID(),"newWhitePlayer","newBlackPlayer",null,new ChessGame());
-        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.update(nullName));
+        Assertions.assertThrows(DataAccessException.class,() -> gameDAO.update(nullName));
         GameData nullGame = new GameData(gameDAO.getLastID(),"newWhitePlayer","newBlackPlayer","badGame",null);
-        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.update(nullGame));
+        Assertions.assertThrows(DataAccessException.class,() -> gameDAO.update(nullGame));
         GameData nullNameGame = new GameData(gameDAO.getLastID(),"newWhitePlayer","newBlackPlayer",null,null);
-        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.update(nullNameGame));
+        Assertions.assertThrows(DataAccessException.class,() -> gameDAO.update(nullNameGame));
     }
 
     @Test

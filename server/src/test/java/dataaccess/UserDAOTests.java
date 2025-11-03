@@ -41,17 +41,17 @@ public class UserDAOTests {
 
     @Test
     public void createAlreadyExistsTest() {
-        Assertions.assertThrows(DataAccessException.class, () -> userDAO.create(goodData));
+        Assertions.assertThrows(DataAccessException.class,() -> userDAO.create(goodData));
     }
 
     @Test
     public void createBadDataTest() {
         UserData nullEmail = new UserData("badUsername","badPassword",null);
-        Assertions.assertThrows(DataAccessException.class, () -> userDAO.create(nullEmail));
+        Assertions.assertThrows(DataAccessException.class,() -> userDAO.create(nullEmail));
         UserData nullPass = new UserData("badUsername",null,"bad@email");
-        Assertions.assertThrows(DataAccessException.class, () -> userDAO.create(nullPass));
+        Assertions.assertThrows(DataAccessException.class,() -> userDAO.create(nullPass));
         UserData nullPassEmail = new UserData("badUsername",null,null);
-        Assertions.assertThrows(DataAccessException.class, () -> userDAO.create(nullPassEmail));
+        Assertions.assertThrows(DataAccessException.class,() -> userDAO.create(nullPassEmail));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class UserDAOTests {
     @Test
     public void updateNotFoundTest() throws DataAccessException {
         UserData badData = new UserData("badUsername","correctPassword","correct@email");
-        Assertions.assertThrows(DataAccessException.class, () -> userDAO.update(badData));
+        Assertions.assertThrows(DataAccessException.class,() -> userDAO.update(badData));
         Assertions.assertEquals(goodData, userDAO.get("correctUsername"));
     }
 
@@ -95,6 +95,8 @@ public class UserDAOTests {
         Assertions.assertNull(userDAO.get("correctUsername"));
         Assertions.assertEquals(otherData, userDAO.get("otherUsername"));
     }
+
+    // TODO: deleteNegativeTest()
 
     @Test
     public void clearTest() throws DataAccessException {
