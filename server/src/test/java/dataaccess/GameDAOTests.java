@@ -1,6 +1,7 @@
 package dataaccess;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import model.GameData;
 import chess.ChessGame;
 import org.junit.jupiter.api.*;
@@ -43,9 +44,40 @@ public class GameDAOTests {
     }
 
     @Test
+    public void createBadDataTest() {
+        GameData nullName = new GameData(0,null,null,null,new ChessGame());
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.create(nullName));
+        GameData nullGame = new GameData(0,null,null,"badGame",null);
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.create(nullGame));
+        GameData nullNameGame = new GameData(0,null,null,null,null);
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.create(nullNameGame));
+    }
+
+    @Test
+    public void getLastIDTest() throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT * FROM gameData");
+            var rs = preparedStatement.executeQuery();
+            if(!rs.next()) {
+                throw new DataAccessException("gameData should not be empty but it is");
+            }
+            Assertions.assertEquals(rs.getInt("gameID"),gameDAO.getLastID());
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
+        }
+    }
+
+    // TODO: getLastIDNegativeTest()
+
+    @Test
     public void getTest() throws DataAccessException {
         GameData returnedData = new GameData(gameDAO.getLastID(),null,null,"correctGame",new ChessGame());
         Assertions.assertEquals(returnedData,gameDAO.get(gameDAO.getLastID()));
+    }
+
+    @Test
+    public void getWrongIDTest() throws DataAccessException {
+        Assertions.assertNull(gameDAO.get(gameDAO.getLastID()+1));
     }
 
     @Test
@@ -54,6 +86,16 @@ public class GameDAOTests {
         gameDAO.update(betterData);
         Assertions.assertNotEquals(goodData, gameDAO.get(gameDAO.getLastID()));
         Assertions.assertEquals(betterData, gameDAO.get(gameDAO.getLastID()));
+    }
+
+    @Test
+    public void updateBadDataTest() {
+        GameData nullName = new GameData(gameDAO.getLastID(),"newWhitePlayer","newBlackPlayer",null,new ChessGame());
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.update(nullName));
+        GameData nullGame = new GameData(gameDAO.getLastID(),"newWhitePlayer","newBlackPlayer","badGame",null);
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.update(nullGame));
+        GameData nullNameGame = new GameData(gameDAO.getLastID(),"newWhitePlayer","newBlackPlayer",null,null);
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.update(nullNameGame));
     }
 
     @Test
@@ -74,6 +116,18 @@ public class GameDAOTests {
     }
 
     @Test
+    public void listCorruptedDataTest() throws DataAccessException {
+        String statement = "INSERT INTO gameData (gameName,game) values (\"badData\",\"0\")";
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), e);
+        }
+        Assertions.assertThrows(JsonSyntaxException.class,() -> gameDAO.list());
+    }
+
+    @Test
     public void deleteTest() throws DataAccessException {
         int goodID = gameDAO.getLastID();
         GameData otherData = new GameData(0,null,null,"otherGame",new ChessGame());
@@ -86,6 +140,8 @@ public class GameDAOTests {
         Assertions.assertNull(gameDAO.get(goodID));
         Assertions.assertEquals(new GameData(otherID,null,null,"otherGame",new ChessGame()), gameDAO.get(otherID));
     }
+
+    // TODO: deleteNegativeTest()
 
     @Test
     public void clearTest() throws DataAccessException {

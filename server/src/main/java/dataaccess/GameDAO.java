@@ -54,6 +54,7 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
                         rs.getString("gameName"),
                         new Gson().fromJson(rs.getString("game"),ChessGame.class)
                 ));
+
             }
             return out.toArray(GameData[]::new);
         } catch (SQLException e) {
@@ -61,7 +62,10 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
         }
     }
 
-    String toSQL(GameData data) {
+    String toSQL(GameData data) throws DataAccessException {
+        if (data.gameName() == null || data.game() == null) {
+            throw new DataAccessException("no UserData fields can be null");
+        }
         return "('" + data.gameName() + "','" + new Gson().toJson(data.game()) + "')";
     }
     String toSQLDiff(GameData data, GameData dataOld) throws DataAccessException {
