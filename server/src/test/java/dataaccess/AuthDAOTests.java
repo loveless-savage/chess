@@ -88,6 +88,12 @@ public class AuthDAOTests {
     @Test
     public void clearTest() throws DataAccessException {
         authDAO.clear();
-        Assertions.assertEquals(daoEmpty, authDAO);
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT * FROM authData");
+            var rs = preparedStatement.executeQuery();
+            Assertions.assertFalse(rs.next(),"TABLE authData should be empty, but is not");
+        } catch (SQLException | DataAccessException e) {
+            Assertions.fail(e);
+        }
     }
 }
