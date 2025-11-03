@@ -59,9 +59,9 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public void delete(K key) throws DataAccessException {
-        String statement = "DELETE FROM " + tableName + " WHERE " + keyName + "='" + key + "'";
         try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement(statement);
+            var preparedStatement = conn.prepareStatement("DELETE FROM " + tableName + " WHERE " + keyName + " = ?");
+            preparedStatement.setString(1,key.toString());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage(), e);
