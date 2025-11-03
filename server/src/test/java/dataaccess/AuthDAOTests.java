@@ -2,6 +2,8 @@ package dataaccess;
 
 import model.AuthData;
 import org.junit.jupiter.api.*;
+import java.sql.SQLException;
+import java.util.UUID;
 
 public class AuthDAOTests {
     private static AuthDAO authDAO, daoEmpty;
@@ -11,7 +13,7 @@ public class AuthDAOTests {
     public static void setup() {
         authDAO = new AuthDAO();
         daoEmpty = new AuthDAO();
-        goodData = new AuthData("goodToken","goodUsername");
+        goodData = new AuthData(UUID.randomUUID().toString(),"correctUsername");
     }
     @BeforeEach
     public void setupEach() throws DataAccessException {
@@ -23,14 +25,18 @@ public class AuthDAOTests {
     }
 
     @Test
-    public void clearTest() throws DataAccessException {
-        authDAO.clear();
-        Assertions.assertEquals(daoEmpty, authDAO);
-    }
-
-    @Test
-    public void createTest() throws DataAccessException {
-        Assertions.assertEquals(goodData, authDAO.get("goodToken"));
+    public void createTest() {
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(
+                    "SELECT * FROM authData WHERE authToken='" + goodData.authToken() + "'"
+            );
+            var rs = preparedStatement.executeQuery();
+            Assertions.assertTrue(rs.next(),"TABLE userData expected to have an entry, but does not");
+            Assertions.assertEquals(goodData.authToken(),rs.getString("authToken"));
+            Assertions.assertEquals("correctUsername",rs.getString("username"));
+        } catch (SQLException | DataAccessException e) {
+            Assertions.fail(e);
+        }
     }
 
     @Test
@@ -55,5 +61,11 @@ public class AuthDAOTests {
         authDAO.delete("goodToken");
         Assertions.assertNull(authDAO.get("goodToken"));
         Assertions.assertEquals(otherData, authDAO.get("otherToken"));
+    }
+
+    @Test
+    public void clearTest() throws DataAccessException {
+        authDAO.clear();
+        Assertions.assertEquals(daoEmpty, authDAO);
     }
 }
