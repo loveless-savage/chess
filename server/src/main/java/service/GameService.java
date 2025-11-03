@@ -30,10 +30,9 @@ public class GameService {
         if(authDAO.get(authToken) == null) {
             throw new UnauthorizedException("unauthorized");
         }
-        int newGameID = gameDAO.getLastID();
-        GameData newGame = new GameData(newGameID,null,null,createRequest.gameName(),new ChessGame());
+        GameData newGame = new GameData(0,null,null,createRequest.gameName(),new ChessGame());
         gameDAO.create(newGame);
-        return newGameID;
+        return gameDAO.getLastID();
     }
     public void joinGame(String authToken, GameJoinRequest joinRequest) throws DataAccessException {
         AuthData userAuth = authDAO.get(authToken);
