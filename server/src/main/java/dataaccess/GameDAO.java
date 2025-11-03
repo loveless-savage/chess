@@ -60,8 +60,10 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
     }
 
     PreparedStatement toSQL(Connection conn, GameData data) throws DataAccessException {
-        if (data.gameName() == null || data.game() == null) {
-            throw new DataAccessException("no UserData fields can be null");
+        if (data.gameName() == null) {
+            throw new DataAccessException("gameName cannot be null");
+        } else if (data.game() == null) {
+            throw new DataAccessException("game cannot be null");
         }
         try {
             PreparedStatement out = conn.prepareStatement(
@@ -76,8 +78,10 @@ public class GameDAO extends MySQLDAO<GameData,Integer>{
     }
 
     String toSQLDiff(GameData data, GameData dataOld) throws DataAccessException {
-        if (data.gameName() == null || data.game() == null) {
-            throw new DataAccessException("no UserData fields can be null");
+        if (data.gameName() == null) {
+            throw new DataAccessException("gameName cannot be null");
+        } else if (data.game() == null) {
+            throw new DataAccessException("game cannot be null");
         }
         String out = "gameName = '" + data.gameName() + "'";
         if (dataOld.whiteUsername() == null && data.whiteUsername() != null) {

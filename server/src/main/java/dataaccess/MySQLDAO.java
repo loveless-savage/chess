@@ -35,9 +35,9 @@ public abstract class MySQLDAO<T extends ModelData<K>,K> implements DAO<T,K> {
     }
 
     public T get(K key) throws DataAccessException {
-        String statement = "SELECT * FROM " + tableName + " WHERE " + keyName + "='" + key + "'";
         try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement(statement);
+            var preparedStatement = conn.prepareStatement("SELECT * FROM " + tableName + " WHERE " + keyName + " = ?");
+            preparedStatement.setString(1,key.toString());
             var rs = preparedStatement.executeQuery();
             return fromSQL(rs);
         } catch (SQLException | DataAccessException e) {
