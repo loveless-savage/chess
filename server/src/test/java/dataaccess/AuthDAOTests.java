@@ -51,6 +51,11 @@ public class AuthDAOTests {
 
     @Test
     public void getTest() throws DataAccessException {
+        Assertions.assertEquals(goodData, authDAO.get(goodData.authToken()));
+    }
+
+    @Test
+    public void getWrongAuthTokenTest() throws DataAccessException {
         Assertions.assertNull(authDAO.get("badToken"));
     }
 
