@@ -64,7 +64,6 @@ public class Server {
             GameData[] listResult = gameService.listGames(authToken);
             ctx.status(200);
             ctx.contentType("application/json");
-            ctx.result(serializer.toJson(listResult));
             ctx.result(serializer.toJson(Map.of("games",listResult)));
         });
 
