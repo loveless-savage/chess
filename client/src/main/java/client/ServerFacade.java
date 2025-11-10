@@ -13,6 +13,7 @@ public class ServerFacade {
     private final String host = "localhost";
     private final int port = 8080;
     private String authToken;
+    private int id;
 
     public void clear() {
         try {
@@ -56,21 +57,26 @@ public class ServerFacade {
         }
     }
 
+    static class ListResponse { GameData[] games; }
     public void listGames() {
         try {
             var request = requestBuilder("GET","/game",null,true);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("[" + response.statusCode() + "]: " + response.body());
+            GameData[] list = new Gson().fromJson(response.body(), ListResponse.class).games;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    static class CreateResponse { int gameID; }
     public void createGame() {
         try {
             var request = requestBuilder("POST","/game",Map.of("gameName","heey"),true);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("[" + response.statusCode() + "]: " + response.body());
+            id = new Gson().fromJson(response.body(), CreateResponse.class).gameID;
+            System.out.println(id);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -78,8 +84,7 @@ public class ServerFacade {
 
     public void joinGame() {
         try {
-            Integer id = 1;
-            var request = requestBuilder("PUT","/game",Map.of("playerColor","BLACK","gameID",id.toString()),true);
+            var request = requestBuilder("PUT","/game",Map.of("playerColor","BLACK","gameID",String.valueOf(id)),true);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("[" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
