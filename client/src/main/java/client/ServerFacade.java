@@ -10,10 +10,18 @@ import model.*;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String host = "localhost";
-    private final int port = 8080;
+    private final String host;
+    private final int port;
     private String authToken;
     private int id;
+
+    public ServerFacade(String hostIn, int portIn) {
+        host = hostIn;
+        port = portIn;
+    }
+    public ServerFacade() {
+        this("localhost",8080);
+    }
 
     public void clear() {
         try {
