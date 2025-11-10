@@ -10,12 +10,12 @@ public class AuthDAOTests {
     private static AuthData goodData;
 
     @BeforeAll
-    public static void setup() {
+    public static void init() {
         authDAO = new AuthDAO();
         goodData = new AuthData(UUID.randomUUID().toString(),"correctUsername");
     }
     @BeforeEach
-    public void setupEach() throws DataAccessException {
+    public void setup() throws DataAccessException {
         authDAO.create(goodData);
     }
     @AfterEach
