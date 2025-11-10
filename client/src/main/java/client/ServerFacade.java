@@ -12,8 +12,7 @@ public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String host;
     private final int port;
-    private String authToken;
-    private int id;
+    String authToken;
 
     public ServerFacade(String hostIn, int portIn) {
         host = hostIn;
@@ -33,22 +32,28 @@ public class ServerFacade {
         }
     }
 
-    public void register() {
+    public void register(String[] params) {
+        if (params.length != 3) {
+            throw new RuntimeException("register() expects 3 String parameters in an array, but you provided "+params.length);
+        }
         try {
-            var request = requestBuilder("POST", "/user", new UserData("correctUser","pass","correct@email"), false);
+            var request = requestBuilder("POST", "/user", new UserData(params[0],params[1],params[2]), false);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("[" + response.statusCode() + "]: " + response.body());
+            System.out.println("register -> [" + response.statusCode() + "]: " + response.body());
             authToken = new Gson().fromJson(response.body(), AuthData.class).authToken();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void login() {
+    public void login(String[] params) {
+        if (params.length != 2) {
+            throw new RuntimeException("login() expects 2 String parameters in an array, but you provided "+params.length);
+        }
         try {
-            var request = requestBuilder("POST", "/session", new UserData("correctUser","pass",null), false);
+            var request = requestBuilder("POST", "/session", new UserData(params[0],params[1],null), false);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("[" + response.statusCode() + "]: " + response.body());
+            System.out.println("login -> [" + response.statusCode() + "]: " + response.body());
             authToken = new Gson().fromJson(response.body(), AuthData.class).authToken();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -59,42 +64,44 @@ public class ServerFacade {
         try {
             var request = requestBuilder("DELETE","/session",null,true);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("[" + response.statusCode() + "]: " + response.body());
+            System.out.println("logout -> [" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     static class ListResponse { GameData[] games; }
-    public void listGames() {
+    public GameData[] listGames() {
         try {
             var request = requestBuilder("GET","/game",null,true);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("[" + response.statusCode() + "]: " + response.body());
-            GameData[] list = new Gson().fromJson(response.body(), ListResponse.class).games;
+            System.out.println("listGames -> [" + response.statusCode() + "]: " + response.body());
+            return new Gson().fromJson(response.body(), ListResponse.class).games;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     static class CreateResponse { int gameID; }
-    public void createGame() {
+    public int createGame(String param) {
         try {
-            var request = requestBuilder("POST","/game",Map.of("gameName","heey"),true);
+            var request = requestBuilder("POST","/game",Map.of("gameName",param),true);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("[" + response.statusCode() + "]: " + response.body());
-            id = new Gson().fromJson(response.body(), CreateResponse.class).gameID;
-            System.out.println(id);
+            System.out.println("createGame -> [" + response.statusCode() + "]: " + response.body());
+            return new Gson().fromJson(response.body(), CreateResponse.class).gameID;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void joinGame() {
+    public void joinGame(String[] params) {
+        if (params.length != 2) {
+            throw new RuntimeException("joinGame() expects 2 String parameters in an array, but you provided "+params.length);
+        }
         try {
-            var request = requestBuilder("PUT","/game",Map.of("playerColor","BLACK","gameID",String.valueOf(id)),true);
+            var request = requestBuilder("PUT","/game",Map.of("playerColor",params[0],"gameID",params[1]),true);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("[" + response.statusCode() + "]: " + response.body());
+            System.out.println("joinGame -> [" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
