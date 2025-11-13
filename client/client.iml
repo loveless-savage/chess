@@ -12,5 +12,6 @@
     <orderEntry type="library" name="org.junit.jupiter" level="project" />
     <orderEntry type="module" module-name="server" scope="TEST" />
     <orderEntry type="library" name="google.code.gson" level="project" />
+    <orderEntry type="library" scope="TEST" name="mindrot.jbcrypt" level="project" />
   </component>
 </module>

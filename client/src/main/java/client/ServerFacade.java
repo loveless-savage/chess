@@ -27,6 +27,7 @@ public class ServerFacade {
             var request = requestBuilder("DELETE", "/db", null, false);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("[" + response.statusCode() + "]: " + response.body());
+            authToken = null;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -65,6 +66,7 @@ public class ServerFacade {
             var request = requestBuilder("DELETE","/session",null,true);
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("logout -> [" + response.statusCode() + "]: " + response.body());
+            authToken = null;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
