@@ -1,7 +1,8 @@
 package client;
 
 import dataaccess.*;
-import model.UserData;
+import model.*;
+import chess.ChessGame;
 import org.junit.jupiter.api.*;
 import org.mindrot.jbcrypt.BCrypt;
 import server.Server;
@@ -93,13 +94,49 @@ public class ServerFacadeTests {
 
     @Test
     public void listGamesTest() {
+        facade.register(registerParams);
+        try {
+            var gameDAO = new GameDAO();
+            gameDAO.create(new GameData(0,null,null,"correctGame",new ChessGame()));
+            gameDAO.create(new GameData(0,null,null,"otherGame",new ChessGame()));
+            GameData[] gamelist = facade.listGames();
+            Assertions.assertEquals(2,gamelist.length);
+            Assertions.assertEquals("correctGame",gamelist[0].gameName());
+            Assertions.assertEquals("otherGame",gamelist[1].gameName());
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     public void createGameTest() {
+        facade.register(registerParams);
+        int gameID = facade.createGame("correctGame");
+        GameData targetData = new GameData(gameID,null,null,"correctGame",new ChessGame());
+        try {
+            var gameDAO = new GameDAO();
+            Assertions.assertEquals(targetData,gameDAO.get(gameID));
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     public void joinGameTest() {
+        facade.register(registerParams);
+        int gameID = facade.createGame("correctGame");
+        try {
+            String[] joinParams = {"WHITE",String.valueOf(gameID)};
+            facade.joinGame(joinParams);
+            GameData targetData = new GameData(gameID,registerParams[0],null,"correctGame",new ChessGame());
+            var gameDAO = new GameDAO();
+            Assertions.assertEquals(targetData,gameDAO.get(gameID));
+            joinParams[0] = "BLACK";
+            facade.joinGame(joinParams);
+            targetData = new GameData(gameID,registerParams[0],registerParams[0], "correctGame",new ChessGame());
+            Assertions.assertEquals(targetData,gameDAO.get(gameID));
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
