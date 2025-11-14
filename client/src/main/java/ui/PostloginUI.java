@@ -2,7 +2,7 @@ package ui;
 
 import client.*;
 import model.*;
-
+import service.*;
 import java.util.Objects;
 
 public class PostloginUI {
@@ -19,16 +19,30 @@ public class PostloginUI {
             case "create":
                 if (args == null || args.length != 1) {
                     System.out.println("create needs 1 argument");
-                } else {
+                    break;
+                }
+                try {
                     server.createGame(args[0]);
+                } catch (BadRequestException e) {
+                    System.out.println("Input not understood. Type 'help' for available commands");
+                } catch (UnauthorizedException e) {
+                    System.out.println("Unauthorized. Are you logged in?");
+                } catch (ServerException e) {
+                    System.out.println("Server error. Check the network logs for more details");
                 }
                 break;
             case "list":
-                GameData[] gameList = server.listGames();
-                for (GameData game : gameList) {
-                    // TODO: gameIDs, unclaimed string
-                    System.out.printf("[%d] %s\t(white=%s,black=%s)\n",
-                            game.gameID(),game.gameName(),game.whiteUsername(),game.blackUsername());
+                try {
+                    GameData[] gameList = server.listGames();
+                    for (GameData game : gameList) {
+                        // TODO: gameIDs, unclaimed string
+                        System.out.printf("[%d] %s\t(white=%s,black=%s)\n",
+                                game.gameID(),game.gameName(),game.whiteUsername(),game.blackUsername());
+                    }
+                } catch (UnauthorizedException e) {
+                    System.out.println("Unauthorized. Are you logged in?");
+                } catch (ServerException e) {
+                    System.out.println("Server error. Check the network logs for more details");
                 }
                 break;
             case "join":
@@ -46,8 +60,19 @@ public class PostloginUI {
                     System.out.println("argument 2 must be a team color [WHITE|BLACK]");
                     break;
                 }
-                server.joinGame(args);
-                return REPL.State.GAMEPLAY;
+                try {
+                    server.joinGame(args);
+                    return REPL.State.GAMEPLAY;
+                } catch (BadRequestException e) {
+                    System.out.println("Input not understood. Type 'help' for available commands");
+                } catch (UnauthorizedException e) {
+                    System.out.println("Unauthorized. Are you logged in?");
+                } catch (AlreadyTakenException e) {
+                    System.out.println("That position is taken");
+                } catch (ServerException e) {
+                    System.out.println("Server error. Check the network logs for more details");
+                }
+                break;
             case "observe":
                 if (args == null || args.length != 1) {
                     System.out.println("observe needs 1 argument");
@@ -61,7 +86,13 @@ public class PostloginUI {
                 }
                 return REPL.State.GAMEPLAY;
             case "logout":
-                server.logout();
+                try {
+                    server.logout();
+                } catch (UnauthorizedException e) {
+                    System.out.println("Unauthorized. You might already be logged out");
+                } catch (ServerException e) {
+                    System.out.println("Server error. Check the network logs for more details");
+                }
                 return REPL.State.PRELOGIN;
             default:
                 System.out.println("Input not understood. Type 'help' for available commands");
