@@ -2,6 +2,7 @@ package client;
 
 import dataaccess.*;
 import model.*;
+import service.*;
 import chess.ChessGame;
 import org.junit.jupiter.api.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -60,6 +61,12 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void registerAlreadyTakenTest() {
+        facade.register(registerParams);
+        Assertions.assertThrows(AlreadyTakenException.class,() -> facade.register(registerParams));
+    }
+
+    @Test
     public void loginTest() {
         try {
             var userDAO = new UserDAO();
@@ -90,6 +97,13 @@ public class ServerFacadeTests {
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void logoutTooManyTimesTest() {
+        facade.register(registerParams);
+        facade.logout();
+        Assertions.assertThrows(Exception.class,() -> facade.logout());
     }
 
     @Test

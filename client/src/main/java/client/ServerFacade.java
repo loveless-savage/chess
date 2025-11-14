@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 import model.*;
+import service.*;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -37,13 +38,26 @@ public class ServerFacade {
         if (params.length != 3) {
             throw new RuntimeException("register() expects 3 String parameters in an array, but you provided "+params.length);
         }
+        HttpResponse<String> response;
         try {
             var request = requestBuilder("POST", "/user", new UserData(params[0],params[1],params[2]), false);
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("register -> [" + response.statusCode() + "]: " + response.body());
-            authToken = new Gson().fromJson(response.body(), AuthData.class).authToken();
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        System.out.println("register -> [" + response.statusCode() + "]: " + response.body());
+        switch (response.statusCode()) {
+            case 200:
+                authToken = new Gson().fromJson(response.body(), AuthData.class).authToken();
+                break;
+            case 400:
+                throw new BadRequestException(response.body());
+            case 403:
+                throw new AlreadyTakenException(response.body());
+            case 500:
+                break;
+            default:
+                throw new RuntimeException("Unexpected status code");
         }
     }
 
@@ -120,7 +134,11 @@ public class ServerFacade {
                         HttpRequest.BodyPublishers.noBody()
                 );
         if (authHeader) {
-            request = request.header("authorization",authToken);
+            if (authToken == null) {
+                throw new UnauthorizedException("argument authHeader cannot be true when authToken is null");
+            } else {
+                request = request.header("authorization", authToken);
+            }
         } else if (body != null) {
             request = request.header("Content-type","application/json");
         }
