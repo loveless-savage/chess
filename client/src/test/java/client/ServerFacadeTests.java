@@ -118,12 +118,26 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void listGamesUnauthorizedTest() {
+        facade.register(registerParams);
+        facade.authToken += "_bad";
+        Assertions.assertThrows(UnauthorizedException.class,() -> facade.listGames());
+    }
+
+    @Test
     public void createGameTest() throws DataAccessException {
         facade.register(registerParams);
         int gameID = facade.createGame("correctGame");
         GameData targetData = new GameData(gameID,null,null,"correctGame",new ChessGame());
         var gameDAO = new GameDAO();
         Assertions.assertEquals(targetData,gameDAO.get(gameID));
+    }
+
+    @Test
+    public void createGameUnauthorizedTest() {
+        facade.register(registerParams);
+        facade.authToken += "_bad";
+        Assertions.assertThrows(UnauthorizedException.class,() -> facade.createGame("correctGame"));
     }
 
     @Test
@@ -139,5 +153,26 @@ public class ServerFacadeTests {
         facade.joinGame(joinParams);
         targetData = new GameData(gameID,registerParams[0],registerParams[0], "correctGame",new ChessGame());
         Assertions.assertEquals(targetData,gameDAO.get(gameID));
+    }
+
+    @Test
+    public void joinGameUnauthorizedTest() {
+        facade.register(registerParams);
+        int gameID = facade.createGame("correctGame");
+        String[] joinParams = {"WHITE",String.valueOf(gameID)};
+        facade.authToken += "_bad";
+        Assertions.assertThrows(UnauthorizedException.class,() -> facade.joinGame(joinParams));
+    }
+
+    @Test
+    public void joinGameAlreadyTakenTest() {
+        facade.register(registerParams);
+        int gameID = facade.createGame("correctGame");
+        String[] joinParams = {"WHITE",String.valueOf(gameID)};
+        facade.joinGame(joinParams);
+        Assertions.assertThrows(AlreadyTakenException.class,() -> facade.joinGame(joinParams));
+        joinParams[0] = "BLACK";
+        facade.joinGame(joinParams);
+        Assertions.assertThrows(AlreadyTakenException.class,() -> facade.joinGame(joinParams));
     }
 }
