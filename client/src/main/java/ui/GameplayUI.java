@@ -19,7 +19,12 @@ public class GameplayUI {
 
     public static void printBoard(ChessGame game, ChessGame.TeamColor team) {
         String gameRaw = game.toString().split("\n",2)[1];
-        char[] gameChars = gameRaw.toCharArray();
+        char[] gameChars;
+        if (team == ChessGame.TeamColor.BLACK) {
+            gameChars = new StringBuffer(gameRaw).reverse().toString().toCharArray();
+        } else {
+            gameChars = gameRaw.toCharArray();
+        }
         String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
         String darkColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
         boolean isSquareLight = false;
