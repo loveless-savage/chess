@@ -73,10 +73,14 @@ public class ServerFacadeTests {
 
     @Test
     public void loginUserNotFoundTest() {
+        String[] loginParams = {registerParams[0]+"_bad",registerParams[1]};
+        Assertions.assertThrows(UnauthorizedException.class,() -> facade.login(loginParams));
     }
 
     @Test
     public void loginBadPasswordTest() {
+        String[] loginParams = {registerParams[0],registerParams[1]+"_bad"};
+        Assertions.assertThrows(UnauthorizedException.class,() -> facade.login(loginParams));
     }
 
     @Test
