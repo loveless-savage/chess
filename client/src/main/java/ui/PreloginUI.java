@@ -16,6 +16,7 @@ public class PreloginUI {
             case "register":
                 if (args == null || args.length != 3) {
                     System.out.println("register needs 3 arguments");
+                    break;
                 } else {
                     server.register(args);
                     return REPL.State.POSTLOGIN;
@@ -23,6 +24,7 @@ public class PreloginUI {
             case "login":
                 if (args == null || args.length != 2) {
                     System.out.println("login needs 2 arguments");
+                    break;
                 } else {
                     server.login(args);
                     return REPL.State.POSTLOGIN;

@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import ui.*;
 import java.util.Scanner;
 
@@ -16,19 +17,30 @@ public class REPL {
         System.out.println("Welcome to 240 chess!");
         Scanner scanner = new Scanner(System.in);
         while(true) {
-            System.out.print(">>> ");
+            System.out.print(state==State.PRELOGIN? "[LOGGED OUT] >>> " : ">>> ");
             String line = scanner.nextLine();
             if (line.equals("quit")) {
-                if (state == State.POSTLOGIN) {
+                if (state != State.PRELOGIN) {
                     server.logout();
                 }
                 System.out.println("Goodbye.");
                 return;
             }
             switch (state) {
-                case PRELOGIN -> state = PreloginUI.parse(server, line);
-                case POSTLOGIN -> state = PostloginUI.parse(server, line);
-                case GAMEPLAY -> state = GameplayUI.parse(server, line);
+                case PRELOGIN:
+                    state = PreloginUI.parse(server, line);
+                    break;
+                case POSTLOGIN:
+                    state = PostloginUI.parse(server, line);
+                    if (state == State.GAMEPLAY) {
+                        // replace with websocket
+                        GameplayUI.printBoard(new ChessGame(), ChessGame.TeamColor.WHITE);
+                        state = State.POSTLOGIN;
+                    }
+                    break;
+                case GAMEPLAY:
+                    state = GameplayUI.parse(server, line);
+                    break;
             }
             System.out.println(line);
         }
