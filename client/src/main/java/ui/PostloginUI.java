@@ -3,6 +3,8 @@ package ui;
 import client.*;
 import model.*;
 
+import java.util.Objects;
+
 public class PostloginUI {
     static final String helpStr = """
             FIXME: help output
@@ -33,19 +35,31 @@ public class PostloginUI {
                 if (args == null || args.length != 2) {
                     System.out.println("join needs 2 arguments");
                     break;
-                } else {
-                    // TODO: check arg types
-                    server.joinGame(args);
-                    return REPL.State.GAMEPLAY;
                 }
+                try {
+                    Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+                    System.out.println("argument 1 must be a game ID number");
+                    break;
+                }
+                if (!Objects.equals(args[1],"WHITE") && !Objects.equals(args[1],"BLACK")) {
+                    System.out.println("argument 2 must be a team color [WHITE|BLACK]");
+                    break;
+                }
+                server.joinGame(args);
+                return REPL.State.GAMEPLAY;
             case "observe":
                 if (args == null || args.length != 1) {
                     System.out.println("observe needs 1 argument");
                     break;
-                } else {
-                    // TODO: check arg type
-                    return REPL.State.GAMEPLAY;
                 }
+                try {
+                    Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+                    System.out.println("argument 1 must be a game ID number");
+                    break;
+                }
+                return REPL.State.GAMEPLAY;
             case "logout":
                 server.logout();
                 return REPL.State.PRELOGIN;
