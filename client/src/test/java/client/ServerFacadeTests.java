@@ -84,6 +84,14 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void loginUserNotFoundTest() {
+    }
+
+    @Test
+    public void loginBadPasswordTest() {
+    }
+
+    @Test
     public void logoutTest() {
         facade.register(registerParams);
         String oldToken = facade.authToken;
@@ -97,6 +105,10 @@ public class ServerFacadeTests {
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void logoutUnauthorizedTest() throws DataAccessException {
     }
 
     @Test
