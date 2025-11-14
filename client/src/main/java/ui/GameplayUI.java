@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import client.*;
 
 public class GameplayUI {
@@ -8,11 +9,16 @@ public class GameplayUI {
             """;
     public static REPL.State parse(ServerFacade server, String cmdIn) {
         String[] cmd = cmdIn.split(" ",2);
-        String[] args = cmd[1].split(" ");
+        String[] args = cmd.length<2? null : cmd[1].split(" ");
         switch (cmd[0]) {
             case "help":
                 System.out.println(helpStr);
+                break;
         }
         return REPL.State.GAMEPLAY;
+    }
+
+    public static void printBoard(ChessGame game, ChessGame.TeamColor team) {
+        System.out.println(game);
     }
 }
