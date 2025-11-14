@@ -39,12 +39,11 @@ public class PostloginUI {
                     for (int i=0; i<gameList.length; i++) {
                         GameData game = gameList[i];
                         gameIDs[i] = game.gameID();
-                        // TODO: unclaimed string
                         System.out.printf("[%d] %s\t(white=%s,black=%s)\n",
                                 i+1,
                                 game.gameName(),
-                                game.whiteUsername(),
-                                game.blackUsername()
+                                game.whiteUsername()==null? "unclaimed":game.whiteUsername(),
+                                game.blackUsername()==null? "unclaimed":game.blackUsername()
                         );
                     }
                 } catch (UnauthorizedException e) {
