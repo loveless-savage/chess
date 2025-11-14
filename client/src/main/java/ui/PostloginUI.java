@@ -5,43 +5,6 @@ import model.*;
 import service.*;
 
 public class PostloginUI {
-    private static final String helpStr =
-              EscapeSequences.SET_TEXT_COLOR_YELLOW
-            + "create <name>"
-            + EscapeSequences.RESET_TEXT_COLOR
-            + " - create an account\n"
-            + EscapeSequences.SET_TEXT_COLOR_YELLOW
-            + "list"
-            + EscapeSequences.RESET_TEXT_COLOR
-            + " - existing games and their players\n"
-            + EscapeSequences.SET_TEXT_COLOR_YELLOW
-            + "join <ID> [WHITE|BLACK]"
-            + EscapeSequences.RESET_TEXT_COLOR
-            + " - play a game \n"
-            + EscapeSequences.SET_TEXT_COLOR_YELLOW
-            + "observe <ID>"
-            + EscapeSequences.RESET_TEXT_COLOR
-            + " - watch a game being played\n"
-            + EscapeSequences.SET_TEXT_COLOR_YELLOW
-            + "logout"
-            + EscapeSequences.RESET_TEXT_COLOR
-            + " - logout\n"
-            + EscapeSequences.SET_TEXT_COLOR_YELLOW
-            + "quit"
-            + EscapeSequences.RESET_TEXT_COLOR
-            + " - logout and exit the program\n"
-            + EscapeSequences.SET_TEXT_COLOR_YELLOW
-            + "help"
-            + EscapeSequences.RESET_TEXT_COLOR
-            + " - list commands\n";
-    private static String badRequestStr =
-              "Input not understood. Type "
-            + EscapeSequences.SET_TEXT_COLOR_YELLOW
-            + "help"
-            + EscapeSequences.RESET_TEXT_COLOR
-            + " for available commands";
-    static int[] gameIDs = new int[0];
-
     public static REPL.State parse(ServerFacade server, String cmdIn) {
         String[] cmd = cmdIn.split(" ",2);
         String[] args = cmd.length<2? null : cmd[1].split(" ");
@@ -162,4 +125,41 @@ public class PostloginUI {
         }
         return REPL.State.POSTLOGIN;
     }
+
+    private static final String helpStr =
+            EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "create <name>"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - create an account\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "list"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - existing games and their players\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "join <ID> [WHITE|BLACK]"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - play a game \n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "observe <ID>"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - watch a game being played\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "logout"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - logout\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "quit"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - logout and exit the program\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "help"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - list commands\n";
+    private static final String badRequestStr =
+            "Input not understood. Type "
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "help"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " for available commands";
+    static int[] gameIDs = new int[0];
 }
