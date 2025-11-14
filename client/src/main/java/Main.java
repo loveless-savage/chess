@@ -1,9 +1,9 @@
 import chess.*;
-import client.ServerFacade;
+import client.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        ServerFacade facade = new ServerFacade();
-        facade.clear();
+        REPL repl = new REPL();
+        repl.run();
     }
 }
