@@ -34,12 +34,15 @@ public class ServerFacadeTests {
     public void clearTest() throws DataAccessException {
         facade.register(registerParams);
         String oldToken = facade.authToken;
+        var userDAO = new UserDAO();
+        var authDAO = new AuthDAO();
+        var gameDAO = new GameDAO();
+        gameDAO.create(new GameData(0,null,null,"correctGame",new ChessGame()));
         facade.clear();
         Assertions.assertNull(facade.authToken,"ServerFacade should erase its authToken when clearing");
-        var userDAO = new UserDAO();
         Assertions.assertNull(userDAO.get(registerParams[0]));
-        var authDAO = new AuthDAO();
         Assertions.assertNull(authDAO.get(oldToken));
+        Assertions.assertNull(gameDAO.get(gameDAO.getLastID()));
     }
 
     @Test
