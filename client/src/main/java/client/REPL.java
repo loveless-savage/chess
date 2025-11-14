@@ -15,6 +15,7 @@ public class REPL {
 
     public void run() {
         System.out.println("Welcome to 240 chess!");
+        PreloginUI.parse(null,"help");
         Scanner scanner = new Scanner(System.in);
         while(true) {
             System.out.print(state==State.PRELOGIN? "[LOGGED OUT] >>> " : ">>> ");
