@@ -1,6 +1,7 @@
 package ui;
 
 import client.*;
+import service.*;
 
 public class PreloginUI {
     static final String helpStr = """
@@ -17,18 +18,34 @@ public class PreloginUI {
                 if (args == null || args.length != 3) {
                     System.out.println("register needs 3 arguments");
                     break;
-                } else {
+                }
+                try {
                     server.register(args);
                     return REPL.State.POSTLOGIN;
+                } catch (BadRequestException e) {
+                    System.out.println("Input not understood. Type 'help' for available commands");
+                } catch (AlreadyTakenException e) {
+                    System.out.println("Username taken");
+                } catch (ServerException e) {
+                    System.out.println("Server error. Check the network logs for more details");
                 }
+                break;
             case "login":
                 if (args == null || args.length != 2) {
                     System.out.println("login needs 2 arguments");
                     break;
-                } else {
+                }
+                try {
                     server.login(args);
                     return REPL.State.POSTLOGIN;
+                } catch (BadRequestException e) {
+                    System.out.println("Input not understood. Type 'help' for available commands");
+                } catch (UnauthorizedException e) {
+                    System.out.println("Unauthorized. Check your username and/or password");
+                } catch (ServerException e) {
+                    System.out.println("Server error. Check the network logs for more details");
                 }
+                break;
             default:
                 System.out.println("Input not understood. Type 'help' for available commands");
         }
