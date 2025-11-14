@@ -105,7 +105,7 @@ public class ServerFacade {
             case 401:
                 throw new UnauthorizedException(response.body());
             case 500:
-                break;
+                throw new ServerException(response.body());
             default:
                 throw new RuntimeException("Unexpected status code");
         }
@@ -113,25 +113,47 @@ public class ServerFacade {
 
     static class ListResponse { GameData[] games; }
     public GameData[] listGames() {
+        HttpResponse<String> response;
         try {
             var request = requestBuilder("GET","/game",null,true);
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("listGames -> [" + response.statusCode() + "]: " + response.body());
-            return new Gson().fromJson(response.body(), ListResponse.class).games;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        switch (response.statusCode()) {
+            case 200:
+                return new Gson().fromJson(response.body(), ListResponse.class).games;
+            case 401:
+                throw new UnauthorizedException(response.body());
+            case 500:
+                throw new ServerException(response.body());
+            default:
+                throw new RuntimeException("Unexpected status code");
         }
     }
 
     static class CreateResponse { int gameID; }
     public int createGame(String param) {
+        HttpResponse<String> response;
         try {
             var request = requestBuilder("POST","/game",Map.of("gameName",param),true);
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("createGame -> [" + response.statusCode() + "]: " + response.body());
-            return new Gson().fromJson(response.body(), CreateResponse.class).gameID;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        switch (response.statusCode()) {
+            case 200:
+                return new Gson().fromJson(response.body(), CreateResponse.class).gameID;
+            case 400:
+                throw new BadRequestException(response.body());
+            case 401:
+                throw new UnauthorizedException(response.body());
+            case 500:
+                throw new ServerException(response.body());
+            default:
+                throw new RuntimeException("Unexpected status code");
         }
     }
 
@@ -139,12 +161,27 @@ public class ServerFacade {
         if (params.length != 2) {
             throw new RuntimeException("joinGame() expects 2 String parameters in an array, but you provided "+params.length);
         }
+        HttpResponse<String> response;
         try {
             var request = requestBuilder("PUT","/game",Map.of("playerColor",params[0],"gameID",params[1]),true);
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("joinGame -> [" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        switch (response.statusCode()) {
+            case 200:
+                break;
+            case 400:
+                throw new BadRequestException(response.body());
+            case 401:
+                throw new UnauthorizedException(response.body());
+            case 403:
+                throw new AlreadyTakenException(response.body());
+            case 500:
+                throw new ServerException(response.body());
+            default:
+                throw new RuntimeException("Unexpected status code");
         }
     }
 
