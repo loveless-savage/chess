@@ -116,7 +116,6 @@ public class ChessPiece {
                     moves = pawnMoves(pos,board);
                 }
                 default -> {
-                    System.out.println(type + " not a recognized piece type!");
                     return null;
                 }
             }

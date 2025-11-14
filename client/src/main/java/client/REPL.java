@@ -43,7 +43,6 @@ public class REPL {
                     state = GameplayUI.parse(server, line);
                     break;
             }
-            System.out.println(line);
         }
     }
 }

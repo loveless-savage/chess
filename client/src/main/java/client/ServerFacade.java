@@ -26,8 +26,7 @@ public class ServerFacade {
     public void clear() {
         try {
             var request = requestBuilder("DELETE", "/db", null, false);
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("[" + response.statusCode() + "]: " + response.body());
+            client.send(request, HttpResponse.BodyHandlers.ofString());
             authToken = null;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -45,7 +44,6 @@ public class ServerFacade {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        System.out.println("register -> [" + response.statusCode() + "]: " + response.body());
         switch (response.statusCode()) {
             case 200:
                 authToken = new Gson().fromJson(response.body(), AuthData.class).authToken();
@@ -69,7 +67,6 @@ public class ServerFacade {
         try {
             var request = requestBuilder("POST", "/session", new UserData(params[0],params[1],null), false);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("login -> [" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -93,7 +90,6 @@ public class ServerFacade {
         try {
             var request = requestBuilder("DELETE","/session",null,true);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("logout -> [" + response.statusCode() + "]: " + response.body());
             authToken = null;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -117,7 +113,6 @@ public class ServerFacade {
         try {
             var request = requestBuilder("GET","/game",null,true);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("listGames -> [" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -139,7 +134,6 @@ public class ServerFacade {
         try {
             var request = requestBuilder("POST","/game",Map.of("gameName",param),true);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("createGame -> [" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -165,7 +159,6 @@ public class ServerFacade {
         try {
             var request = requestBuilder("PUT","/game",Map.of("gameID",params[0],"playerColor",params[1]),true);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("joinGame -> [" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
