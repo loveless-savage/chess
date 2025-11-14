@@ -99,14 +99,10 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void logoutUnauthorizedTest() throws DataAccessException {
-    }
-
-    @Test
-    public void logoutTooManyTimesTest() {
+    public void logoutUnauthorizedTest() {
         facade.register(registerParams);
-        facade.logout();
-        Assertions.assertThrows(Exception.class,() -> facade.logout());
+        facade.authToken += "_bad";
+        Assertions.assertThrows(UnauthorizedException.class,() -> facade.logout());
     }
 
     @Test
