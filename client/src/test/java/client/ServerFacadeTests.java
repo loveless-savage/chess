@@ -31,32 +31,24 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void clearTest() {
+    public void clearTest() throws DataAccessException {
         facade.register(registerParams);
         String oldToken = facade.authToken;
         facade.clear();
         Assertions.assertNull(facade.authToken,"ServerFacade should erase its authToken when clearing");
-        try {
-            var userDAO = new UserDAO();
-            Assertions.assertNull(userDAO.get(registerParams[0]));
-            var authDAO = new AuthDAO();
-            Assertions.assertNull(authDAO.get(oldToken));
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+        var userDAO = new UserDAO();
+        Assertions.assertNull(userDAO.get(registerParams[0]));
+        var authDAO = new AuthDAO();
+        Assertions.assertNull(authDAO.get(oldToken));
     }
 
     @Test
-    public void registerTest() {
+    public void registerTest() throws DataAccessException {
         facade.register(registerParams);
-        try {
-            var userDAO = new UserDAO();
-            Assertions.assertNotNull(userDAO.get(registerParams[0]));
-            var authDAO = new AuthDAO();
-            Assertions.assertNotNull(authDAO.get(facade.authToken));
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+        var userDAO = new UserDAO();
+        Assertions.assertNotNull(userDAO.get(registerParams[0]));
+        var authDAO = new AuthDAO();
+        Assertions.assertNotNull(authDAO.get(facade.authToken));
         Assertions.assertNotNull(facade.authToken,"ServerFacade did not save the returned value of authToken");
     }
 
@@ -67,20 +59,16 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void loginTest() {
-        try {
-            var userDAO = new UserDAO();
-            userDAO.create(new UserData(
-                    registerParams[0],
-                    BCrypt.hashpw(registerParams[1],BCrypt.gensalt()),
-                    registerParams[2]));
-            String[] loginParams = {registerParams[0],registerParams[1]};
-            facade.login(loginParams);
-            var authDAO = new AuthDAO();
-            Assertions.assertNotNull(authDAO.get(facade.authToken));
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void loginTest() throws DataAccessException {
+        var userDAO = new UserDAO();
+        userDAO.create(new UserData(
+                registerParams[0],
+                BCrypt.hashpw(registerParams[1],BCrypt.gensalt()),
+                registerParams[2]));
+        String[] loginParams = {registerParams[0],registerParams[1]};
+        facade.login(loginParams);
+        var authDAO = new AuthDAO();
+        Assertions.assertNotNull(authDAO.get(facade.authToken));
     }
 
     @Test
@@ -92,19 +80,15 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void logoutTest() {
+    public void logoutTest() throws DataAccessException {
         facade.register(registerParams);
         String oldToken = facade.authToken;
         facade.logout();
         Assertions.assertNull(facade.authToken,"ServerFacade should erase its authToken when logging out");
-        try {
-            var userDAO = new UserDAO();
-            Assertions.assertNotNull(userDAO.get(registerParams[0]));
-            var authDAO = new AuthDAO();
-            Assertions.assertNull(authDAO.get(oldToken));
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+        var userDAO = new UserDAO();
+        Assertions.assertNotNull(userDAO.get(registerParams[0]));
+        var authDAO = new AuthDAO();
+        Assertions.assertNull(authDAO.get(oldToken));
     }
 
     @Test
@@ -119,50 +103,38 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void listGamesTest() {
+    public void listGamesTest() throws DataAccessException {
         facade.register(registerParams);
-        try {
-            var gameDAO = new GameDAO();
-            gameDAO.create(new GameData(0,null,null,"correctGame",new ChessGame()));
-            gameDAO.create(new GameData(0,null,null,"otherGame",new ChessGame()));
-            GameData[] gamelist = facade.listGames();
-            Assertions.assertEquals(2,gamelist.length);
-            Assertions.assertEquals("correctGame",gamelist[0].gameName());
-            Assertions.assertEquals("otherGame",gamelist[1].gameName());
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+        var gameDAO = new GameDAO();
+        gameDAO.create(new GameData(0,null,null,"correctGame",new ChessGame()));
+        gameDAO.create(new GameData(0,null,null,"otherGame",new ChessGame()));
+        GameData[] gamelist = facade.listGames();
+        Assertions.assertEquals(2,gamelist.length);
+        Assertions.assertEquals("correctGame",gamelist[0].gameName());
+        Assertions.assertEquals("otherGame",gamelist[1].gameName());
     }
 
     @Test
-    public void createGameTest() {
+    public void createGameTest() throws DataAccessException {
         facade.register(registerParams);
         int gameID = facade.createGame("correctGame");
         GameData targetData = new GameData(gameID,null,null,"correctGame",new ChessGame());
-        try {
-            var gameDAO = new GameDAO();
-            Assertions.assertEquals(targetData,gameDAO.get(gameID));
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+        var gameDAO = new GameDAO();
+        Assertions.assertEquals(targetData,gameDAO.get(gameID));
     }
 
     @Test
-    public void joinGameTest() {
+    public void joinGameTest() throws DataAccessException {
         facade.register(registerParams);
         int gameID = facade.createGame("correctGame");
-        try {
-            String[] joinParams = {"WHITE",String.valueOf(gameID)};
-            facade.joinGame(joinParams);
-            GameData targetData = new GameData(gameID,registerParams[0],null,"correctGame",new ChessGame());
-            var gameDAO = new GameDAO();
-            Assertions.assertEquals(targetData,gameDAO.get(gameID));
-            joinParams[0] = "BLACK";
-            facade.joinGame(joinParams);
-            targetData = new GameData(gameID,registerParams[0],registerParams[0], "correctGame",new ChessGame());
-            Assertions.assertEquals(targetData,gameDAO.get(gameID));
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+        String[] joinParams = {"WHITE",String.valueOf(gameID)};
+        facade.joinGame(joinParams);
+        GameData targetData = new GameData(gameID,registerParams[0],null,"correctGame",new ChessGame());
+        var gameDAO = new GameDAO();
+        Assertions.assertEquals(targetData,gameDAO.get(gameID));
+        joinParams[0] = "BLACK";
+        facade.joinGame(joinParams);
+        targetData = new GameData(gameID,registerParams[0],registerParams[0], "correctGame",new ChessGame());
+        Assertions.assertEquals(targetData,gameDAO.get(gameID));
     }
 }
