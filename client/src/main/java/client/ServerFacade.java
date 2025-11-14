@@ -55,7 +55,7 @@ public class ServerFacade {
             case 403:
                 throw new AlreadyTakenException(response.body());
             case 500:
-                break;
+                throw new ServerException(response.body());
             default:
                 throw new RuntimeException("Unexpected status code");
         }
@@ -65,24 +65,49 @@ public class ServerFacade {
         if (params.length != 2) {
             throw new RuntimeException("login() expects 2 String parameters in an array, but you provided "+params.length);
         }
+        HttpResponse<String> response;
         try {
             var request = requestBuilder("POST", "/session", new UserData(params[0],params[1],null), false);
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("login -> [" + response.statusCode() + "]: " + response.body());
-            authToken = new Gson().fromJson(response.body(), AuthData.class).authToken();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        switch (response.statusCode()) {
+            case 200:
+                authToken = new Gson().fromJson(response.body(), AuthData.class).authToken();
+                break;
+            case 400:
+                throw new BadRequestException(response.body());
+            case 401:
+                throw new UnauthorizedException(response.body());
+            case 500:
+                throw new ServerException(response.body());
+            default:
+                throw new RuntimeException("Unexpected status code");
         }
     }
 
     public void logout() {
+        HttpResponse<String> response;
         try {
             var request = requestBuilder("DELETE","/session",null,true);
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("logout -> [" + response.statusCode() + "]: " + response.body());
             authToken = null;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        switch (response.statusCode()) {
+            case 200:
+                authToken = new Gson().fromJson(response.body(), AuthData.class).authToken();
+                break;
+            case 401:
+                throw new UnauthorizedException(response.body());
+            case 500:
+                break;
+            default:
+                throw new RuntimeException("Unexpected status code");
         }
     }
 
