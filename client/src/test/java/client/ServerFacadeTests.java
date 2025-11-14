@@ -144,12 +144,12 @@ public class ServerFacadeTests {
     public void joinGameTest() throws DataAccessException {
         facade.register(registerParams);
         int gameID = facade.createGame("correctGame");
-        String[] joinParams = {"WHITE",String.valueOf(gameID)};
+        String[] joinParams = {String.valueOf(gameID),"WHITE"};
         facade.joinGame(joinParams);
         GameData targetData = new GameData(gameID,registerParams[0],null,"correctGame",new ChessGame());
         var gameDAO = new GameDAO();
         Assertions.assertEquals(targetData,gameDAO.get(gameID));
-        joinParams[0] = "BLACK";
+        joinParams[1] = "BLACK";
         facade.joinGame(joinParams);
         targetData = new GameData(gameID,registerParams[0],registerParams[0], "correctGame",new ChessGame());
         Assertions.assertEquals(targetData,gameDAO.get(gameID));

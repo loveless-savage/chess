@@ -163,7 +163,7 @@ public class ServerFacade {
         }
         HttpResponse<String> response;
         try {
-            var request = requestBuilder("PUT","/game",Map.of("playerColor",params[0],"gameID",params[1]),true);
+            var request = requestBuilder("PUT","/game",Map.of("gameID",params[0],"playerColor",params[1]),true);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("joinGame -> [" + response.statusCode() + "]: " + response.body());
         } catch (Exception e) {
