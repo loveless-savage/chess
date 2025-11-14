@@ -94,6 +94,12 @@ public class PostloginUI {
                     System.out.println("Server error. Check the network logs for more details");
                 }
                 return REPL.State.PRELOGIN;
+            case "register":
+                System.out.println("Log out before you can register as a new user");
+                break;
+            case "login":
+                System.out.println("Already logged in");
+                break;
             default:
                 System.out.println("Input not understood. Type 'help' for available commands");
         }

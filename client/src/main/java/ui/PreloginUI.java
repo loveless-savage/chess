@@ -46,6 +46,15 @@ public class PreloginUI {
                     System.out.println("Server error. Check the network logs for more details");
                 }
                 break;
+            case "create":
+            case "list":
+            case "join":
+            case "observe":
+                System.out.println("You need to log in first");
+                break;
+            case "logout":
+                System.out.println("Not logged in");
+                break;
             default:
                 System.out.println("Input not understood. Type 'help' for available commands");
         }
