@@ -25,6 +25,11 @@ public class REPL {
                 System.out.println("Goodbye.");
                 return;
             }
+            switch (state) {
+                case PRELOGIN -> state = PreloginUI.parse(server, line);
+                case POSTLOGIN -> state = PostloginUI.parse(server, line);
+                case GAMEPLAY -> state = GameplayUI.parse(server, line);
+            }
             System.out.println(line);
         }
     }
