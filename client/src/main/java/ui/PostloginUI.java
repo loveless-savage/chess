@@ -3,12 +3,13 @@ package ui;
 import client.*;
 import model.*;
 import service.*;
-import java.util.Objects;
 
 public class PostloginUI {
     static final String helpStr = """
             FIXME: help output
             """;
+    static int[] gameIDs = new int[0];
+
     public static REPL.State parse(ServerFacade server, String cmdIn) {
         String[] cmd = cmdIn.split(" ",2);
         String[] args = cmd.length<2? null : cmd[1].split(" ");
@@ -34,10 +35,17 @@ public class PostloginUI {
             case "list":
                 try {
                     GameData[] gameList = server.listGames();
-                    for (GameData game : gameList) {
-                        // TODO: gameIDs, unclaimed string
+                    gameIDs = new int[gameList.length];
+                    for (int i=0; i<gameList.length; i++) {
+                        GameData game = gameList[i];
+                        gameIDs[i] = game.gameID();
+                        // TODO: unclaimed string
                         System.out.printf("[%d] %s\t(white=%s,black=%s)\n",
-                                game.gameID(),game.gameName(),game.whiteUsername(),game.blackUsername());
+                                i+1,
+                                game.gameName(),
+                                game.whiteUsername(),
+                                game.blackUsername()
+                        );
                     }
                 } catch (UnauthorizedException e) {
                     System.out.println("Unauthorized. Are you logged in?");
@@ -50,18 +58,25 @@ public class PostloginUI {
                     System.out.println("join needs 2 arguments");
                     break;
                 }
+                int idx;
                 try {
-                    Integer.parseInt(args[0]);
+                    idx = Integer.parseInt(args[0]);
+                    if (idx < 1 || idx > gameIDs.length) {
+                        System.out.println("Pick a game ID number reported by 'list'");
+                        break;
+                    }
                 } catch (NumberFormatException e) {
                     System.out.println("argument 1 must be a game ID number");
                     break;
                 }
-                if (!Objects.equals(args[1],"WHITE") && !Objects.equals(args[1],"BLACK")) {
+                String teamColor = args[1].toUpperCase();
+                if (!teamColor.equals("WHITE") && !teamColor.equals("BLACK")) {
                     System.out.println("argument 2 must be a team color [WHITE|BLACK]");
                     break;
                 }
                 try {
-                    server.joinGame(args);
+                    server.joinGame(new String[]{
+                            String.valueOf(gameIDs[idx-1]),teamColor});
                     return REPL.State.GAMEPLAY;
                 } catch (BadRequestException e) {
                     System.out.println("Input not understood. Type 'help' for available commands");
