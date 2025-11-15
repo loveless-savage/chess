@@ -64,20 +64,4 @@ public class GameplayUI {
     static final String HELP_STR = """
             help output string will go here
             """;
-    static final Map<ChessPiece.PieceType,String> whitePieceMap = Map.ofEntries(
-            entry(ChessPiece.PieceType.PAWN,  EscapeSequences.WHITE_PAWN),
-            entry(ChessPiece.PieceType.KNIGHT,EscapeSequences.WHITE_KNIGHT),
-            entry(ChessPiece.PieceType.ROOK,  EscapeSequences.WHITE_ROOK),
-            entry(ChessPiece.PieceType.QUEEN, EscapeSequences.WHITE_QUEEN),
-            entry(ChessPiece.PieceType.KING,  EscapeSequences.WHITE_KING),
-            entry(ChessPiece.PieceType.BISHOP,EscapeSequences.WHITE_BISHOP)
-    );
-    static final Map<ChessPiece.PieceType,String> blackPieceMap = Map.ofEntries(
-            entry(ChessPiece.PieceType.PAWN,  EscapeSequences.BLACK_PAWN),
-            entry(ChessPiece.PieceType.KNIGHT,EscapeSequences.BLACK_KNIGHT),
-            entry(ChessPiece.PieceType.ROOK,  EscapeSequences.BLACK_ROOK),
-            entry(ChessPiece.PieceType.QUEEN, EscapeSequences.BLACK_QUEEN),
-            entry(ChessPiece.PieceType.KING,  EscapeSequences.BLACK_KING),
-            entry(ChessPiece.PieceType.BISHOP,EscapeSequences.BLACK_BISHOP)
-    );
 }
