@@ -31,6 +31,10 @@ public class PostloginUI {
                 try {
                     GameData[] gameList = server.listGames();
                     gameIDs = new int[gameList.length];
+                    if (gameList.length == 0) {
+                        System.out.println("No games exist");
+                        break;
+                    }
                     for (int i=0; i<gameList.length; i++) {
                         GameData game = gameList[i];
                         gameIDs[i] = game.gameID();
