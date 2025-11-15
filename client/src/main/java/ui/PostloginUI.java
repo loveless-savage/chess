@@ -35,23 +35,7 @@ public class PostloginUI {
                         System.out.println("No games exist");
                         break;
                     }
-                    for (int i=0; i<gameList.length; i++) {
-                        GameData game = gameList[i];
-                        gameIDs[i] = game.gameID();
-                        String listStr = EscapeSequences.SET_TEXT_COLOR_YELLOW
-                                + "[%d]"
-                                + EscapeSequences.RESET_TEXT_COLOR
-                                + " %s\t(white=%s,black=%s)\n";
-                        String nullUserStr = EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY
-                                + "unclaimed"
-                                + EscapeSequences.RESET_TEXT_COLOR;
-                        System.out.printf(listStr,
-                                i+1,
-                                game.gameName(),
-                                game.whiteUsername()==null? nullUserStr:game.whiteUsername(),
-                                game.blackUsername()==null? nullUserStr:game.blackUsername()
-                        );
-                    }
+                    printGames(gameList);
                 } catch (UnauthorizedException e) {
                     System.out.println("Unauthorized. Are you logged in?");
                 } catch (ServerException e) {
@@ -132,6 +116,26 @@ public class PostloginUI {
                 System.out.println(BAD_REQUEST_STR);
         }
         return REPL.State.POSTLOGIN;
+    }
+
+    public static void printGames(GameData[] gameList) {
+        for (int i=0; i<gameList.length; i++) {
+            GameData game = gameList[i];
+            gameIDs[i] = game.gameID();
+            String listStr = EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "[%d]"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " %s\t(white=%s,black=%s)\n";
+            String nullUserStr = EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY
+                    + "unclaimed"
+                    + EscapeSequences.RESET_TEXT_COLOR;
+            System.out.printf(listStr,
+                    i+1,
+                    game.gameName(),
+                    game.whiteUsername()==null? nullUserStr:game.whiteUsername(),
+                    game.blackUsername()==null? nullUserStr:game.blackUsername()
+            );
+        }
     }
 
     private static final String HELP_STR =
