@@ -16,33 +16,19 @@ public class PreloginUI {
                     System.out.println("register needs 3 arguments");
                     break;
                 }
-                try {
+                return tryWithErrorDialog(() -> {
                     server.register(args);
                     return REPL.State.POSTLOGIN;
-                } catch (BadRequestException e) {
-                    System.out.println(BAD_REQUEST_STR);
-                } catch (AlreadyTakenException e) {
-                    System.out.println("Username taken");
-                } catch (ServerException e) {
-                    System.out.println("Server error. Check the network logs for more details");
-                }
-                break;
+                });
             case "login":
                 if (args == null || args.length != 2) {
                     System.out.println("login needs 2 arguments");
                     break;
                 }
-                try {
+                return tryWithErrorDialog(() -> {
                     server.login(args);
                     return REPL.State.POSTLOGIN;
-                } catch (BadRequestException e) {
-                    System.out.println(BAD_REQUEST_STR);
-                } catch (UnauthorizedException e) {
-                    System.out.println("Unauthorized. Check your username and/or password");
-                } catch (ServerException e) {
-                    System.out.println("Server error. Check the network logs for more details");
-                }
-                break;
+                });
             case "create":
             case "list":
             case "join":
@@ -54,6 +40,22 @@ public class PreloginUI {
                 break;
             default:
                 System.out.println(BAD_REQUEST_STR);
+        }
+        return REPL.State.PRELOGIN;
+    }
+
+    interface TryArg { REPL.State run(); }
+    private static REPL.State tryWithErrorDialog(TryArg tryArg) {
+        try {
+            return tryArg.run();
+        } catch (BadRequestException e) {
+            System.out.println(BAD_REQUEST_STR);
+        } catch (AlreadyTakenException e) {
+            System.out.println("Username taken");
+        } catch (UnauthorizedException e) {
+            System.out.println("Unauthorized. Check your username and/or password");
+        } catch (ServerException e) {
+            System.out.println("Server error. Check the network logs for more details");
         }
         return REPL.State.PRELOGIN;
     }
