@@ -35,7 +35,11 @@ public class REPL {
                     state = PostloginUI.parse(server, line);
                     if (state == State.GAMEPLAY) {
                         // replace with websocket
-                        GameplayUI.printBoard(new ChessGame(), ChessGame.TeamColor.WHITE);
+                        if (line.startsWith("join") && line.split(" ")[2].equalsIgnoreCase("BLACK")) {
+                            GameplayUI.printBoard(new ChessGame(), ChessGame.TeamColor.BLACK);
+                        } else {
+                            GameplayUI.printBoard(new ChessGame(), ChessGame.TeamColor.WHITE);
+                        }
                         state = State.POSTLOGIN;
                     }
                     break;
