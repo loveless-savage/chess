@@ -159,7 +159,7 @@ public class ServerFacadeTests {
     public void joinGameUnauthorizedTest() {
         facade.register(registerParams);
         int gameID = facade.createGame("correctGame");
-        String[] joinParams = {"WHITE",String.valueOf(gameID)};
+        String[] joinParams = {String.valueOf(gameID),"WHITE"};
         facade.authToken += "_bad";
         Assertions.assertThrows(UnauthorizedException.class,() -> facade.joinGame(joinParams));
     }
@@ -168,10 +168,10 @@ public class ServerFacadeTests {
     public void joinGameAlreadyTakenTest() {
         facade.register(registerParams);
         int gameID = facade.createGame("correctGame");
-        String[] joinParams = {"WHITE",String.valueOf(gameID)};
+        String[] joinParams = {String.valueOf(gameID),"WHITE"};
         facade.joinGame(joinParams);
         Assertions.assertThrows(AlreadyTakenException.class,() -> facade.joinGame(joinParams));
-        joinParams[0] = "BLACK";
+        joinParams[1] = "BLACK";
         facade.joinGame(joinParams);
         Assertions.assertThrows(AlreadyTakenException.class,() -> facade.joinGame(joinParams));
     }
