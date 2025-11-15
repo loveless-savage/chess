@@ -11,7 +11,7 @@ public class GameplayUI {
         String[] args = cmd.length<2? null : cmd[1].split(" ");
         switch (cmd[0]) {
             case "help":
-                System.out.println(helpStr);
+                System.out.println(HELP_STR);
                 break;
         }
         return REPL.State.GAMEPLAY;
@@ -61,7 +61,7 @@ public class GameplayUI {
         System.out.print(outStr);
     }
 
-    static final String helpStr = """
+    static final String HELP_STR = """
             help output string will go here
             """;
     static final Map<ChessPiece.PieceType,String> whitePieceMap = Map.ofEntries(

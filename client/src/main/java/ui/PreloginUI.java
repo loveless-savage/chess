@@ -9,7 +9,7 @@ public class PreloginUI {
         String[] args = cmd.length<2? null : cmd[1].split(" ");
         switch (cmd[0]) {
             case "help":
-                System.out.print(helpStr);
+                System.out.print(HELP_STR);
                 break;
             case "register":
                 if (args == null || args.length != 3) {
@@ -20,7 +20,7 @@ public class PreloginUI {
                     server.register(args);
                     return REPL.State.POSTLOGIN;
                 } catch (BadRequestException e) {
-                    System.out.println(badRequestStr);
+                    System.out.println(BAD_REQUEST_STR);
                 } catch (AlreadyTakenException e) {
                     System.out.println("Username taken");
                 } catch (ServerException e) {
@@ -36,7 +36,7 @@ public class PreloginUI {
                     server.login(args);
                     return REPL.State.POSTLOGIN;
                 } catch (BadRequestException e) {
-                    System.out.println(badRequestStr);
+                    System.out.println(BAD_REQUEST_STR);
                 } catch (UnauthorizedException e) {
                     System.out.println("Unauthorized. Check your username and/or password");
                 } catch (ServerException e) {
@@ -53,12 +53,12 @@ public class PreloginUI {
                 System.out.println("Not logged in");
                 break;
             default:
-                System.out.println(badRequestStr);
+                System.out.println(BAD_REQUEST_STR);
         }
         return REPL.State.PRELOGIN;
     }
 
-    private static final String helpStr =
+    private static final String HELP_STR =
             EscapeSequences.SET_TEXT_COLOR_YELLOW
                     + "register <username> <password> <email>"
                     + EscapeSequences.RESET_TEXT_COLOR
@@ -75,7 +75,7 @@ public class PreloginUI {
                     + "help"
                     + EscapeSequences.RESET_TEXT_COLOR
                     + " - list commands\n";
-    private static final String badRequestStr =
+    private static final String BAD_REQUEST_STR =
             "Input not understood. Type "
                     + EscapeSequences.SET_TEXT_COLOR_YELLOW
                     + "help"
