@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,6 +33,24 @@ public class ChessPiece {
         ROOK,
         PAWN
     }
+
+    /**
+     * mappings between ascii representation of pieces to object representation
+     */
+    public static final Map<Character, PieceType> CHAR_TO_TYPE_MAP = Map.of(
+            'p', ChessPiece.PieceType.PAWN,
+            'n', ChessPiece.PieceType.KNIGHT,
+            'r', ChessPiece.PieceType.ROOK,
+            'q', ChessPiece.PieceType.QUEEN,
+            'k', ChessPiece.PieceType.KING,
+            'b', ChessPiece.PieceType.BISHOP);
+    public static final Map<ChessPiece.PieceType, Character> TYPE_TO_CHAR_MAP = Map.of(
+            ChessPiece.PieceType.PAWN, 'p',
+            ChessPiece.PieceType.KNIGHT, 'n',
+            ChessPiece.PieceType.ROOK, 'r',
+            ChessPiece.PieceType.QUEEN, 'q',
+            ChessPiece.PieceType.KING, 'k',
+            ChessPiece.PieceType.BISHOP, 'b');
 
     /**
      * @return Which team this chess piece belongs to

@@ -145,7 +145,7 @@ public class ChessBoard {
 
             ChessGame.TeamColor color = Character.isLowerCase(c) ?
                     ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-            var type = CHAR_TO_TYPE_MAP.get(Character.toLowerCase(c));
+            var type = ChessPiece.CHAR_TO_TYPE_MAP.get(Character.toLowerCase(c));
 
             if(pieces[row-1][col-1] == null || // always write to null spaces
                     type != pieces[row-1][col-1].getPieceType() || // if piece type and color both match,
@@ -170,7 +170,7 @@ public class ChessBoard {
                 if(currentPiece == null){ // blank space
                     boardText[18*i+2*j+1] = ' ';
                 }else{ // non-empty character
-                    char type = TYPE_TO_CHAR_MAP.get(currentPiece.getPieceType());
+                    char type = ChessPiece.TYPE_TO_CHAR_MAP.get(currentPiece.getPieceType());
                     if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                         type = Character.toUpperCase(type);
                     }

@@ -23,6 +23,8 @@ public class GameplayUI {
         String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
         String darkColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
         String resetColor = EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR;
+        String lightPieceColor = EscapeSequences.SET_TEXT_COLOR_WHITE;
+        String darkPieceColor = EscapeSequences.SET_TEXT_COLOR_BLACK;
 
         String outStr = borderColor;
         String topNums = borderColor + (team == ChessGame.TeamColor.BLACK?
@@ -44,9 +46,11 @@ public class GameplayUI {
                 if(p == null){
                     outStr += "   ";
                 }else{
-                    outStr += (p.getTeamColor()==ChessGame.TeamColor.WHITE?
-                            whitePieceMap.get(p.getPieceType()):
-                            blackPieceMap.get(p.getPieceType()));
+                    char pieceIcon = ChessPiece.TYPE_TO_CHAR_MAP.get(p.getPieceType());
+                    outStr += " " + (p.getTeamColor()==ChessGame.TeamColor.WHITE?
+                                        lightPieceColor + Character.toUpperCase(pieceIcon):
+                                        darkPieceColor + Character.toLowerCase(pieceIcon))
+                                        + " ";
                 }
             }
             outStr += borderColor + " " + ((team==ChessGame.TeamColor.BLACK)?1+i:8-i) + " "
