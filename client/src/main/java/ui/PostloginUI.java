@@ -63,7 +63,7 @@ public class PostloginUI {
                 try {
                     idx = Integer.parseInt(args[0]);
                     if (idx < 1 || idx > gameIDs.length) {
-                        System.out.println("Pick a game ID number reported by 'list'");
+                        System.out.println(BAD_GAMEID_STR);
                         break;
                     }
                 } catch (NumberFormatException e) {
@@ -99,7 +99,11 @@ public class PostloginUI {
                     break;
                 }
                 try {
-                    Integer.parseInt(args[0]);
+                    idx = Integer.parseInt(args[0]);
+                    if (idx < 1 || idx > gameIDs.length) {
+                        System.out.println(BAD_GAMEID_STR);
+                        break;
+                    }
                 } catch (NumberFormatException e) {
                     System.out.println("Argument 1 must be a game ID number");
                     break;
@@ -161,5 +165,11 @@ public class PostloginUI {
                     + "help"
                     + EscapeSequences.RESET_TEXT_COLOR
                     + " for available commands";
+    private static final String BAD_GAMEID_STR =
+            "Pick a valid game ID number, as reported by the "
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "list"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " command";
     static int[] gameIDs = new int[0];
 }
