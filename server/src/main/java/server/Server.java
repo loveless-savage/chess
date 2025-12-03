@@ -84,6 +84,18 @@ public class Server {
             ctx.result("{}");
         });
 
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(ctx -> {
+                ctx.enableAutomaticPings();
+                System.out.println("Websocket connected");
+            });
+            ws.onMessage(ctx -> {
+                System.out.println("received message "+ctx.message());
+                ctx.send("Websocket response: " + ctx.message());
+            });
+            ws.onClose(ctx -> System.out.println("Websocket closed"));
+        });
+
 
         javalin.exception(BadRequestException.class, (e,ctx) -> {
             ctx.status(400);

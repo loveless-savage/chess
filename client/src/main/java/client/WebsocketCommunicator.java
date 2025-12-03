@@ -4,7 +4,7 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 
-public class WebsocketCommunicator {
+public class WebsocketCommunicator extends Endpoint {
     public Session session;
     public WebsocketCommunicator(String hostIn, int portIn) throws Exception {
         URI uri = new URI(String.format("ws://%s:%d/ws",hostIn,portIn));
