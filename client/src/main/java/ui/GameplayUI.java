@@ -2,8 +2,8 @@ package ui;
 
 import chess.*;
 import client.*;
-import java.util.Map;
-import static java.util.Map.entry;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class GameplayUI {
     public static REPL.State parse(ServerFacade server, String cmdIn) {
@@ -18,10 +18,17 @@ public class GameplayUI {
     }
 
     public static void printBoard(ChessGame game, ChessGame.TeamColor team) {
+        printBoard(game, team, new ChessPosition(0,0), new HashSet<>());
+    }
+
+    public static void printBoard(ChessGame game, ChessGame.TeamColor team, ChessPosition focusPos, Collection<ChessPosition> moves) {
         ChessBoard board = game.getBoard();
         String borderColor = EscapeSequences.SET_BG_COLOR_WHITE + EscapeSequences.SET_TEXT_COLOR_BLACK;
         String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
         String darkColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
+        String focusHighlightColor = EscapeSequences.SET_BG_COLOR_BLUE;
+        String lightHighlightColor = EscapeSequences.SET_BG_COLOR_GREEN;
+        String darkHighlightColor = EscapeSequences.SET_BG_COLOR_DARK_GREEN;
         String resetColor = EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR;
         String lightPieceColor = EscapeSequences.SET_TEXT_COLOR_WHITE;
         String darkPieceColor = EscapeSequences.SET_TEXT_COLOR_BLACK;
@@ -36,13 +43,20 @@ public class GameplayUI {
         for (int i = 0; i < 8; i++) {
             outStr += borderColor + " " + ((team==ChessGame.TeamColor.BLACK)?1+i:8-i) + " ";
             for (int j = 0; j < 8; j++) {
-                chess.ChessPiece p;
+                ChessPosition pos;
                 if (team == ChessGame.TeamColor.BLACK) {
-                    p = board.getPiece(new ChessPosition(8-i, 8-j));
+                    pos = new ChessPosition(8-i, 8-j);
                 } else {
-                    p = board.getPiece(new ChessPosition(1+i, 1+j));
+                    pos = new ChessPosition(1+i, 1+j);
                 }
-                outStr += ((i+j)/2*2==(i+j)?lightColor:darkColor);
+                chess.ChessPiece p = board.getPiece(pos);
+                if (pos.equals(focusPos)) {
+                    outStr += focusHighlightColor;
+                } else if (moves.contains(pos)) {
+                    outStr += ((i + j) / 2 * 2 == (i + j) ? lightHighlightColor : darkHighlightColor);
+                } else {
+                    outStr += ((i + j) / 2 * 2 == (i + j) ? lightColor : darkColor);
+                }
                 if(p == null){
                     outStr += "   ";
                 }else{
