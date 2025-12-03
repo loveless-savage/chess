@@ -4,6 +4,7 @@ import chess.*;
 import client.*;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class GameplayUI {
     public static REPL.State parse(ServerFacade server, String cmdIn) {
@@ -13,6 +14,29 @@ public class GameplayUI {
             case "help":
                 System.out.println(HELP_STR);
                 break;
+            case "redraw":
+            case "r":
+                // FIXME: get new board
+                ChessGame refreshedGame = new ChessGame();
+                printBoard(refreshedGame, ChessGame.TeamColor.WHITE); // FIXME: which team?
+                break;
+            case "leave":
+                System.out.println("Leaving the game.");
+                // FIXME: close websocket
+                return REPL.State.POSTLOGIN;
+            case "move":
+                // TODO: parse move
+                break;
+            case "resign":
+                // TODO: prompt confirmation, then forfeit
+                break;
+            case "highlight":
+            case "h":
+                // TODO: get legal moves
+                Collection<ChessMove> moves = new HashSet<>();
+                ChessPosition focusPos = moves.iterator().next().getEndPosition();
+                Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
+                printBoard(new ChessGame(), ChessGame.TeamColor.WHITE,focusPos,targets);
         }
         return REPL.State.GAMEPLAY;
     }
