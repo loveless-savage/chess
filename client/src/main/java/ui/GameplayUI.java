@@ -69,9 +69,9 @@ public class GameplayUI {
             for (int j = 0; j < 8; j++) {
                 ChessPosition pos;
                 if (team == ChessGame.TeamColor.BLACK) {
-                    pos = new ChessPosition(8-i, 8-j);
+                    pos = new ChessPosition(1+i, 8-j);
                 } else {
-                    pos = new ChessPosition(1+i, 1+j);
+                    pos = new ChessPosition(8-i, 1+j);
                 }
                 chess.ChessPiece p = board.getPiece(pos);
                 if (pos.equals(focusPos)) {
