@@ -99,7 +99,29 @@ public class GameplayUI {
         System.out.print(outStr);
     }
 
-    static final String HELP_STR = """
-            help output string will go here
-            """;
+    private static final String HELP_STR =
+            EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "redraw|r"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - redraw chess board\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "leave"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - leave the game\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "move <startPos> <endPos>"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - move relevant piece. Format arguments like 'g4' or 'a6'\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "resign"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - forfeit the game. Does not leave\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "highlight|h <startPos>"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - highlight legal moves for selected piece. Format argument like 'g4' or 'a6'\n"
+                    + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                    + "help"
+                    + EscapeSequences.RESET_TEXT_COLOR
+                    + " - list commands\n";
 }
