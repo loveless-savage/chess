@@ -140,7 +140,7 @@ public class PostloginUI {
             EscapeSequences.SET_TEXT_COLOR_YELLOW
                     + "create <name>"
                     + EscapeSequences.RESET_TEXT_COLOR
-                    + " - create an account\n"
+                    + " - create a game\n"
                     + EscapeSequences.SET_TEXT_COLOR_YELLOW
                     + "list"
                     + EscapeSequences.RESET_TEXT_COLOR
