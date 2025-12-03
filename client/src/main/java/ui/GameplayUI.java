@@ -34,7 +34,7 @@ public class GameplayUI {
             case "h":
                 // TODO: get legal moves
                 Collection<ChessMove> moves = new HashSet<>();
-                ChessPosition focusPos = moves.iterator().next().getEndPosition();
+                ChessPosition focusPos = moves.iterator().next().getStartPosition();
                 Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
                 printBoard(new ChessGame(), ChessGame.TeamColor.WHITE,focusPos,targets);
         }
