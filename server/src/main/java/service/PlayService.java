@@ -2,6 +2,8 @@ package service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import io.javalin.websocket.*;
 import org.jetbrains.annotations.NotNull;
 import chess.*;
@@ -9,6 +11,8 @@ import websocket.commands.*;
 import websocket.messages.*;
 
 public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
+    private final Map<WsContext,String> clientList = new HashMap<>();
+
     @Override
     public void handleConnect(@NotNull WsConnectContext ctx) {
         ctx.enableAutomaticPings();
@@ -29,9 +33,13 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
         switch (cmd.getCommandType()) {
             case CONNECT -> {
                 System.out.println("Connecting user "+cmd.getAuthToken()+" to game "+cmd.getGameID()); // FIXME
+                NotificationMessage notifyJoin = new NotificationMessage(cmd.getAuthToken()+" has joined the game");
+                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx -> {
+                    otherCtx.send(new Gson().toJson(notifyJoin));
+                });
+                clientList.put(ctx,cmd.getAuthToken());
                 LoadGameMessage msg = new LoadGameMessage(new ChessGame()); // FIXME
                 ctx.send(new Gson().toJson(msg));
-                // TODO: notify others
             }
             case MAKE_MOVE -> {
                 cmd = new Gson().fromJson(ctx.message(),MakeMoveCommand.class);
