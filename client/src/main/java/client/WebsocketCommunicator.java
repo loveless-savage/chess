@@ -6,7 +6,9 @@ import java.net.URI;
 
 public class WebsocketCommunicator extends Endpoint {
     public Session session;
-    public WebsocketCommunicator(String hostIn, int portIn) throws Exception {
+    NotificationHandler notificationHandler;
+
+    public WebsocketCommunicator(String hostIn, int portIn, NotificationHandler notificationHandler) throws Exception {
         URI uri = new URI(String.format("ws://%s:%d/ws",hostIn,portIn));
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, uri);
