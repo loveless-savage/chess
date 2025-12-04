@@ -34,18 +34,49 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
             case CONNECT -> {
                 System.out.println("Connecting user "+cmd.getAuthToken()+" to game "+cmd.getGameID()); // FIXME
                 NotificationMessage notifyJoin = new NotificationMessage(cmd.getAuthToken()+" has joined the game");
-                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx -> {
-                    otherCtx.send(new Gson().toJson(notifyJoin));
-                });
+                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
+                        otherCtx.send(new Gson().toJson(notifyJoin))
+                );
                 clientList.put(ctx,cmd.getAuthToken());
                 LoadGameMessage msg = new LoadGameMessage(new ChessGame()); // FIXME
                 ctx.send(new Gson().toJson(msg));
             }
             case MAKE_MOVE -> {
-                cmd = new Gson().fromJson(ctx.message(),MakeMoveCommand.class);
+                ChessMove move;
+                try {
+                    move = new Gson().fromJson(ctx.message(), MakeMoveCommand.class).getMove();
+                } catch (JsonSyntaxException e) {
+                    ErrorMessage msg = new ErrorMessage("ERROR: command cannot be parsed");
+                    ctx.send(new Gson().toJson(msg));
+                    return;
+                }
+                // TODO: update game
+                LoadGameMessage msg = new LoadGameMessage(new ChessGame());
+                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(everyCtx ->
+                    everyCtx.send(new Gson().toJson(msg))
+                );
+                NotificationMessage notifyMove = new NotificationMessage(cmd.getAuthToken()+" just moved "+move);
+                clientList.keySet().stream().filter(c -> c.session.isOpen())
+                        .filter(c -> !c.equals(ctx)).forEach(everyCtx ->
+                        everyCtx.send(new Gson().toJson(msg))
+                );
+                // TODO: are we in check / checkmate / stalemate?
             }
-            case LEAVE -> {}
-            case RESIGN -> {}
+            case LEAVE -> {
+                // TODO: remove player from game
+                clientList.remove(ctx);
+                NotificationMessage notifyLeave = new NotificationMessage(cmd.getAuthToken()+" has left the game");
+                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
+                    otherCtx.send(new Gson().toJson(notifyLeave))
+                );
+            }
+            case RESIGN -> {
+                // TODO: update game
+                NotificationMessage notifyResign = new NotificationMessage(cmd.getAuthToken()+" has resigned");
+                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
+                    otherCtx.send(new Gson().toJson(notifyResign))
+                );
+            }
         }
     }
 
