@@ -5,6 +5,9 @@ import dataaccess.*;
 import model.*;
 import io.javalin.*;
 import service.*;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
+
 import java.util.Map;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -14,6 +17,7 @@ public class Server {
     private final Gson serializer;
     private final UserService userService;
     private final GameService gameService;
+    private final PlayService playService;
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
@@ -26,6 +30,7 @@ public class Server {
         gameDAO = new GameDAO();
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);
+        playService = new PlayService();
 
         javalin.delete("/db", ctx -> { // Clear application
             gameService.clear();
@@ -85,15 +90,9 @@ public class Server {
         });
 
         javalin.ws("/ws", ws -> {
-            ws.onConnect(ctx -> {
-                ctx.enableAutomaticPings();
-                System.out.println("Websocket connected");
-            });
-            ws.onMessage(ctx -> {
-                System.out.println("received message "+ctx.message());
-                ctx.send("Websocket response: " + ctx.message());
-            });
-            ws.onClose(ctx -> System.out.println("Websocket closed"));
+            ws.onConnect(playService);
+            ws.onMessage(playService);
+            ws.onClose(playService);
         });
 
 
