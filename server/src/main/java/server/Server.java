@@ -30,7 +30,7 @@ public class Server {
         gameDAO = new GameDAO();
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);
-        playService = new PlayService();
+        playService = new PlayService(authDAO, gameDAO);
 
         javalin.delete("/db", ctx -> { // Clear application
             gameService.clear();
