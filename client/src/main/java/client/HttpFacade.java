@@ -9,16 +9,20 @@ import java.util.Map;
 import model.*;
 import service.*;
 
-public class HttpCommunicator {
+public class HttpFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String host;
     private final int port;
     String authToken;
 
-    public HttpCommunicator(String hostIn, int portIn) {
+    public HttpFacade(String hostIn, int portIn) {
         host = hostIn;
         port = portIn;
         authToken = null;
+    }
+
+    public HttpFacade() {
+        this("localhost",8080);
     }
 
     public String getAuthToken() {

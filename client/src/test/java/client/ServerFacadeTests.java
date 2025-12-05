@@ -10,7 +10,7 @@ import server.Server;
 
 
 public class ServerFacadeTests {
-    private static ServerFacade facade;
+    private static HttpFacade facade;
     private static Server server;
     private static final String[] REGISTER_PARAMS = {"correctUsername","correctPassword","correct@email"};
 
@@ -19,7 +19,7 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
-        facade = new ServerFacade("localhost",port);
+        facade = new HttpFacade("localhost",port);
     }
     @BeforeEach
     public void setup() {
@@ -101,7 +101,7 @@ public class ServerFacadeTests {
     @Test
     public void logoutUnauthorizedTest() {
         facade.register(REGISTER_PARAMS);
-        facade.http.authToken += "_bad";
+        facade.authToken += "_bad";
         Assertions.assertThrows(UnauthorizedException.class,() -> facade.logout());
     }
 
@@ -120,7 +120,7 @@ public class ServerFacadeTests {
     @Test
     public void listGamesUnauthorizedTest() {
         facade.register(REGISTER_PARAMS);
-        facade.http.authToken += "_bad";
+        facade.authToken += "_bad";
         Assertions.assertThrows(UnauthorizedException.class,() -> facade.listGames());
     }
 
@@ -136,7 +136,7 @@ public class ServerFacadeTests {
     @Test
     public void createGameUnauthorizedTest() {
         facade.register(REGISTER_PARAMS);
-        facade.http.authToken += "_bad";
+        facade.authToken += "_bad";
         Assertions.assertThrows(UnauthorizedException.class,() -> facade.createGame("correctGame"));
     }
 
@@ -160,7 +160,7 @@ public class ServerFacadeTests {
         facade.register(REGISTER_PARAMS);
         int gameID = facade.createGame("correctGame");
         String[] joinParams = {String.valueOf(gameID),"WHITE"};
-        facade.http.authToken += "_bad";
+        facade.authToken += "_bad";
         Assertions.assertThrows(UnauthorizedException.class,() -> facade.joinGame(joinParams));
     }
 

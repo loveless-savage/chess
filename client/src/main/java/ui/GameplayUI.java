@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class GameplayUI {
-    public static REPL.State parse(ServerFacade server, String cmdIn) {
+    public static REPL.State parse(HttpFacade server, String cmdIn) {
         String[] cmd = cmdIn.split(" ",2);
         String[] args = cmd.length<2? null : cmd[1].split(" ");
         switch (cmd[0]) {

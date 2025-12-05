@@ -5,7 +5,7 @@ import ui.*;
 import java.util.Scanner;
 
 public class REPL {
-    ServerFacade server = new ServerFacade();
+    HttpFacade httpServer = new HttpFacade();
     public enum State {
         PRELOGIN,
         POSTLOGIN,
@@ -22,17 +22,17 @@ public class REPL {
             String line = scanner.nextLine();
             if (line.equals("quit")) {
                 if (state != State.PRELOGIN) {
-                    server.logout();
+                    httpServer.logout();
                 }
                 System.out.println("Goodbye.");
                 return;
             }
             switch (state) {
                 case PRELOGIN:
-                    state = PreloginUI.parse(server, line);
+                    state = PreloginUI.parse(httpServer, line);
                     break;
                 case POSTLOGIN:
-                    state = PostloginUI.parse(server, line);
+                    state = PostloginUI.parse(httpServer, line);
                     if (state == State.GAMEPLAY) {
                         // replace with websocket
                         if (line.startsWith("join") && line.split(" ")[2].equalsIgnoreCase("BLACK")) {
@@ -44,7 +44,7 @@ public class REPL {
                     }
                     break;
                 case GAMEPLAY:
-                    state = GameplayUI.parse(server, line);
+                    state = GameplayUI.parse(httpServer, line);
                     break;
             }
         }
