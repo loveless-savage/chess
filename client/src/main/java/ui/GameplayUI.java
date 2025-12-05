@@ -9,11 +9,11 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class GameplayUI implements NotificationHandler {
-    ChessGame gameCache = null;
-    ChessGame.TeamColor team;
     WebsocketFacade ws = null;
     String authToken;
     int gameID;
+    ChessGame.TeamColor team;
+    ChessGame gameCache = null;
 
     public void open(String authToken, int gameID, ChessGame.TeamColor team) {
         this.authToken = authToken;
@@ -22,6 +22,7 @@ public class GameplayUI implements NotificationHandler {
         try {
             ws = new WebsocketFacade(this);
             this.team = team;
+            ws.connect(authToken,gameID);
         } catch (Exception e) {
             System.out.println("Failed to open a connection. Is the server running?");
         }
@@ -52,17 +53,32 @@ public class GameplayUI implements NotificationHandler {
                 break;
             case "leave":
                 System.out.println("Leaving the game.");
+                try {
+                    ws.leave(authToken,gameID);
+                } catch (IOException e) {
+                    // TODO
+                }
                 close();
                 return REPL.State.POSTLOGIN;
             case "move":
-                // TODO: parse move
+                ChessMove move = new ChessMove(new ChessPosition(2,2),new ChessPosition(3,2)); // TODO: parse move
+                try {
+                    ws.makeMove(move,authToken,gameID);
+                } catch (IOException e) {
+                    // TODO
+                }
                 break;
             case "resign":
                 // TODO: prompt confirmation, then forfeit
+                try {
+                    ws.resign(authToken,gameID);
+                } catch (IOException e) {
+                    // TODO
+                }
                 break;
             case "highlight":
             case "h":
-                // TODO: get legal moves
+                move = new ChessMove(new ChessPosition(2,2),new ChessPosition(3,2)); // TODO: parse move
                 Collection<ChessMove> moves = new HashSet<>();
                 ChessPosition focusPos = moves.iterator().next().getStartPosition();
                 Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());

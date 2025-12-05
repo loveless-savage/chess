@@ -38,6 +38,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                         otherCtx.send(new Gson().toJson(notifyJoin))
                 );
                 clientList.put(ctx,cmd.getAuthToken());
+                System.out.println("sending loadGame");
                 LoadGameMessage msg = new LoadGameMessage(new ChessGame()); // FIXME
                 ctx.send(new Gson().toJson(msg));
             }
@@ -51,19 +52,22 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     return;
                 }
                 // TODO: update game
+                System.out.println("sending loadGame");
                 LoadGameMessage msg = new LoadGameMessage(new ChessGame());
                 clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(everyCtx ->
                     everyCtx.send(new Gson().toJson(msg))
                 );
+                System.out.println("sending notifyMove");
                 NotificationMessage notifyMove = new NotificationMessage(cmd.getAuthToken()+" just moved "+move);
                 clientList.keySet().stream().filter(c -> c.session.isOpen())
                         .filter(c -> !c.equals(ctx)).forEach(everyCtx ->
-                        everyCtx.send(new Gson().toJson(msg))
+                        everyCtx.send(new Gson().toJson(notifyMove))
                 );
                 // TODO: are we in check / checkmate / stalemate?
             }
             case LEAVE -> {
                 // TODO: remove player from game
+                System.out.println("sending notifyLeave");
                 clientList.remove(ctx);
                 NotificationMessage notifyLeave = new NotificationMessage(cmd.getAuthToken()+" has left the game");
                 clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
@@ -72,6 +76,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
             }
             case RESIGN -> {
                 // TODO: update game
+                System.out.println("sending notifyResign");
                 NotificationMessage notifyResign = new NotificationMessage(cmd.getAuthToken()+" has resigned");
                 clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
                     otherCtx.send(new Gson().toJson(notifyResign))
