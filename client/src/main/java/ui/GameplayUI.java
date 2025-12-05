@@ -4,6 +4,7 @@ import chess.*;
 import client.*;
 import websocket.messages.*;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -61,7 +62,14 @@ public class GameplayUI implements NotificationHandler {
                 close();
                 return REPL.State.POSTLOGIN;
             case "move":
-                ChessMove move = new ChessMove(new ChessPosition(2,2),new ChessPosition(3,2)); // TODO: parse move
+                ChessMove move;
+                try {
+                    assert args != null;
+                    move = new ChessMove(parsePos(args[0]), parsePos(args[1]));
+                } catch (NullPointerException | ParseException e) {
+                    System.out.println("You need to provide a starting Position and and ending Position, each formatted correctly");
+                    break;
+                }
                 try {
                     ws.makeMove(move,authToken,gameID);
                 } catch (IOException e) {
@@ -78,11 +86,23 @@ public class GameplayUI implements NotificationHandler {
                 break;
             case "highlight":
             case "h":
-                move = new ChessMove(new ChessPosition(2,2),new ChessPosition(3,2)); // TODO: parse move
-                Collection<ChessMove> moves = new HashSet<>();
-                ChessPosition focusPos = moves.iterator().next().getStartPosition();
-                Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
-                printBoard(new ChessGame(),team,focusPos,targets);
+                ChessPosition focusPos;
+                try {
+                    assert args != null;
+                    focusPos = parsePos(args[0]);
+                } catch (NullPointerException | ParseException e) {
+                    System.out.println("You need to provide a starting Position and and ending Position, each formatted correctly");
+                    break;
+                }
+                Collection<ChessMove> moves = gameCache.validMoves(focusPos);
+                if (moves == null || moves.isEmpty()) {
+                    printBoard(gameCache, team, focusPos, new HashSet<>());
+                    System.out.println("This piece cannot move.");
+                    // TODO: "Note that this is not your piece"
+                } else {
+                    Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
+                    printBoard(gameCache,team,focusPos,targets);
+                }
         }
         return REPL.State.GAMEPLAY;
     }
@@ -99,6 +119,17 @@ public class GameplayUI implements NotificationHandler {
     @Override
     public void notify(NotificationMessage notification) {
         System.out.println(notification.getMessage());
+    }
+
+    private static ChessPosition parsePos(String posIn) throws ParseException {
+        if(posIn==null || posIn.length() != 2 ||
+                !Character.isAlphabetic(posIn.charAt(0)) ||
+                !Character.isDigit(posIn.charAt(1))) {
+            throw new ParseException("position parameter must be a row letter, then a column number",0);
+        }
+        int row = posIn.charAt(1)-'0';
+        int col = 1+Character.toLowerCase(posIn.charAt(0))-'a';
+        return new ChessPosition(row,col);
     }
 
     public static void printBoard(ChessGame game, ChessGame.TeamColor team) {
