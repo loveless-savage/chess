@@ -62,12 +62,16 @@ public class GameplayUI implements NotificationHandler {
                 close();
                 return REPL.State.POSTLOGIN;
             case "move":
+                // TODO: gameover, turn
+                if (args == null || args.length<2) {
+                    System.out.println("move needs 2 position arguments");
+                    break;
+                }
                 ChessMove move;
                 try {
-                    assert args != null;
                     move = new ChessMove(parsePos(args[0]), parsePos(args[1]));
-                } catch (NullPointerException | ParseException e) {
-                    System.out.println("You need to provide a starting Position and and ending Position, each formatted correctly");
+                } catch (InvalidMoveException e) {
+                    System.out.println(e.getLocalizedMessage());
                     break;
                 }
                 try {
@@ -86,12 +90,16 @@ public class GameplayUI implements NotificationHandler {
                 break;
             case "highlight":
             case "h":
+                // TODO: gameover
+                if (args == null || args.length<1) {
+                    System.out.println("highlight needs 1 position argument");
+                    break;
+                }
                 ChessPosition focusPos;
                 try {
-                    assert args != null;
                     focusPos = parsePos(args[0]);
-                } catch (NullPointerException | ParseException e) {
-                    System.out.println("You need to provide a starting Position and and ending Position, each formatted correctly");
+                } catch (InvalidMoveException e) {
+                    System.out.println(e.getMessage());
                     break;
                 }
                 Collection<ChessMove> moves = gameCache.validMoves(focusPos);
@@ -121,14 +129,15 @@ public class GameplayUI implements NotificationHandler {
         System.out.println(notification.getMessage());
     }
 
-    private static ChessPosition parsePos(String posIn) throws ParseException {
-        if(posIn==null || posIn.length() != 2 ||
-                !Character.isAlphabetic(posIn.charAt(0)) ||
-                !Character.isDigit(posIn.charAt(1))) {
-            throw new ParseException("position parameter must be a row letter, then a column number",0);
+    private static ChessPosition parsePos(String posIn) throws InvalidMoveException {
+        if(posIn==null || posIn.length() != 2) {
+            throw new InvalidMoveException(posIn+" is not a valid board position");
         }
         int row = posIn.charAt(1)-'0';
         int col = 1+Character.toLowerCase(posIn.charAt(0))-'a';
+        if(row<1 || row>8 || col<1 || col>8) {
+            throw new InvalidMoveException(posIn+" is not a valid board position");
+        }
         return new ChessPosition(row,col);
     }
 
