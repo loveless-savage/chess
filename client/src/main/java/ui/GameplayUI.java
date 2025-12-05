@@ -12,8 +12,12 @@ public class GameplayUI implements NotificationHandler {
     ChessGame gameCache = null;
     ChessGame.TeamColor team;
     WebsocketFacade ws = null;
+    String authToken;
+    int gameID;
 
-    public void open(ChessGame.TeamColor team) {
+    public void open(String authToken, int gameID, ChessGame.TeamColor team) {
+        this.authToken = authToken;
+        this.gameID = gameID;
         System.out.println("Connecting to the server...");
         try {
             ws = new WebsocketFacade(this);

@@ -57,9 +57,10 @@ public class PostloginUI {
                     System.out.println(outStr);
                     break;
                 }
+                selectedGameID = gameIDs[idx-1];
                 return tryWithErrorDialog(() -> {
                     server.joinGame(new String[]{
-                            String.valueOf(gameIDs[idx-1]),teamColor});
+                            String.valueOf(selectedGameID),teamColor});
                     return REPL.State.GAMEPLAY;
                 });
             case "observe":
@@ -77,6 +78,7 @@ public class PostloginUI {
                     System.out.println("Argument 1 must be a game ID number");
                     break;
                 }
+                selectedGameID = gameIDs[idx-1];
                 return REPL.State.GAMEPLAY;
             case "logout":
                 try {
@@ -98,6 +100,10 @@ public class PostloginUI {
                 System.out.println(BAD_REQUEST_STR);
         }
         return REPL.State.POSTLOGIN;
+    }
+
+    public static int getSelectedGameID() {
+        return selectedGameID;
     }
 
     public static void printGames(GameData[] gameList) {
@@ -178,4 +184,5 @@ public class PostloginUI {
                     + EscapeSequences.RESET_TEXT_COLOR
                     + " command";
     static int[] gameIDs = new int[0];
+    static int selectedGameID = -1;
 }

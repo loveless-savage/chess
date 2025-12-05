@@ -37,13 +37,7 @@ public class REPL {
                     state = PostloginUI.parse(httpServer, line);
                     if (state == State.GAMEPLAY) {
                         ChessGame.TeamColor team = ChessGame.TeamColor.WHITE; // FIXME
-                        gameplayUI.open(team);
-                        // replace with websocket
-                        if (line.startsWith("join") && line.split(" ")[2].equalsIgnoreCase("BLACK")) {
-                            GameplayUI.printBoard(new ChessGame(), ChessGame.TeamColor.BLACK);
-                        } else {
-                            GameplayUI.printBoard(new ChessGame(), ChessGame.TeamColor.WHITE);
-                        }
+                        gameplayUI.open(httpServer.getAuthToken(),PostloginUI.getSelectedGameID(),team);
                     }
                     break;
                 case GAMEPLAY:
