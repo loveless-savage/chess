@@ -19,7 +19,14 @@ public class WebsocketFacade extends Endpoint {
         session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
                 System.out.println(message);
-                notificationHandler.notify(message);
+                switch(new Gson().fromJson(message, ServerMessage.class).getServerMessageType()) {
+                    case LOAD_GAME ->
+                            notificationHandler.loadGame(new Gson().fromJson(message, LoadGameMessage.class).getGame());
+                    case ERROR ->
+                            notificationHandler.sendError(new Gson().fromJson(message, ErrorMessage.class));
+                    case NOTIFICATION ->
+                            notificationHandler.notify(new Gson().fromJson(message, NotificationMessage.class));
+                }
             }
         });
     }
@@ -28,13 +35,8 @@ public class WebsocketFacade extends Endpoint {
         this("localhost",8080,notificationHandler);
     }
 
-    public void send(String message) throws IOException, EncodeException {
-        if(message.equals("connect")) {
-            UserGameCommand cmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT,"fillerAuth",31);
-            session.getBasicRemote().sendText(new Gson().toJson(cmd));
-        } else {
-            session.getBasicRemote().sendText(message);
-        }
+    public void send(String message) throws IOException {
+        session.getBasicRemote().sendText(message);
     }
 
     public void onOpen(Session session, EndpointConfig endpointConfig) {

@@ -3,13 +3,39 @@ package ui;
 import chess.*;
 import client.*;
 import websocket.messages.*;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
-import com.google.gson.Gson;
 
 public class GameplayUI implements NotificationHandler {
-    public static REPL.State parse(HttpFacade server, String cmdIn) {
+    ChessGame gameCache = null;
+    ChessGame.TeamColor team;
+    WebsocketFacade ws = null;
+
+    public void open(ChessGame.TeamColor team) {
+        System.out.println("Connecting to the server...");
+        try {
+            ws = new WebsocketFacade(this);
+            this.team = team;
+        } catch (Exception e) {
+            System.out.println("Failed to open a connection. Is the server running?");
+        }
+    }
+
+    public boolean isOpen() {
+        return ws.session.isOpen();
+    }
+
+    public void close() {
+        try {
+            ws.session.close();
+        } catch (IOException e) {
+            System.out.println("There was an error trying to close the gameplay connection. Check the server.");
+        }
+    }
+
+    public REPL.State parse(String cmdIn) {
         String[] cmd = cmdIn.split(" ",2);
         String[] args = cmd.length<2? null : cmd[1].split(" ");
         switch (cmd[0]) {
@@ -18,13 +44,11 @@ public class GameplayUI implements NotificationHandler {
                 break;
             case "redraw":
             case "r":
-                // FIXME: get new board
-                ChessGame refreshedGame = new ChessGame();
-                printBoard(refreshedGame, ChessGame.TeamColor.WHITE); // FIXME: which team?
+                printBoard(gameCache, team);
                 break;
             case "leave":
                 System.out.println("Leaving the game.");
-                // FIXME: close websocket
+                close();
                 return REPL.State.POSTLOGIN;
             case "move":
                 // TODO: parse move
@@ -38,33 +62,28 @@ public class GameplayUI implements NotificationHandler {
                 Collection<ChessMove> moves = new HashSet<>();
                 ChessPosition focusPos = moves.iterator().next().getStartPosition();
                 Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
-                printBoard(new ChessGame(), ChessGame.TeamColor.WHITE,focusPos,targets);
+                printBoard(new ChessGame(),team,focusPos,targets);
         }
         return REPL.State.GAMEPLAY;
     }
 
     @Override
-    public void notify(String notification) {
-        switch(new Gson().fromJson(notification, ServerMessage.class).getServerMessageType()) {
-            case LOAD_GAME -> {
-                ChessGame retrievedGame = new Gson().fromJson(notification, LoadGameMessage.class).getGame();
-                printBoard(retrievedGame, ChessGame.TeamColor.WHITE);
-            }
-            case ERROR -> {
-                String errorMsg = new Gson().fromJson(notification, ErrorMessage.class).getErrorMessage();
-                System.out.println(errorMsg);
-            }
-            case NOTIFICATION -> {
-                String msg = new Gson().fromJson(notification, NotificationMessage.class).getMessage();
-                System.out.println(msg);
-            }
-        }
+    public void loadGame(ChessGame game) {
+        gameCache = game;
+        printBoard(game,team);
+    }
+    @Override
+    public void sendError(ErrorMessage errorMsg) {
+        System.out.println(errorMsg.getErrorMessage());
+    }
+    @Override
+    public void notify(NotificationMessage notification) {
+        System.out.println(notification.getMessage());
     }
 
     public static void printBoard(ChessGame game, ChessGame.TeamColor team) {
         printBoard(game, team, new ChessPosition(0,0), new HashSet<>());
     }
-
     public static void printBoard(ChessGame game, ChessGame.TeamColor team, ChessPosition focusPos, Collection<ChessPosition> moves) {
         ChessBoard board = game.getBoard();
         String borderColor = EscapeSequences.SET_BG_COLOR_WHITE + EscapeSequences.SET_TEXT_COLOR_BLACK;
