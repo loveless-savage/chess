@@ -104,9 +104,9 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
             }
             case LEAVE -> {
                 GameData newData;
-                if (gameData.whiteUsername().equals(username)) {
+                if (username.equals(gameData.whiteUsername())) {
                     newData = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
-                } else if (gameData.blackUsername().equals(username)) {
+                } else if (username.equals(gameData.blackUsername())) {
                     newData = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
                 } else {
                     newData = gameData;
