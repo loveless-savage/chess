@@ -14,12 +14,10 @@ import java.util.Objects;
 public class ChessPiece {
     private final ChessGame.TeamColor color;
     private final ChessPiece.PieceType type;
-    private final MoveSet moveSet;
 
     public ChessPiece(ChessGame.TeamColor color, ChessPiece.PieceType type) {
         this.color = color;
         this.type = type;
-        moveSet = new MoveSet();
     }
 
     /**
@@ -74,7 +72,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pos) {
-        return moveSet.pieceMoves(board,pos);
+        return new MoveSet().pieceMoves(board,pos);
     }
 
     /**
