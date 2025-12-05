@@ -19,7 +19,6 @@ public class WebsocketFacade extends Endpoint {
         session = container.connectToServer(this, uri);
         session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
-                System.out.println(message);
                 switch(new Gson().fromJson(message, ServerMessage.class).getServerMessageType()) {
                     case LOAD_GAME ->
                             notificationHandler.loadGame(new Gson().fromJson(message, LoadGameMessage.class).getGame());

@@ -4,7 +4,6 @@ import chess.*;
 import client.*;
 import websocket.messages.*;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -37,7 +36,7 @@ public class GameplayUI implements NotificationHandler {
         try {
             ws.session.close();
         } catch (IOException e) {
-            System.out.println("There was an error trying to close the gameplay connection. Check the server.");
+            System.out.println(SERVER_ERROR_STR);
         }
     }
 
@@ -57,7 +56,7 @@ public class GameplayUI implements NotificationHandler {
                 try {
                     ws.leave(authToken,gameID);
                 } catch (IOException e) {
-                    // TODO
+                    System.out.println(SERVER_ERROR_STR);
                 }
                 close();
                 return REPL.State.POSTLOGIN;
@@ -77,7 +76,7 @@ public class GameplayUI implements NotificationHandler {
                 try {
                     ws.makeMove(move,authToken,gameID);
                 } catch (IOException e) {
-                    // TODO
+                    System.out.println(SERVER_ERROR_STR);
                 }
                 break;
             case "resign":
@@ -85,7 +84,7 @@ public class GameplayUI implements NotificationHandler {
                 try {
                     ws.resign(authToken,gameID);
                 } catch (IOException e) {
-                    // TODO
+                    System.out.println(SERVER_ERROR_STR);
                 }
                 break;
             case "highlight":
@@ -105,6 +104,7 @@ public class GameplayUI implements NotificationHandler {
                 Collection<ChessMove> moves = gameCache.validMoves(focusPos);
                 if (moves == null || moves.isEmpty()) {
                     printBoard(gameCache, team, focusPos, new HashSet<>());
+                    // TODO: no piece there
                     System.out.println("This piece cannot move.");
                     // TODO: "Note that this is not your piece"
                 } else {
@@ -118,15 +118,21 @@ public class GameplayUI implements NotificationHandler {
     @Override
     public void loadGame(ChessGame game) {
         gameCache = game;
+        System.out.print("\n");
         printBoard(game,team);
+        System.out.print(">>> ");
     }
     @Override
     public void sendError(ErrorMessage errorMsg) {
+        System.out.print("\n");
         System.out.println(errorMsg.getErrorMessage());
+        System.out.print(">>> ");
     }
     @Override
     public void notify(NotificationMessage notification) {
+        System.out.print("\n");
         System.out.println(notification.getMessage());
+        System.out.print(">>> ");
     }
 
     private static ChessPosition parsePos(String posIn) throws InvalidMoveException {
@@ -194,7 +200,7 @@ public class GameplayUI implements NotificationHandler {
                         + resetColor + "\n";
         }
         outStr += topNums;
-        outStr += EscapeSequences.RESET_BG_COLOR + "\n";
+        outStr += EscapeSequences.RESET_BG_COLOR;
         System.out.print(outStr);
     }
 
@@ -223,4 +229,5 @@ public class GameplayUI implements NotificationHandler {
                     + "help"
                     + EscapeSequences.RESET_TEXT_COLOR
                     + " - list commands\n";
+    private static final String SERVER_ERROR_STR = "There was an error trying to close the gameplay connection. Check the server.";
 }

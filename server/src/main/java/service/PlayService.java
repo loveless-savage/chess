@@ -35,7 +35,6 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
 
     @Override
     public void handleMessage(@NotNull WsMessageContext ctx) {
-        System.out.println("Received message " + ctx.message());
         UserGameCommand cmd;
         try {
             cmd = gson.fromJson(ctx.message(), UserGameCommand.class);
@@ -55,7 +54,6 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
         }
         switch (cmd.getCommandType()) {
             case CONNECT -> {
-                System.out.println("Connecting user "+username+" to game "+cmd.getGameID());
                 NotificationMessage notifyJoin = new NotificationMessage(username+" has joined the game");
                 clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
                         otherCtx.send(gson.toJson(notifyJoin))
@@ -82,7 +80,13 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     ctx.send(gson.toJson(errorMsg));
                     return;
                 }
-                System.out.println("sending loadGame");
+                System.out.println("sending notifyMove");
+                NotificationMessage notifyMove = new NotificationMessage(username+" just moved "+move);
+                clientList.keySet().stream().filter(c -> c.session.isOpen())
+                        .filter(c -> !c.equals(ctx)).forEach(everyCtx ->
+                        everyCtx.send(gson.toJson(notifyMove))
+                );
+                // TODO: are we in check / checkmate / stalemate?
                 GameData newData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), updatedGame);
                 try {
                     gameDAO.update(newData);
@@ -90,17 +94,11 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     // TODO: unauthorized
                     return;
                 }
+                System.out.println("sending loadGame");
                 LoadGameMessage msg = new LoadGameMessage(updatedGame);
                 clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(everyCtx ->
-                    everyCtx.send(gson.toJson(msg))
+                        everyCtx.send(gson.toJson(msg))
                 );
-                System.out.println("sending notifyMove");
-                NotificationMessage notifyMove = new NotificationMessage(username+" just moved "+move); // FIXME
-                clientList.keySet().stream().filter(c -> c.session.isOpen())
-                        .filter(c -> !c.equals(ctx)).forEach(everyCtx ->
-                        everyCtx.send(gson.toJson(notifyMove))
-                );
-                // TODO: are we in check / checkmate / stalemate?
             }
             case LEAVE -> {
                 GameData newData;
@@ -119,10 +117,12 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                 }
                 System.out.println("sending notifyLeave");
                 clientList.remove(ctx);
-                NotificationMessage notifyLeave = new NotificationMessage(username+" has left the game");
-                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
-                    otherCtx.send(gson.toJson(notifyLeave))
-                );
+                if (!clientList.isEmpty()) {
+                    NotificationMessage notifyLeave = new NotificationMessage(username+" has left the game");
+                    clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
+                            otherCtx.send(gson.toJson(notifyLeave))
+                    );
+                }
             }
             case RESIGN -> {
                 // TODO: update game
