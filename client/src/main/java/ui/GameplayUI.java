@@ -2,11 +2,13 @@ package ui;
 
 import chess.*;
 import client.*;
+import websocket.messages.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import com.google.gson.Gson;
 
-public class GameplayUI {
+public class GameplayUI implements NotificationHandler {
     public static REPL.State parse(HttpFacade server, String cmdIn) {
         String[] cmd = cmdIn.split(" ",2);
         String[] args = cmd.length<2? null : cmd[1].split(" ");
@@ -39,6 +41,24 @@ public class GameplayUI {
                 printBoard(new ChessGame(), ChessGame.TeamColor.WHITE,focusPos,targets);
         }
         return REPL.State.GAMEPLAY;
+    }
+
+    @Override
+    public void notify(String notification) {
+        switch(new Gson().fromJson(notification, ServerMessage.class).getServerMessageType()) {
+            case LOAD_GAME -> {
+                ChessGame retrievedGame = new Gson().fromJson(notification, LoadGameMessage.class).getGame();
+                printBoard(retrievedGame, ChessGame.TeamColor.WHITE);
+            }
+            case ERROR -> {
+                String errorMsg = new Gson().fromJson(notification, ErrorMessage.class).getErrorMessage();
+                System.out.println(errorMsg);
+            }
+            case NOTIFICATION -> {
+                String msg = new Gson().fromJson(notification, NotificationMessage.class).getMessage();
+                System.out.println(msg);
+            }
+        }
     }
 
     public static void printBoard(ChessGame game, ChessGame.TeamColor team) {
