@@ -36,7 +36,10 @@ public class REPL {
                 case POSTLOGIN:
                     state = PostloginUI.parse(httpServer, line);
                     if (state == State.GAMEPLAY) {
-                        ChessGame.TeamColor team = ChessGame.TeamColor.WHITE; // FIXME
+                        ChessGame.TeamColor team =
+                                line.toUpperCase().contains("WHITE")? ChessGame.TeamColor.WHITE:
+                                line.toUpperCase().contains("BLACK")? ChessGame.TeamColor.BLACK:
+                                null;
                         gameplayUI.open(httpServer.getAuthToken(),PostloginUI.getSelectedGameID(),team);
                     }
                     break;
