@@ -6,6 +6,7 @@ import websocket.messages.*;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class GameplayUI implements NotificationHandler {
@@ -89,7 +90,18 @@ public class GameplayUI implements NotificationHandler {
                 }
                 break;
             case "resign":
-                // TODO: prompt confirmation, then forfeit
+                String resignMsg =
+                        "Are you sure you want to resign the game? "
+                        + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                        + "[y/n]"
+                        + EscapeSequences.RESET_TEXT_COLOR + " ";
+                System.out.print(resignMsg);
+                String confirmation = new Scanner(System.in).nextLine();
+                if(confirmation == null ||
+                        Character.toLowerCase(confirmation.charAt(0)) != 'y') {
+                   System.out.println("Resignation cancelled. Continuing gameplay");
+                   break;
+                }
                 try {
                     ws.resign(authToken,gameID);
                 } catch (IOException e) {
