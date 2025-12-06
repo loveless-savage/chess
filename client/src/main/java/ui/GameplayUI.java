@@ -61,7 +61,12 @@ public class GameplayUI implements NotificationHandler {
                 close();
                 return REPL.State.POSTLOGIN;
             case "move":
-                // TODO: gameover, turn
+                // TODO: gameover
+                if (team == null) {
+                    System.out.println("Observers cannot make moves");
+                } else if (team != gameCache.getTeamTurn()) {
+                    System.out.println("Not your turn");
+                }
                 if (args == null || args.length<2) {
                     System.out.println("move needs 2 position arguments");
                     break;
@@ -71,6 +76,10 @@ public class GameplayUI implements NotificationHandler {
                     move = new ChessMove(parsePos(args[0]), parsePos(args[1]));
                 } catch (InvalidMoveException e) {
                     System.out.println(e.getLocalizedMessage());
+                    break;
+                }
+                if (gameCache.getBoard().getPiece(move.getStartPosition())==null) {
+                    System.out.println("That position on the board is empty");
                     break;
                 }
                 try {
@@ -101,15 +110,20 @@ public class GameplayUI implements NotificationHandler {
                     System.out.println(e.getMessage());
                     break;
                 }
+                if (gameCache.getBoard().getPiece(focusPos)==null) {
+                    System.out.println("That position on the board is empty");
+                    break;
+                }
                 Collection<ChessMove> moves = gameCache.validMoves(focusPos);
                 if (moves == null || moves.isEmpty()) {
                     printBoard(gameCache, team, focusPos, new HashSet<>());
-                    // TODO: no piece there
                     System.out.println("This piece cannot move.");
-                    // TODO: "Note that this is not your piece"
                 } else {
                     Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
                     printBoard(gameCache,team,focusPos,targets);
+                }
+                if (gameCache.getBoard().getPiece(focusPos).getTeamColor() != team) {
+                    System.out.println("Note that this is not your piece.");
                 }
         }
         return REPL.State.GAMEPLAY;
