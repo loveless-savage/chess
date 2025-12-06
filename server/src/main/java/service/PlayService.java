@@ -39,17 +39,25 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
         try {
             cmd = gson.fromJson(ctx.message(), UserGameCommand.class);
         } catch (JsonSyntaxException e) {
-            ErrorMessage msg = new ErrorMessage("ERROR: command cannot be parsed");
-            ctx.send(gson.toJson(msg));
+            sendError(ctx,"command cannot be parsed");
             return;
         }
         String username;
-        GameData gameData;
+        GameData gameData, newData;
         try {
-            username = authDAO.get(cmd.getAuthToken()).username();
+            AuthData authData = authDAO.get(cmd.getAuthToken());
+            if (authData == null) {
+                sendError(ctx,"bad authtoken. Try signing out and in again.");
+                return;
+            }
+            username = authData.username();
             gameData = gameDAO.get(cmd.getGameID());
+            if (gameData == null) {
+                sendError(ctx,"game cannot be found");
+                return;
+            }
         } catch (DataAccessException e) {
-            // TODO: unauthorized
+            sendError(ctx,"could not connect to database. Check server");
             return;
         }
         switch (cmd.getCommandType()) {
@@ -68,16 +76,14 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                 try {
                     move = gson.fromJson(ctx.message(), MakeMoveCommand.class).getMove();
                 } catch (JsonSyntaxException e) {
-                    ErrorMessage msg = new ErrorMessage("ERROR: command cannot be parsed");
-                    ctx.send(gson.toJson(msg));
+                    sendError(ctx,"command cannot be parsed");
                     return;
                 }
                 ChessGame updatedGame = gameData.game();
                 try {
                     updatedGame.makeMove(move);
                 } catch (InvalidMoveException e) {
-                    ErrorMessage errorMsg = new ErrorMessage("ERROR: "+e.getMessage());
-                    ctx.send(gson.toJson(errorMsg));
+                    sendError(ctx,e.getMessage());
                     return;
                 }
                 System.out.println("sending notifyMove");
@@ -87,11 +93,11 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                         everyCtx.send(gson.toJson(notifyMove))
                 );
                 // TODO: are we in check / checkmate / stalemate?
-                GameData newData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), updatedGame);
+                newData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), updatedGame);
                 try {
                     gameDAO.update(newData);
                 } catch (DataAccessException e) {
-                    // TODO: unauthorized
+                    sendError(ctx,"could not connect to database. Check server");
                     return;
                 }
                 System.out.println("sending loadGame");
@@ -101,7 +107,6 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                 );
             }
             case LEAVE -> {
-                GameData newData;
                 if (username.equals(gameData.whiteUsername())) {
                     newData = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
                 } else if (username.equals(gameData.blackUsername())) {
@@ -112,7 +117,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                 try {
                     gameDAO.update(newData);
                 } catch (DataAccessException e) {
-                    // TODO: unauthorized
+                    sendError(ctx,"could not connect to database. Check server");
                     return;
                 }
                 System.out.println("sending notifyLeave");
@@ -138,5 +143,10 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
     @Override
     public void handleClose(@NotNull WsCloseContext ctx) {
         System.out.println("Websocket closed");
+    }
+
+    private void sendError(WsContext ctx, String errorMsg) {
+        ErrorMessage msg = new ErrorMessage("ERROR: "+errorMsg);
+        ctx.send(gson.toJson(msg));
     }
 }
