@@ -60,6 +60,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
             sendError(ctx,"could not connect to database. Check server");
             return;
         }
+        ChessGame newGame = gameData.game();
         switch (cmd.getCommandType()) {
             case CONNECT -> {
                 NotificationMessage notifyJoin = new NotificationMessage(username+" has joined the game");
@@ -79,21 +80,13 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     sendError(ctx,"command cannot be parsed");
                     return;
                 }
-                ChessGame updatedGame = gameData.game();
                 try {
-                    updatedGame.makeMove(move);
+                    newGame.makeMove(move);
                 } catch (InvalidMoveException e) {
                     sendError(ctx,e.getMessage());
                     return;
                 }
-                System.out.println("sending notifyMove");
-                NotificationMessage notifyMove = new NotificationMessage(username+" just moved "+move);
-                clientList.keySet().stream().filter(c -> c.session.isOpen())
-                        .filter(c -> !c.equals(ctx)).forEach(everyCtx ->
-                        everyCtx.send(gson.toJson(notifyMove))
-                );
-                // TODO: are we in check / checkmate / stalemate?
-                newData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), updatedGame);
+                newData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), newGame);
                 try {
                     gameDAO.update(newData);
                 } catch (DataAccessException e) {
@@ -101,10 +94,33 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     return;
                 }
                 System.out.println("sending loadGame");
-                LoadGameMessage msg = new LoadGameMessage(updatedGame);
+                LoadGameMessage msg = new LoadGameMessage(newGame);
                 clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(everyCtx ->
                         everyCtx.send(gson.toJson(msg))
                 );
+                System.out.println("sending notifyMove");
+                NotificationMessage notifyMove = new NotificationMessage(username+" just moved "+move);
+                clientList.keySet().stream().filter(c -> c.session.isOpen())
+                        .filter(c -> !c.equals(ctx)).forEach(everyCtx ->
+                        everyCtx.send(gson.toJson(notifyMove))
+                );
+                ChessGame.TeamColor nextTurn = newGame.getTeamTurn();
+                if (newGame.isInCheckmate(nextTurn)) {
+                    NotificationMessage notifyCheckmate = new NotificationMessage(nextTurn+" is in checkmate!");
+                    clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
+                            otherCtx.send(gson.toJson(notifyCheckmate))
+                    );
+                } else if (newGame.isInStalemate(newGame.getTeamTurn())) {
+                    NotificationMessage notifyStalemate = new NotificationMessage(nextTurn+" is in stalemate!");
+                    clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
+                            otherCtx.send(gson.toJson(notifyStalemate))
+                    );
+                } else if (newGame.isInCheck(newGame.getTeamTurn())) {
+                    NotificationMessage notifyCheck = new NotificationMessage(nextTurn+" is in check");
+                    clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
+                            otherCtx.send(gson.toJson(notifyCheck))
+                    );
+                }
             }
             case LEAVE -> {
                 if (username.equals(gameData.whiteUsername())) {
@@ -130,7 +146,14 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                 }
             }
             case RESIGN -> {
-                // TODO: update game
+                newGame.setOver();
+                newData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), newGame);
+                try {
+                    gameDAO.update(newData);
+                } catch (DataAccessException e) {
+                    sendError(ctx,"could not connect to database. Check server");
+                    return;
+                }
                 System.out.println("sending notifyResign");
                 NotificationMessage notifyResign = new NotificationMessage(username+" has resigned");
                 clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->

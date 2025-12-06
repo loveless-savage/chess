@@ -62,11 +62,16 @@ public class GameplayUI implements NotificationHandler {
                 close();
                 return REPL.State.POSTLOGIN;
             case "move":
-                // TODO: gameover
+                if (gameCache.isOver()) {
+                    System.out.println("This game is over");
+                    break;
+                }
                 if (team == null) {
                     System.out.println("Observers cannot make moves");
+                    break;
                 } else if (team != gameCache.getTeamTurn()) {
                     System.out.println("Not your turn");
+                    break;
                 }
                 if (args == null || args.length<2) {
                     System.out.println("move needs 2 position arguments");
@@ -110,7 +115,6 @@ public class GameplayUI implements NotificationHandler {
                 break;
             case "highlight":
             case "h":
-                // TODO: gameover
                 if (args == null || args.length<1) {
                     System.out.println("highlight needs 1 position argument");
                     break;
@@ -134,7 +138,9 @@ public class GameplayUI implements NotificationHandler {
                     Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
                     printBoard(focusPos,targets);
                 }
-                if (gameCache.getBoard().getPiece(focusPos).getTeamColor() != team) {
+                if (gameCache.isOver()) {
+                    System.out.println("The game is over, so no pieces can be moved.");
+                } else if (gameCache.getBoard().getPiece(focusPos).getTeamColor() != team) {
                     System.out.println("Note that this is not your piece.");
                 }
         }
@@ -159,6 +165,9 @@ public class GameplayUI implements NotificationHandler {
         System.out.print("\n");
         System.out.println(notification.getMessage());
         System.out.print(">>> ");
+        if (notification.getMessage().contains(" has resigned")) {
+            gameCache.setOver();
+        }
     }
 
     private static ChessPosition parsePos(String posIn) throws InvalidMoveException {

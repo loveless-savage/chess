@@ -13,6 +13,7 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor turn;
+    private boolean isOver = false;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -44,6 +45,14 @@ public class ChessGame {
         turn = nextTurn;
     }
 
+    public boolean isOver() {
+        return isOver;
+    }
+
+    public void setOver() {
+        isOver = true;
+    }
+
     /**
      * Gets a valid moves for a piece at the given location
      *
@@ -53,7 +62,7 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if(piece == null) {
+        if(piece == null || isOver) {
             return null;
         }
         Collection<ChessMove> moves = new HashSet<>();
@@ -80,6 +89,9 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if(isOver) {
+            throw new InvalidMoveException("This game is over, no pieces can be moved");
+        }
         ChessPiece piece = board.getPiece(move.getStartPosition());
         if(piece == null) { // is there a piece to move?
             throw new InvalidMoveException("No piece at "+move.getStartPosition());
@@ -97,6 +109,10 @@ public class ChessGame {
         board.addPiece(move.getStartPosition(),null);
         // switch turns
         setTeamTurn(turn == TeamColor.BLACK ? TeamColor.WHITE : TeamColor.BLACK);
+        // check for checkmate + stalemate
+        if(isInCheckmate(turn) || isInStalemate(turn)) {
+            isOver = true;
+        }
     }
 
     /**
