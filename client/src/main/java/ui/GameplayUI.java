@@ -49,7 +49,7 @@ public class GameplayUI implements NotificationHandler {
                 break;
             case "redraw":
             case "r":
-                printBoard(gameCache, team);
+                printBoard();
                 break;
             case "leave":
                 System.out.println("Leaving the game.");
@@ -116,11 +116,11 @@ public class GameplayUI implements NotificationHandler {
                 }
                 Collection<ChessMove> moves = gameCache.validMoves(focusPos);
                 if (moves == null || moves.isEmpty()) {
-                    printBoard(gameCache, team, focusPos, new HashSet<>());
+                    printBoard(focusPos, new HashSet<>());
                     System.out.println("This piece cannot move.");
                 } else {
                     Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
-                    printBoard(gameCache,team,focusPos,targets);
+                    printBoard(focusPos,targets);
                 }
                 if (gameCache.getBoard().getPiece(focusPos).getTeamColor() != team) {
                     System.out.println("Note that this is not your piece.");
@@ -133,7 +133,7 @@ public class GameplayUI implements NotificationHandler {
     public void loadGame(ChessGame game) {
         gameCache = game;
         System.out.print("\n");
-        printBoard(game,team);
+        printBoard();
         System.out.print(">>> ");
     }
     @Override
@@ -161,11 +161,11 @@ public class GameplayUI implements NotificationHandler {
         return new ChessPosition(row,col);
     }
 
-    public static void printBoard(ChessGame game, ChessGame.TeamColor team) {
-        printBoard(game, team, new ChessPosition(0,0), new HashSet<>());
+    public void printBoard() {
+        printBoard(new ChessPosition(0,0), new HashSet<>());
     }
-    public static void printBoard(ChessGame game, ChessGame.TeamColor team, ChessPosition focusPos, Collection<ChessPosition> moves) {
-        ChessBoard board = game.getBoard();
+    public void printBoard(ChessPosition focusPos, Collection<ChessPosition> moves) {
+        ChessBoard board = gameCache.getBoard();
         String borderColor = EscapeSequences.SET_BG_COLOR_WHITE + EscapeSequences.SET_TEXT_COLOR_BLACK;
         String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
         String darkColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
