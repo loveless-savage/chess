@@ -95,14 +95,18 @@ public class GameplayUI implements NotificationHandler {
                 }
                 break;
             case "resign":
+                if (gameCache.isOver()) {
+                    System.out.println("Game is already over");
+                    break;
+                }
                 String resignMsg =
                         "Are you sure you want to resign the game? "
                         + EscapeSequences.SET_TEXT_COLOR_YELLOW
-                        + "[y/n]"
+                        + "y/[n]"
                         + EscapeSequences.RESET_TEXT_COLOR + " ";
                 System.out.print(resignMsg);
                 String confirmation = new Scanner(System.in).nextLine();
-                if(confirmation == null ||
+                if(confirmation == null || confirmation.isEmpty() ||
                         Character.toLowerCase(confirmation.charAt(0)) != 'y') {
                    System.out.println("Resignation cancelled. Continuing gameplay");
                    break;
@@ -127,21 +131,28 @@ public class GameplayUI implements NotificationHandler {
                     break;
                 }
                 if (gameCache.getBoard().getPiece(focusPos)==null) {
+                    printBoard(focusPos, new HashSet<>());
                     System.out.println("That position on the board is empty");
                     break;
                 }
                 Collection<ChessMove> moves = gameCache.validMoves(focusPos);
                 if (moves == null || moves.isEmpty()) {
                     printBoard(focusPos, new HashSet<>());
-                    System.out.println("This piece cannot move.");
+                    if (!gameCache.isOver()) {
+                        System.out.println("This piece cannot move.");
+                    }
                 } else {
                     Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
                     printBoard(focusPos,targets);
                 }
                 if (gameCache.isOver()) {
                     System.out.println("The game is over, so no pieces can be moved.");
+                } else if (team == null) {
+                    System.out.println("Note that you are not a player.");
                 } else if (gameCache.getBoard().getPiece(focusPos).getTeamColor() != team) {
                     System.out.println("Note that this is not your piece.");
+                } else if (gameCache.getTeamTurn() != team) {
+                    System.out.println("Note that it is not your turn.");
                 }
         }
         return REPL.State.GAMEPLAY;
@@ -163,6 +174,7 @@ public class GameplayUI implements NotificationHandler {
     @Override
     public void notify(NotificationMessage notification) {
         System.out.print("\n");
+        // TODO: replace "(7,1)" with "a7"
         System.out.println(notification.getMessage());
         System.out.print(">>> ");
         if (notification.getMessage().contains(" has resigned")) {
@@ -188,6 +200,9 @@ public class GameplayUI implements NotificationHandler {
     public void printBoard(ChessPosition focusPos, Collection<ChessPosition> moves) {
         ChessBoard board = gameCache.getBoard();
         String borderColor = EscapeSequences.SET_BG_COLOR_WHITE + EscapeSequences.SET_TEXT_COLOR_BLACK;
+        if (gameCache.isOver()) {
+            borderColor = EscapeSequences.SET_BG_COLOR_BLUE + EscapeSequences.SET_TEXT_COLOR_BLACK;
+        }
         String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
         String darkColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
         String focusHighlightColor = EscapeSequences.SET_BG_COLOR_BLUE;
@@ -241,7 +256,7 @@ public class GameplayUI implements NotificationHandler {
 
     private static final String HELP_STR =
             EscapeSequences.SET_TEXT_COLOR_YELLOW
-                    + "redraw|r"
+                    + "[r]edraw"
                     + EscapeSequences.RESET_TEXT_COLOR
                     + " - redraw chess board\n"
                     + EscapeSequences.SET_TEXT_COLOR_YELLOW
@@ -257,7 +272,7 @@ public class GameplayUI implements NotificationHandler {
                     + EscapeSequences.RESET_TEXT_COLOR
                     + " - forfeit the game. Does not leave\n"
                     + EscapeSequences.SET_TEXT_COLOR_YELLOW
-                    + "highlight|h <startPos>"
+                    + "[h]ighlight <startPos>"
                     + EscapeSequences.RESET_TEXT_COLOR
                     + " - highlight legal moves for selected piece. Format argument like 'g4' or 'a6'\n"
                     + EscapeSequences.SET_TEXT_COLOR_YELLOW
