@@ -63,7 +63,16 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
         ChessGame newGame = gameData.game();
         switch (cmd.getCommandType()) {
             case CONNECT -> {
-                NotificationMessage notifyJoin = new NotificationMessage(username+" has joined the game");
+                String joinMsg = username+" has joined the game";
+                if (username.equals(gameData.whiteUsername())) {
+                    joinMsg += " as WHITE";
+                } else if (username.equals(gameData.blackUsername())) {
+                    joinMsg += " as BLACK";
+                } else {
+                    joinMsg = username+" is observing the game";
+                }
+                // TODO: only send to same game players
+                NotificationMessage notifyJoin = new NotificationMessage(joinMsg);
                 clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
                         otherCtx.send(gson.toJson(notifyJoin))
                 );
