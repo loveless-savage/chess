@@ -5,6 +5,7 @@ import client.*;
 import websocket.messages.*;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -83,9 +84,34 @@ public class GameplayUI implements NotificationHandler {
                     System.out.println(e.getLocalizedMessage());
                     break;
                 }
-                if (gameCache.getBoard().getPiece(move.getStartPosition())==null) {
+                ChessPiece piece = gameCache.getBoard().getPiece(move.getStartPosition());
+                if (piece == null) {
                     System.out.println("That position on the board is empty");
                     break;
+                } else if (piece.getPieceType()==ChessPiece.PieceType.PAWN) {
+                    if (piece.getTeamColor()==ChessGame.TeamColor.WHITE && move.getEndPosition().getRow()==8
+                     || piece.getTeamColor()==ChessGame.TeamColor.BLACK && move.getEndPosition().getRow()==1) {
+                        String promoQ = "What should this pawn be promoted to? \n"
+                                + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                                + "q(queen) | b(bishop) | n(knight) | r(rook)"
+                                + EscapeSequences.RESET_TEXT_COLOR + " ";
+                        System.out.print(promoQ);
+                        String promoResponse = new Scanner(System.in).nextLine();
+                        if (promoResponse == null || promoResponse.isEmpty()
+                            || !Set.of('q','b','n','r').contains(promoResponse.charAt(0))) {
+                            System.out.println("Input not understood. Move was not made");
+                            break;
+                        }
+                        move = new ChessMove(
+                                move.getStartPosition(),move.getEndPosition(),
+                                switch(promoResponse.charAt(0)){
+                                    case 'q' -> ChessPiece.PieceType.QUEEN;
+                                    case 'b' -> ChessPiece.PieceType.BISHOP;
+                                    case 'n' -> ChessPiece.PieceType.KNIGHT;
+                                    case 'r' -> ChessPiece.PieceType.ROOK;
+                                    default -> null;
+                                });
+                    }
                 }
                 try {
                     ws.makeMove(move,authToken,gameID);
