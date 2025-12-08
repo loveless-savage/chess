@@ -59,7 +59,6 @@ public class GameplayUI implements NotificationHandler {
                 } catch (IOException e) {
                     System.out.println(SERVER_ERROR_STR);
                 }
-                close();
                 return REPL.State.POSTLOGIN;
             case "move":
                 if (gameCache.isOver()) {
