@@ -200,10 +200,10 @@ public class GameplayUI implements NotificationHandler {
         ChessBoard board = gameCache.getBoard();
         String borderColor = EscapeSequences.SET_BG_COLOR_WHITE + EscapeSequences.SET_TEXT_COLOR_BLACK;
         if (gameCache.isOver()) {
-            borderColor = EscapeSequences.SET_BG_COLOR_BLUE + EscapeSequences.SET_TEXT_COLOR_BLACK;
+            borderColor = EscapeSequences.SET_BG_COLOR_YELLOW + EscapeSequences.SET_TEXT_COLOR_BLACK;
         }
         String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
-        String darkColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
+        String darkColor = EscapeSequences.SET_BG_COLOR_MED_GREY;
         String focusHighlightColor = EscapeSequences.SET_BG_COLOR_BLUE;
         String lightHighlightColor = EscapeSequences.SET_BG_COLOR_GREEN;
         String darkHighlightColor = EscapeSequences.SET_BG_COLOR_DARK_GREEN;
