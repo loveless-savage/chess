@@ -4,7 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import websocket.commands.*;
 import websocket.messages.*;
-import javax.websocket.*;
+import jakarta.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import com.google.gson.Gson;
