@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import websocket.commands.*;
 import websocket.messages.*;
@@ -35,8 +36,8 @@ public class WebsocketFacade extends Endpoint {
         this("localhost",8080,notificationHandler);
     }
 
-    public void connect(String authToken, int gameID) throws IOException {
-        UserGameCommand cmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT,authToken,gameID);
+    public void connect(String authToken, int gameID, ChessGame.TeamColor team) throws IOException {
+        PlayCommand cmd = new PlayCommand(authToken,gameID,team);
         session.getBasicRemote().sendText(new Gson().toJson(cmd));
     }
 

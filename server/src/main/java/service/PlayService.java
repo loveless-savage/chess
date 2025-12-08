@@ -1,5 +1,6 @@
 package service;
 
+import java.util.Objects;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ import websocket.messages.*;
 public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     final AuthDAO authDAO;
     final GameDAO gameDAO;
-    private final Map<WsContext,String> clientList = new HashMap<>();
+    private final Map<WsContext,PlayCommand> clientList = new HashMap<>();
     private static final Gson gson = new Gson();
 
     public PlayService() {
@@ -63,20 +64,29 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
         ChessGame newGame = gameData.game();
         switch (cmd.getCommandType()) {
             case CONNECT -> {
-                String joinMsg = username+" has joined the game";
-                if (username.equals(gameData.whiteUsername())) {
-                    joinMsg += " as WHITE";
-                } else if (username.equals(gameData.blackUsername())) {
-                    joinMsg += " as BLACK";
-                } else {
-                    joinMsg = username+" is observing the game";
+                PlayCommand connectCmd;
+                try {
+                    connectCmd = new Gson().fromJson(ctx.message(), PlayCommand.class);
+                } catch (JsonSyntaxException e) {
+                    sendError(ctx,"command cannot be parsed");
+                    return;
                 }
-                // TODO: only send to same game players
+                String joinMsg = username;
+                if (connectCmd.getTeam()==ChessGame.TeamColor.WHITE) {
+                    joinMsg += " has joined the game as WHITE";
+                } else if (connectCmd.getTeam()==ChessGame.TeamColor.BLACK) {
+                    joinMsg += " has joined the game as BLACK";
+                } else {
+                    joinMsg += " is observing the game";
+                }
                 NotificationMessage notifyJoin = new NotificationMessage(joinMsg);
-                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
+                clientList.keySet().stream().filter(
+                        c -> c.session.isOpen() &&
+                        Objects.equals(clientList.get(c).getGameID(), connectCmd.getGameID())
+                ).forEach(otherCtx ->
                         otherCtx.send(gson.toJson(notifyJoin))
                 );
-                clientList.put(ctx,cmd.getAuthToken());
+                clientList.put(ctx,connectCmd);
                 System.out.println("sending loadGame");
                 LoadGameMessage msg = new LoadGameMessage(gameData.game());
                 ctx.send(gson.toJson(msg));
@@ -102,43 +112,61 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     sendError(ctx,"could not connect to database. Check server");
                     return;
                 }
+                var allClients = clientList.keySet().stream().filter(
+                        c -> c.session.isOpen() &&
+                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
+                );
                 System.out.println("sending loadGame");
                 LoadGameMessage msg = new LoadGameMessage(newGame);
-                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(everyCtx ->
+                clientList.keySet().stream().filter(
+                        c -> c.session.isOpen() &&
+                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
+                ).forEach(everyCtx ->
                         everyCtx.send(gson.toJson(msg))
                 );
                 System.out.println("sending notifyMove");
                 NotificationMessage notifyMove = new NotificationMessage(username+" just moved "+move);
-                clientList.keySet().stream().filter(c -> c.session.isOpen())
-                        .filter(c -> !c.equals(ctx)).forEach(everyCtx ->
+                clientList.keySet().stream().filter(
+                        c -> c.session.isOpen() &&
+                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID()) &&
+                        !c.equals(ctx)
+                ).forEach(everyCtx ->
                         everyCtx.send(gson.toJson(notifyMove))
                 );
                 ChessGame.TeamColor nextTurn = newGame.getTeamTurn();
+                String nextUser = nextTurn==ChessGame.TeamColor.WHITE? newData.whiteUsername():newData.blackUsername();
                 if (newGame.isInCheckmate(nextTurn)) {
-                    NotificationMessage notifyCheckmate = new NotificationMessage(nextTurn+" is in checkmate!");
-                    clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
-                            otherCtx.send(gson.toJson(notifyCheckmate))
+                    NotificationMessage notifyCheckmate = new NotificationMessage(nextUser+" is in checkmate!");
+                    clientList.keySet().stream().filter(
+                            c -> c.session.isOpen() &&
+                            Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
+                    ).forEach(everyCtx ->
+                            everyCtx.send(gson.toJson(notifyCheckmate))
                     );
                 } else if (newGame.isInStalemate(newGame.getTeamTurn())) {
-                    NotificationMessage notifyStalemate = new NotificationMessage(nextTurn+" is in stalemate!");
-                    clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
-                            otherCtx.send(gson.toJson(notifyStalemate))
+                    NotificationMessage notifyStalemate = new NotificationMessage(nextUser+" is in stalemate!");
+                    clientList.keySet().stream().filter(
+                            c -> c.session.isOpen() &&
+                            Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
+                    ).forEach(everyCtx ->
+                            everyCtx.send(gson.toJson(notifyStalemate))
                     );
                 } else if (newGame.isInCheck(newGame.getTeamTurn())) {
-                    NotificationMessage notifyCheck = new NotificationMessage(nextTurn+" is in check");
-                    clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
-                            otherCtx.send(gson.toJson(notifyCheck))
+                    NotificationMessage notifyCheck = new NotificationMessage(nextUser+" is in check");
+                    clientList.keySet().stream().filter(
+                            c -> c.session.isOpen() &&
+                            Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
+                    ).forEach(everyCtx ->
+                            everyCtx.send(gson.toJson(notifyCheck))
                     );
                 }
             }
             case LEAVE -> {
-                if (username.equals(gameData.whiteUsername())) {
-                    newData = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
-                } else if (username.equals(gameData.blackUsername())) {
-                    newData = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
-                } else {
-                    newData = gameData;
-                }
+                newData = switch(clientList.get(ctx).getTeam()) {
+                    case WHITE -> new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+                    case BLACK -> new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
+                    case null -> gameData;
+                };
                 try {
                     gameDAO.update(newData);
                 } catch (DataAccessException e) {
@@ -146,13 +174,15 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     return;
                 }
                 System.out.println("sending notifyLeave");
+                NotificationMessage notifyLeave = new NotificationMessage(username+" has left the game");
+                clientList.keySet().stream().filter(
+                        c -> c.session.isOpen() &&
+                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID()) &&
+                        !c.equals(ctx)
+                ).forEach(everyCtx ->
+                        everyCtx.send(gson.toJson(notifyLeave))
+                );
                 clientList.remove(ctx);
-                if (!clientList.isEmpty()) {
-                    NotificationMessage notifyLeave = new NotificationMessage(username+" has left the game");
-                    clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
-                            otherCtx.send(gson.toJson(notifyLeave))
-                    );
-                }
             }
             case RESIGN -> {
                 newGame.setOver();
@@ -165,8 +195,11 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                 }
                 System.out.println("sending notifyResign");
                 NotificationMessage notifyResign = new NotificationMessage(username+" has resigned");
-                clientList.keySet().stream().filter(c -> c.session.isOpen()).forEach(otherCtx ->
-                    otherCtx.send(gson.toJson(notifyResign))
+                clientList.keySet().stream().filter(
+                        c -> c.session.isOpen() &&
+                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
+                ).forEach(everyCtx ->
+                    everyCtx.send(gson.toJson(notifyResign))
                 );
             }
         }

@@ -23,7 +23,7 @@ public class GameplayUI implements NotificationHandler {
         try {
             ws = new WebsocketFacade(this);
             this.team = team;
-            ws.connect(authToken,gameID);
+            ws.connect(authToken,gameID,team);
         } catch (Exception e) {
             System.out.println("Failed to open a connection. Is the server running?");
         }
