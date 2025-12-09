@@ -60,18 +60,10 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
             return;
         }
         switch (cmd.getCommandType()) {
-            case CONNECT -> {
-                connect(ctx,username,gameData,cmd);
-            }
-            case MAKE_MOVE -> {
-                makeMove(ctx,username,gameData);
-            }
-            case LEAVE -> {
-                leave(ctx,username,gameData);
-            }
-            case RESIGN -> {
-                resign(ctx,username,gameData);
-            }
+            case CONNECT -> connect(ctx,username,gameData,cmd);
+            case MAKE_MOVE -> makeMove(ctx,username,gameData);
+            case LEAVE -> leave(ctx,username,gameData);
+            case RESIGN -> resign(ctx,username,gameData);
         }
     }
 
