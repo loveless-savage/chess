@@ -62,17 +62,12 @@ public class GameplayUI implements NotificationHandler {
                 }
                 return REPL.State.POSTLOGIN;
             case "move":
-                if (gameCache.isOver()) {
-                    System.out.println("This game is over");
+                String gameStateAbort = gameCache.stateDialog(team);
+                if (gameStateAbort != null) {
+                    System.out.println(gameStateAbort);
                     break;
                 }
-                if (team == null) {
-                    System.out.println("Observers cannot make moves");
-                    break;
-                } else if (team != gameCache.getTeamTurn()) {
-                    System.out.println("Not your turn");
-                    break;
-                }
+
                 if (args == null || args.length<2) {
                     System.out.println("move needs 2 position arguments");
                     break;
@@ -84,33 +79,18 @@ public class GameplayUI implements NotificationHandler {
                     System.out.println(e.getLocalizedMessage());
                     break;
                 }
-                ChessPiece piece = gameCache.getBoard().getPiece(move.getStartPosition());
-                if (piece == null) {
-                    System.out.println("That position on the board is empty");
-                    break;
-                } else if (piece.getPieceType()==ChessPiece.PieceType.PAWN) {
-                    if (piece.getTeamColor()==ChessGame.TeamColor.WHITE && move.getEndPosition().getRow()==8
-                     || piece.getTeamColor()==ChessGame.TeamColor.BLACK && move.getEndPosition().getRow()==1) {
-                        String promoQ = "What should this pawn be promoted to? \n"
-                                + EscapeSequences.SET_TEXT_COLOR_YELLOW
-                                + "q(queen) | b(bishop) | n(knight) | r(rook)"
-                                + EscapeSequences.RESET_TEXT_COLOR + " ";
-                        System.out.print(promoQ);
-                        String promoResponse = new Scanner(System.in).nextLine();
-                        if (promoResponse == null || promoResponse.isEmpty()
-                            || !Set.of('q','b','n','r').contains(promoResponse.charAt(0))) {
-                            System.out.println("Input not understood. Move was not made");
+
+                try {
+                    gameCache.makeMove(move, team);
+                } catch (InvalidMoveException e) {
+                    if (e.getLocalizedMessage().equals("pawn was not promoted")) {
+                        move = promotePawn(move);
+                        if (move == null) {
                             break;
                         }
-                        move = new ChessMove(
-                                move.getStartPosition(),move.getEndPosition(),
-                                switch(promoResponse.charAt(0)){
-                                    case 'q' -> ChessPiece.PieceType.QUEEN;
-                                    case 'b' -> ChessPiece.PieceType.BISHOP;
-                                    case 'n' -> ChessPiece.PieceType.KNIGHT;
-                                    case 'r' -> ChessPiece.PieceType.ROOK;
-                                    default -> null;
-                                });
+                    } else {
+                        System.out.println(e.getLocalizedMessage());
+                        break;
                     }
                 }
                 try {
@@ -152,7 +132,7 @@ public class GameplayUI implements NotificationHandler {
                 try {
                     focusPos = parsePos(args[0]);
                 } catch (InvalidMoveException e) {
-                    System.out.println(e.getMessage());
+                    System.out.println(e.getLocalizedMessage());
                     break;
                 }
                 if (gameCache.getBoard().getPiece(focusPos)==null) {
@@ -216,6 +196,29 @@ public class GameplayUI implements NotificationHandler {
             throw new InvalidMoveException(posIn+" is not a valid board position");
         }
         return new ChessPosition(row,col);
+    }
+
+    private ChessMove promotePawn(ChessMove move) {
+        String promoQ = "What should this pawn be promoted to? \n"
+                + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                + "q(queen) | b(bishop) | n(knight) | r(rook)"
+                + EscapeSequences.RESET_TEXT_COLOR + " ";
+        System.out.print(promoQ);
+        String promoResponse = new Scanner(System.in).nextLine();
+        if (promoResponse == null || promoResponse.isEmpty()
+                || !Set.of('q','b','n','r').contains(promoResponse.charAt(0))) {
+            System.out.println("Input not understood. Move was not made");
+            return null;
+        }
+        return new ChessMove(
+                move.getStartPosition(),move.getEndPosition(),
+                switch(promoResponse.charAt(0)){
+                    case 'q' -> ChessPiece.PieceType.QUEEN;
+                    case 'b' -> ChessPiece.PieceType.BISHOP;
+                    case 'n' -> ChessPiece.PieceType.KNIGHT;
+                    case 'r' -> ChessPiece.PieceType.ROOK;
+                    default -> null;
+                });
     }
 
     public void printBoard() {

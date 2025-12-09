@@ -17,7 +17,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
     final AuthDAO authDAO;
     final GameDAO gameDAO;
     private final Map<WsContext,PlayCommand> clientList = new HashMap<>();
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
 
     public PlayService() {
         authDAO = new AuthDAO();
@@ -31,14 +31,13 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
     @Override
     public void handleConnect(@NotNull WsConnectContext ctx) {
         ctx.enableAutomaticPings();
-        System.out.println("Websocket user connected");
     }
 
     @Override
     public void handleMessage(@NotNull WsMessageContext ctx) {
         UserGameCommand cmd;
         try {
-            cmd = gson.fromJson(ctx.message(), UserGameCommand.class);
+            cmd = GSON.fromJson(ctx.message(), UserGameCommand.class);
         } catch (JsonSyntaxException e) {
             sendError(ctx,"command cannot be parsed");
             return;
@@ -84,25 +83,26 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                         c -> c.session.isOpen() &&
                         Objects.equals(clientList.get(c).getGameID(), connectCmd.getGameID())
                 ).forEach(otherCtx ->
-                        otherCtx.send(gson.toJson(notifyJoin))
+                        otherCtx.send(GSON.toJson(notifyJoin))
                 );
                 clientList.put(ctx,connectCmd);
-                System.out.println("sending loadGame");
                 LoadGameMessage msg = new LoadGameMessage(gameData.game());
-                ctx.send(gson.toJson(msg));
+                ctx.send(GSON.toJson(msg));
             }
             case MAKE_MOVE -> {
                 ChessMove move;
                 try {
-                    move = gson.fromJson(ctx.message(), MakeMoveCommand.class).getMove();
+                    move = GSON.fromJson(ctx.message(), MakeMoveCommand.class).getMove();
                 } catch (JsonSyntaxException e) {
                     sendError(ctx,"command cannot be parsed");
                     return;
                 }
+
+                ChessGame.TeamColor team = clientList.get(ctx).getTeam();
                 try {
-                    newGame.makeMove(move);
+                    newGame.makeMove(move,team);
                 } catch (InvalidMoveException e) {
-                    sendError(ctx,e.getMessage());
+                    sendError(ctx,e.getLocalizedMessage());
                     return;
                 }
                 newData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), newGame);
@@ -116,22 +116,20 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                         c -> c.session.isOpen() &&
                         Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
                 );
-                System.out.println("sending loadGame");
                 LoadGameMessage msg = new LoadGameMessage(newGame);
                 clientList.keySet().stream().filter(
                         c -> c.session.isOpen() &&
                         Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
                 ).forEach(everyCtx ->
-                        everyCtx.send(gson.toJson(msg))
+                        everyCtx.send(GSON.toJson(msg))
                 );
-                System.out.println("sending notifyMove");
                 NotificationMessage notifyMove = new NotificationMessage(username+" just moved "+move);
                 clientList.keySet().stream().filter(
                         c -> c.session.isOpen() &&
                         Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID()) &&
                         !c.equals(ctx)
                 ).forEach(everyCtx ->
-                        everyCtx.send(gson.toJson(notifyMove))
+                        everyCtx.send(GSON.toJson(notifyMove))
                 );
                 ChessGame.TeamColor nextTurn = newGame.getTeamTurn();
                 String nextUser = nextTurn==ChessGame.TeamColor.WHITE? newData.whiteUsername():newData.blackUsername();
@@ -141,7 +139,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                             c -> c.session.isOpen() &&
                             Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
                     ).forEach(everyCtx ->
-                            everyCtx.send(gson.toJson(notifyCheckmate))
+                            everyCtx.send(GSON.toJson(notifyCheckmate))
                     );
                 } else if (newGame.isInStalemate(newGame.getTeamTurn())) {
                     NotificationMessage notifyStalemate = new NotificationMessage(nextUser+" is in stalemate!");
@@ -149,7 +147,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                             c -> c.session.isOpen() &&
                             Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
                     ).forEach(everyCtx ->
-                            everyCtx.send(gson.toJson(notifyStalemate))
+                            everyCtx.send(GSON.toJson(notifyStalemate))
                     );
                 } else if (newGame.isInCheck(newGame.getTeamTurn())) {
                     NotificationMessage notifyCheck = new NotificationMessage(nextUser+" is in check");
@@ -157,7 +155,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                             c -> c.session.isOpen() &&
                             Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
                     ).forEach(everyCtx ->
-                            everyCtx.send(gson.toJson(notifyCheck))
+                            everyCtx.send(GSON.toJson(notifyCheck))
                     );
                 }
             }
@@ -173,14 +171,13 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     sendError(ctx,"could not connect to database. Check server");
                     return;
                 }
-                System.out.println("sending notifyLeave");
                 NotificationMessage notifyLeave = new NotificationMessage(username+" has left the game");
                 clientList.keySet().stream().filter(
                         c -> c.session.isOpen() &&
                         Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID()) &&
                         !c.equals(ctx)
                 ).forEach(everyCtx ->
-                        everyCtx.send(gson.toJson(notifyLeave))
+                        everyCtx.send(GSON.toJson(notifyLeave))
                 );
                 clientList.remove(ctx);
             }
@@ -193,25 +190,23 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     sendError(ctx,"could not connect to database. Check server");
                     return;
                 }
-                System.out.println("sending notifyResign");
                 NotificationMessage notifyResign = new NotificationMessage(username+" has resigned");
                 clientList.keySet().stream().filter(
                         c -> c.session.isOpen() &&
                         Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
                 ).forEach(everyCtx ->
-                    everyCtx.send(gson.toJson(notifyResign))
+                    everyCtx.send(GSON.toJson(notifyResign))
                 );
             }
         }
     }
 
     @Override
-    public void handleClose(@NotNull WsCloseContext ctx) {
-        System.out.println("Websocket closed");
-    }
+    public void handleClose(@NotNull WsCloseContext ctx) {}
 
     private void sendError(WsContext ctx, String errorMsg) {
         ErrorMessage msg = new ErrorMessage("ERROR: "+errorMsg);
-        ctx.send(gson.toJson(msg));
+        ctx.send(GSON.toJson(msg));
+        //ctx.session.getRemote().sendString(GSON.toJson(msg));
     }
 }

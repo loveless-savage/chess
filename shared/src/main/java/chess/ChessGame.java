@@ -89,17 +89,21 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if(isOver) {
-            throw new InvalidMoveException("This game is over, no pieces can be moved");
+        makeMove(move,turn);
+    }
+    public void makeMove(ChessMove move, TeamColor team) throws InvalidMoveException {
+        // check for errors related to turns and game state
+        String gameStateAbort = stateDialog(team);
+        if(gameStateAbort != null) {
+            throw new InvalidMoveException(gameStateAbort);
         }
+        // check for errors related to move validity
+        String moveStateAbort = moveDialog(move);
+        if (moveStateAbort != null) {
+            throw new InvalidMoveException(moveStateAbort);
+        }
+
         ChessPiece piece = board.getPiece(move.getStartPosition());
-        if(piece == null) { // is there a piece to move?
-            throw new InvalidMoveException("No piece at "+move.getStartPosition());
-        } else if(piece.getTeamColor() != turn) { // is it that piece's turn?
-            throw new InvalidMoveException("Not "+piece.getTeamColor()+"'s turn!");
-        } else if(!validMoves(move.getStartPosition()).contains(move)) { // is this move valid?
-            throw new InvalidMoveException(piece+" cannot move to "+move.getEndPosition()+"!");
-        }
         // promote pawn if applicable
         if(move.getPromotionPiece() != null) {
             piece = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
@@ -188,6 +192,39 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public String stateDialog(TeamColor team) {
+        String out = null;
+        if (isOver) {
+            out = "this game is over, no pieces can be moved";
+        } else if (team == null) {
+            out = "observers cannot make moves";
+        } else if (team != turn) {
+            out = "not your turn";
+        }
+        return out;
+    }
+
+    public String moveDialog(ChessMove move) {
+        String moveStateAbort = null;
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if(piece == null) { // is there a piece to move?
+            moveStateAbort = "that position on the board is empty";
+        } else if(piece.getTeamColor() != turn) { // is it that piece's turn?
+            moveStateAbort = "that is not your piece";
+        } else if(piece.getPieceType()==ChessPiece.PieceType.PAWN && move.getPromotionPiece()==null) {
+            if ((piece.getTeamColor()==ChessGame.TeamColor.WHITE && move.getEndPosition().getRow()==8
+              || piece.getTeamColor()==ChessGame.TeamColor.BLACK && move.getEndPosition().getRow()==1)
+              && validMoves(move.getStartPosition()).contains(
+                      new ChessMove(move.getStartPosition(),move.getEndPosition(),ChessPiece.PieceType.QUEEN)
+              )) {
+                moveStateAbort = "pawn was not promoted";
+            }
+        } else if(!validMoves(move.getStartPosition()).contains(move)) { // is this move valid?
+            moveStateAbort = piece+" cannot move to "+move.getEndPosition();
+        }
+        return moveStateAbort;
     }
 
     /**
