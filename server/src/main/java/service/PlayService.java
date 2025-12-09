@@ -63,25 +63,22 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
         ChessGame newGame = gameData.game();
         switch (cmd.getCommandType()) {
             case CONNECT -> {
-                PlayCommand connectCmd;
-                try {
-                    connectCmd = new Gson().fromJson(ctx.message(), PlayCommand.class);
-                } catch (JsonSyntaxException e) {
-                    sendError(ctx,"command cannot be parsed");
-                    return;
-                }
+                ChessGame.TeamColor team = null;
                 String joinMsg = username;
-                if (connectCmd.getTeam()==ChessGame.TeamColor.WHITE) {
+                if (username.equals(gameData.whiteUsername())) {
+                    team = ChessGame.TeamColor.WHITE;
                     joinMsg += " has joined the game as WHITE";
-                } else if (connectCmd.getTeam()==ChessGame.TeamColor.BLACK) {
+                } else if (username.equals(gameData.blackUsername())) {
+                    team = ChessGame.TeamColor.BLACK;
                     joinMsg += " has joined the game as BLACK";
                 } else {
                     joinMsg += " is observing the game";
                 }
+                PlayCommand connectCmd = new PlayCommand(cmd.getAuthToken(),cmd.getGameID(),team);
                 NotificationMessage notifyJoin = new NotificationMessage(joinMsg);
                 clientList.keySet().stream().filter(
                         c -> c.session.isOpen() &&
-                        Objects.equals(clientList.get(c).getGameID(), connectCmd.getGameID())
+                        Objects.equals(clientList.get(c).getGameID(), cmd.getGameID())
                 ).forEach(otherCtx ->
                         otherCtx.send(GSON.toJson(notifyJoin))
                 );
