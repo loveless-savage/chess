@@ -53,116 +53,18 @@ public class GameplayUI implements NotificationHandler {
             case "r":
                 printBoard();
                 break;
-            case "leave":
-                System.out.println("Leaving the game.");
-                try {
-                    ws.leave(authToken,gameID);
-                } catch (IOException e) {
-                    System.out.println(SERVER_ERROR_STR);
-                }
-                return REPL.State.POSTLOGIN;
             case "move":
-                String gameStateAbort = gameCache.stateDialog(team);
-                if (gameStateAbort != null) {
-                    System.out.println(gameStateAbort);
-                    break;
-                }
-
-                if (args == null || args.length<2) {
-                    System.out.println("move needs 2 position arguments");
-                    break;
-                }
-                ChessMove move;
-                try {
-                    move = new ChessMove(parsePos(args[0]), parsePos(args[1]));
-                } catch (InvalidMoveException e) {
-                    System.out.println(e.getLocalizedMessage());
-                    break;
-                }
-
-                try {
-                    gameCache.makeMove(move, team);
-                } catch (InvalidMoveException e) {
-                    if (e.getLocalizedMessage().equals("pawn was not promoted")) {
-                        move = promotePawn(move);
-                        if (move == null) {
-                            break;
-                        }
-                    } else {
-                        System.out.println(e.getLocalizedMessage());
-                        break;
-                    }
-                }
-                try {
-                    ws.makeMove(move,authToken,gameID);
-                } catch (IOException e) {
-                    System.out.println(SERVER_ERROR_STR);
-                }
+                makeMove(args);
                 break;
+            case "leave":
+                leave();
+                return REPL.State.POSTLOGIN;
             case "resign":
-                if (team == null) {
-                    System.out.println("you are not a player");
-                    break;
-                }
-                if (gameCache.isOver()) {
-                    System.out.println("game is already over");
-                    break;
-                }
-                String resignMsg =
-                        "Are you sure you want to resign the game? "
-                        + EscapeSequences.SET_TEXT_COLOR_YELLOW
-                        + "y/[n]"
-                        + EscapeSequences.RESET_TEXT_COLOR + " ";
-                System.out.print(resignMsg);
-                String confirmation = new Scanner(System.in).nextLine();
-                if(confirmation == null || confirmation.isEmpty() ||
-                        Character.toLowerCase(confirmation.charAt(0)) != 'y') {
-                   System.out.println("Resignation cancelled. Continuing gameplay");
-                   break;
-                }
-                try {
-                    ws.resign(authToken,gameID);
-                } catch (IOException e) {
-                    System.out.println(SERVER_ERROR_STR);
-                }
+                resign();
                 break;
             case "highlight":
             case "h":
-                if (args == null || args.length<1) {
-                    System.out.println("highlight needs 1 position argument");
-                    break;
-                }
-                ChessPosition focusPos;
-                try {
-                    focusPos = parsePos(args[0]);
-                } catch (InvalidMoveException e) {
-                    System.out.println(e.getLocalizedMessage());
-                    break;
-                }
-                if (gameCache.getBoard().getPiece(focusPos)==null) {
-                    printBoard(focusPos, new HashSet<>());
-                    System.out.println("That position on the board is empty");
-                    break;
-                }
-                Collection<ChessMove> moves = gameCache.validMoves(focusPos);
-                if (moves == null || moves.isEmpty()) {
-                    printBoard(focusPos, new HashSet<>());
-                    if (!gameCache.isOver()) {
-                        System.out.println("This piece cannot move.");
-                    }
-                } else {
-                    Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
-                    printBoard(focusPos,targets);
-                }
-                if (gameCache.isOver()) {
-                    System.out.println("The game is over, so no pieces can be moved.");
-                } else if (team == null) {
-                    System.out.println("Note that you are not a player.");
-                } else if (gameCache.getBoard().getPiece(focusPos).getTeamColor() != team) {
-                    System.out.println("Note that this is not your piece.");
-                } else if (gameCache.getTeamTurn() != team) {
-                    System.out.println("Note that it is not your turn.");
-                }
+                highlight(args);
         }
         return REPL.State.GAMEPLAY;
     }
@@ -187,6 +89,180 @@ public class GameplayUI implements NotificationHandler {
         System.out.print(">>> ");
         if (notification.getMessage().contains(" has resigned")) {
             gameCache.setOver();
+        }
+    }
+
+    public void printBoard() {
+        printBoard(new ChessPosition(0,0), new HashSet<>());
+    }
+    public void printBoard(ChessPosition focusPos, Collection<ChessPosition> moves) {
+        ChessBoard board = gameCache.getBoard();
+        String borderColor = EscapeSequences.SET_BG_COLOR_WHITE + EscapeSequences.SET_TEXT_COLOR_BLACK;
+        if (gameCache.isOver()) {
+            borderColor = EscapeSequences.SET_BG_COLOR_YELLOW + EscapeSequences.SET_TEXT_COLOR_BLACK;
+        }
+        String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+        String darkColor = EscapeSequences.SET_BG_COLOR_MED_GREY;
+        String focusHighlightColor = EscapeSequences.SET_BG_COLOR_BLUE;
+        String lightHighlightColor = EscapeSequences.SET_BG_COLOR_GREEN;
+        String darkHighlightColor = EscapeSequences.SET_BG_COLOR_DARK_GREEN;
+        String resetColor = EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR;
+        String lightPieceColor = EscapeSequences.SET_TEXT_COLOR_WHITE;
+        String darkPieceColor = EscapeSequences.SET_TEXT_COLOR_BLACK;
+
+        String outStr = borderColor;
+        String topNums = borderColor + (team == ChessGame.TeamColor.BLACK?
+                "    h  g  f  e  d  c  b  a    ":
+                "    a  b  c  d  e  f  g  h    ")
+                + resetColor + "\n";
+        outStr += topNums;
+
+        for (int i = 0; i < 8; i++) {
+            outStr += borderColor + " " + ((team==ChessGame.TeamColor.BLACK)?1+i:8-i) + " ";
+            for (int j = 0; j < 8; j++) {
+                ChessPosition pos;
+                if (team == ChessGame.TeamColor.BLACK) {
+                    pos = new ChessPosition(1+i, 8-j);
+                } else {
+                    pos = new ChessPosition(8-i, 1+j);
+                }
+                chess.ChessPiece p = board.getPiece(pos);
+                if (pos.equals(focusPos)) {
+                    outStr += focusHighlightColor;
+                } else if (moves.contains(pos)) {
+                    outStr += ((i + j) / 2 * 2 == (i + j) ? lightHighlightColor : darkHighlightColor);
+                } else {
+                    outStr += ((i + j) / 2 * 2 == (i + j) ? lightColor : darkColor);
+                }
+                if(p == null){
+                    outStr += "   ";
+                }else{
+                    char pieceIcon = ChessPiece.TYPE_TO_CHAR_MAP.get(p.getPieceType());
+                    outStr += " " + (p.getTeamColor()==ChessGame.TeamColor.WHITE?
+                            lightPieceColor + Character.toUpperCase(pieceIcon):
+                            darkPieceColor + Character.toLowerCase(pieceIcon))
+                            + " ";
+                }
+            }
+            outStr += borderColor + " " + ((team==ChessGame.TeamColor.BLACK)?1+i:8-i) + " "
+                    + resetColor + "\n";
+        }
+        outStr += topNums;
+        outStr += EscapeSequences.RESET_BG_COLOR;
+        System.out.print(outStr);
+    }
+
+    private void makeMove(String[] args) {
+        String gameStateAbort = gameCache.stateDialog(team);
+        if (gameStateAbort != null) {
+            System.out.println(gameStateAbort);
+            return;
+        }
+
+        if (args == null || args.length<2) {
+            System.out.println("move needs 2 position arguments");
+            return;
+        }
+        ChessMove move;
+        try {
+            move = new ChessMove(parsePos(args[0]), parsePos(args[1]));
+        } catch (InvalidMoveException e) {
+            System.out.println(e.getLocalizedMessage());
+            return;
+        }
+
+        try {
+            gameCache.makeMove(move, team);
+        } catch (InvalidMoveException e) {
+            if (e.getLocalizedMessage().equals("pawn was not promoted")) {
+                move = promotePawn(move);
+                if (move == null) {
+                    return;
+                }
+            } else {
+                System.out.println(e.getLocalizedMessage());
+                return;
+            }
+        }
+        try {
+            ws.makeMove(move,authToken,gameID);
+        } catch (IOException e) {
+            System.out.println(SERVER_ERROR_STR);
+        }
+    }
+
+    private void leave() {
+        System.out.println("Leaving the game.");
+        try {
+            ws.leave(authToken,gameID);
+        } catch (IOException e) {
+            System.out.println(SERVER_ERROR_STR);
+        }
+    }
+
+    private void resign() {
+        if (team == null) {
+            System.out.println("you are not a player");
+            return;
+        }
+        if (gameCache.isOver()) {
+            System.out.println("game is already over");
+            return;
+        }
+        String resignMsg =
+                "Are you sure you want to resign the game? "
+                        + EscapeSequences.SET_TEXT_COLOR_YELLOW
+                        + "y/[n]"
+                        + EscapeSequences.RESET_TEXT_COLOR + " ";
+        System.out.print(resignMsg);
+        String confirmation = new Scanner(System.in).nextLine();
+        if(confirmation == null || confirmation.isEmpty() ||
+                Character.toLowerCase(confirmation.charAt(0)) != 'y') {
+            System.out.println("Resignation cancelled. Continuing gameplay");
+            return;
+        }
+        try {
+            ws.resign(authToken,gameID);
+        } catch (IOException e) {
+            System.out.println(SERVER_ERROR_STR);
+        }
+    }
+
+    private void highlight(String[] args) {
+        if (args == null || args.length<1) {
+            System.out.println("highlight needs 1 position argument");
+            return;
+        }
+        ChessPosition focusPos;
+        try {
+            focusPos = parsePos(args[0]);
+        } catch (InvalidMoveException e) {
+            System.out.println(e.getLocalizedMessage());
+            return;
+        }
+        if (gameCache.getBoard().getPiece(focusPos)==null) {
+            printBoard(focusPos, new HashSet<>());
+            System.out.println("That position on the board is empty");
+            return;
+        }
+        Collection<ChessMove> moves = gameCache.validMoves(focusPos);
+        if (moves == null || moves.isEmpty()) {
+            printBoard(focusPos, new HashSet<>());
+            if (!gameCache.isOver()) {
+                System.out.println("This piece cannot move.");
+            }
+        } else {
+            Collection<ChessPosition> targets = moves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
+            printBoard(focusPos,targets);
+        }
+        if (gameCache.isOver()) {
+            System.out.println("The game is over, so no pieces can be moved.");
+        } else if (team == null) {
+            System.out.println("Note that you are not a player.");
+        } else if (gameCache.getBoard().getPiece(focusPos).getTeamColor() != team) {
+            System.out.println("Note that this is not your piece.");
+        } else if (gameCache.getTeamTurn() != team) {
+            System.out.println("Note that it is not your turn.");
         }
     }
 
@@ -223,66 +299,6 @@ public class GameplayUI implements NotificationHandler {
                     case 'r' -> ChessPiece.PieceType.ROOK;
                     default -> null;
                 });
-    }
-
-    public void printBoard() {
-        printBoard(new ChessPosition(0,0), new HashSet<>());
-    }
-    public void printBoard(ChessPosition focusPos, Collection<ChessPosition> moves) {
-        ChessBoard board = gameCache.getBoard();
-        String borderColor = EscapeSequences.SET_BG_COLOR_WHITE + EscapeSequences.SET_TEXT_COLOR_BLACK;
-        if (gameCache.isOver()) {
-            borderColor = EscapeSequences.SET_BG_COLOR_YELLOW + EscapeSequences.SET_TEXT_COLOR_BLACK;
-        }
-        String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
-        String darkColor = EscapeSequences.SET_BG_COLOR_MED_GREY;
-        String focusHighlightColor = EscapeSequences.SET_BG_COLOR_BLUE;
-        String lightHighlightColor = EscapeSequences.SET_BG_COLOR_GREEN;
-        String darkHighlightColor = EscapeSequences.SET_BG_COLOR_DARK_GREEN;
-        String resetColor = EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR;
-        String lightPieceColor = EscapeSequences.SET_TEXT_COLOR_WHITE;
-        String darkPieceColor = EscapeSequences.SET_TEXT_COLOR_BLACK;
-
-        String outStr = borderColor;
-        String topNums = borderColor + (team == ChessGame.TeamColor.BLACK?
-                                        "    h  g  f  e  d  c  b  a    ":
-                                        "    a  b  c  d  e  f  g  h    ")
-                        + resetColor + "\n";
-        outStr += topNums;
-
-        for (int i = 0; i < 8; i++) {
-            outStr += borderColor + " " + ((team==ChessGame.TeamColor.BLACK)?1+i:8-i) + " ";
-            for (int j = 0; j < 8; j++) {
-                ChessPosition pos;
-                if (team == ChessGame.TeamColor.BLACK) {
-                    pos = new ChessPosition(1+i, 8-j);
-                } else {
-                    pos = new ChessPosition(8-i, 1+j);
-                }
-                chess.ChessPiece p = board.getPiece(pos);
-                if (pos.equals(focusPos)) {
-                    outStr += focusHighlightColor;
-                } else if (moves.contains(pos)) {
-                    outStr += ((i + j) / 2 * 2 == (i + j) ? lightHighlightColor : darkHighlightColor);
-                } else {
-                    outStr += ((i + j) / 2 * 2 == (i + j) ? lightColor : darkColor);
-                }
-                if(p == null){
-                    outStr += "   ";
-                }else{
-                    char pieceIcon = ChessPiece.TYPE_TO_CHAR_MAP.get(p.getPieceType());
-                    outStr += " " + (p.getTeamColor()==ChessGame.TeamColor.WHITE?
-                                        lightPieceColor + Character.toUpperCase(pieceIcon):
-                                        darkPieceColor + Character.toLowerCase(pieceIcon))
-                                        + " ";
-                }
-            }
-            outStr += borderColor + " " + ((team==ChessGame.TeamColor.BLACK)?1+i:8-i) + " "
-                        + resetColor + "\n";
-        }
-        outStr += topNums;
-        outStr += EscapeSequences.RESET_BG_COLOR;
-        System.out.print(outStr);
     }
 
     private static final String HELP_STR =
