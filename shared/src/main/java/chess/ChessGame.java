@@ -213,16 +213,13 @@ public class ChessGame {
             moveStateAbort = "that position on the board is empty";
         } else if(piece.getTeamColor() != turn) { // is it that piece's turn?
             moveStateAbort = "that is not your piece";
-        } else if(piece.getPieceType()==ChessPiece.PieceType.PAWN && move.getPromotionPiece()==null) {
-            if ((piece.getTeamColor()==ChessGame.TeamColor.WHITE && move.getEndPosition().getRow()==8
-              || piece.getTeamColor()==ChessGame.TeamColor.BLACK && move.getEndPosition().getRow()==1)
-              && validMoves(move.getStartPosition()).contains(
-                      new ChessMove(move.getStartPosition(),move.getEndPosition(),ChessPiece.PieceType.QUEEN)
-              )) {
-                moveStateAbort = "pawn was not promoted";
-            }
         } else if(!validMoves(move.getStartPosition()).contains(move)) { // is this move valid?
-            moveStateAbort = piece+" cannot move to "+move.getEndPosition();
+            if ((piece.getTeamColor()==ChessGame.TeamColor.WHITE && move.getEndPosition().getRow()==8)
+                    || (piece.getTeamColor()==ChessGame.TeamColor.BLACK && move.getEndPosition().getRow()==1)) {
+                moveStateAbort = "pawn was not promoted";
+            } else {
+                moveStateAbort = piece + " cannot move to " + move.getEndPosition();
+            }
         }
         return moveStateAbort;
     }
