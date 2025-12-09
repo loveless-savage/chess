@@ -100,8 +100,12 @@ public class GameplayUI implements NotificationHandler {
                 }
                 break;
             case "resign":
+                if (team == null) {
+                    System.out.println("you are not a player");
+                    break;
+                }
                 if (gameCache.isOver()) {
-                    System.out.println("Game is already over");
+                    System.out.println("game is already over");
                     break;
                 }
                 String resignMsg =

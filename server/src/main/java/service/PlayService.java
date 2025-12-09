@@ -179,6 +179,14 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                 clientList.remove(ctx);
             }
             case RESIGN -> {
+                if (clientList.get(ctx).getTeam() == null) {
+                    sendError(ctx,"you are not a player");
+                    break;
+                }
+                if (gameData.game().isOver()) {
+                    sendError(ctx,"game is already over");
+                    break;
+                }
                 newGame.setOver();
                 newData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), newGame);
                 try {
