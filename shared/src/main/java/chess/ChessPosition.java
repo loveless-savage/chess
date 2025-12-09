@@ -54,6 +54,8 @@ public class ChessPosition {
     }
     @Override
     public String toString() {
-        return "(" + row + "," + col + ")";
+        char rowNum = (char) (row+'0');
+        char colVal = (char) (col+'a'-1);
+        return new String(new char[]{colVal,rowNum});
     }
 }

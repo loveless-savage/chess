@@ -199,7 +199,6 @@ public class GameplayUI implements NotificationHandler {
     @Override
     public void notify(NotificationMessage notification) {
         System.out.print("\n");
-        // TODO: replace "(7,1)" with "a7"
         System.out.println(notification.getMessage());
         System.out.print(">>> ");
         if (notification.getMessage().contains(" has resigned")) {
