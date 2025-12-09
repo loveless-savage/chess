@@ -63,7 +63,7 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
         Collection<ChessMove> moves = new HashSet<>();
-        if(piece == null || isOver) {
+        if(piece == null) {
             return moves;
         }
         // test each potential move to see if it endangers this piece's own king
