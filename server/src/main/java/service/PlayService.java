@@ -76,12 +76,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                 }
                 PlayCommand connectCmd = new PlayCommand(cmd.getAuthToken(),cmd.getGameID(),team);
                 NotificationMessage notifyJoin = new NotificationMessage(joinMsg);
-                clientList.keySet().stream().filter(
-                        c -> c.session.isOpen() &&
-                        Objects.equals(clientList.get(c).getGameID(), cmd.getGameID())
-                ).forEach(otherCtx ->
-                        otherCtx.send(GSON.toJson(notifyJoin))
-                );
+                notifyAll(cmd.getGameID(),notifyJoin);
                 clientList.put(ctx,connectCmd);
                 LoadGameMessage msg = new LoadGameMessage(gameData.game());
                 ctx.send(GSON.toJson(msg));
@@ -109,51 +104,21 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     sendError(ctx,"could not connect to database. Check server");
                     return;
                 }
-                var allClients = clientList.keySet().stream().filter(
-                        c -> c.session.isOpen() &&
-                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
-                );
-                LoadGameMessage msg = new LoadGameMessage(newGame);
-                clientList.keySet().stream().filter(
-                        c -> c.session.isOpen() &&
-                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
-                ).forEach(everyCtx ->
-                        everyCtx.send(GSON.toJson(msg))
-                );
+                LoadGameMessage gameMsg = new LoadGameMessage(newGame);
+                notifyAll(cmd.getGameID(),gameMsg);
                 NotificationMessage notifyMove = new NotificationMessage(username+" just moved "+move);
-                clientList.keySet().stream().filter(
-                        c -> c.session.isOpen() &&
-                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID()) &&
-                        !c.equals(ctx)
-                ).forEach(everyCtx ->
-                        everyCtx.send(GSON.toJson(notifyMove))
-                );
+                notifyOthers(ctx,cmd.getGameID(),notifyMove);
                 ChessGame.TeamColor nextTurn = newGame.getTeamTurn();
                 String nextUser = nextTurn==ChessGame.TeamColor.WHITE? newData.whiteUsername():newData.blackUsername();
                 if (newGame.isInCheckmate(nextTurn)) {
                     NotificationMessage notifyCheckmate = new NotificationMessage(nextUser+" is in checkmate!");
-                    clientList.keySet().stream().filter(
-                            c -> c.session.isOpen() &&
-                            Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
-                    ).forEach(everyCtx ->
-                            everyCtx.send(GSON.toJson(notifyCheckmate))
-                    );
+                    notifyAll(cmd.getGameID(),notifyCheckmate);
                 } else if (newGame.isInStalemate(newGame.getTeamTurn())) {
                     NotificationMessage notifyStalemate = new NotificationMessage(nextUser+" is in stalemate!");
-                    clientList.keySet().stream().filter(
-                            c -> c.session.isOpen() &&
-                            Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
-                    ).forEach(everyCtx ->
-                            everyCtx.send(GSON.toJson(notifyStalemate))
-                    );
+                    notifyAll(cmd.getGameID(),notifyStalemate);
                 } else if (newGame.isInCheck(newGame.getTeamTurn())) {
                     NotificationMessage notifyCheck = new NotificationMessage(nextUser+" is in check");
-                    clientList.keySet().stream().filter(
-                            c -> c.session.isOpen() &&
-                            Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
-                    ).forEach(everyCtx ->
-                            everyCtx.send(GSON.toJson(notifyCheck))
-                    );
+                    notifyAll(cmd.getGameID(),notifyCheck);
                 }
             }
             case LEAVE -> {
@@ -169,13 +134,7 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     return;
                 }
                 NotificationMessage notifyLeave = new NotificationMessage(username+" has left the game");
-                clientList.keySet().stream().filter(
-                        c -> c.session.isOpen() &&
-                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID()) &&
-                        !c.equals(ctx)
-                ).forEach(everyCtx ->
-                        everyCtx.send(GSON.toJson(notifyLeave))
-                );
+                notifyOthers(ctx,cmd.getGameID(),notifyLeave);
                 clientList.remove(ctx);
             }
             case RESIGN -> {
@@ -196,18 +155,29 @@ public class PlayService implements WsConnectHandler, WsMessageHandler, WsCloseH
                     return;
                 }
                 NotificationMessage notifyResign = new NotificationMessage(username+" has resigned");
-                clientList.keySet().stream().filter(
-                        c -> c.session.isOpen() &&
-                        Objects.equals(clientList.get(c).getGameID(), clientList.get(ctx).getGameID())
-                ).forEach(everyCtx ->
-                    everyCtx.send(GSON.toJson(notifyResign))
-                );
+                notifyAll(cmd.getGameID(),notifyResign);
             }
         }
     }
 
     @Override
     public void handleClose(@NotNull WsCloseContext ctx) {}
+
+    private void notifyAll(int gameID, ServerMessage notify) {
+        clientList.keySet().stream().filter(
+                c -> c.session.isOpen() && clientList.get(c).getGameID() == gameID
+        ).forEach(everyCtx ->
+                everyCtx.send(GSON.toJson(notify))
+        );
+    }
+
+    private void notifyOthers(WsContext ctx, int gameID, ServerMessage notify) {
+        clientList.keySet().stream().filter(
+                c -> c.session.isOpen() && clientList.get(c).getGameID() == gameID && !c.equals(ctx)
+        ).forEach(everyCtx ->
+                everyCtx.send(GSON.toJson(notify))
+        );
+    }
 
     private void sendError(WsContext ctx, String errorMsg) {
         ErrorMessage msg = new ErrorMessage("ERROR: "+errorMsg);
